@@ -5,6 +5,10 @@ const express = require('express'); // Aplicación express
 const { Server } = require("socket.io"); // Socket
 const sqlite3 = require('sqlite3').verbose(); // Cliente SQLite3
 
+// Clases
+//import DPrendas from './Entities/DPrendas';
+const DPrendas = require('./Entities/DPrendas');
+
 // PARAMETROS
 // Server port
 const HTTP_PORT = 3000 ;
@@ -46,7 +50,11 @@ io.on('connection', (socket) => {
     })
     socket.on('MenuActions', () => {
         io.emit("MenuActionsRes", getMenuActions());
-    })
+    });
+    socket.on('TestClass', () => {
+        var ropa1 = new DPrendas(1,'Pantalon',1,1,2,3,true,1,1,1)
+        socket.emit("TEST", ropa1.TxSelect());
+    });
 });
 
 const sendMenuActions = function(socket){
@@ -59,4 +67,11 @@ const sendPrendas = function(socket){
     db.all("SELECT P.ID_PRENDA IdPrenda, P.TX_NAME TxName, P.CD_TYPE CdType FROM D_PRENDAS P WHERE P.CH_ACTIVE = 1", (error, rows) => {
         socket.emit("AllPrendas", rows);
     });
+}
+
+const sendTest = function(socket){
+    var ropa1 = new DPrendas(1,'Pantalon',1,1,2,3,true,1,1,1);
+    var salida = ropa1.TxSelect();
+    console.log(salida);
+    socket.emit("TEST", salida);
 }

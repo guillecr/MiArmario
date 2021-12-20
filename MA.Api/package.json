@@ -4,7 +4,7 @@
   "description": "Api para el cliente im.App",
   "main": "main.js",
   "scripts": {
-    "test": "node main.js"
+    "run": "node ./main.js"
   },
   "author": "Guillermo C.R.",
   "license": "ISC",
