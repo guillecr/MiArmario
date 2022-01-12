@@ -8,6 +8,9 @@ const sqlite3 = require('sqlite3').verbose(); // Cliente SQLite3
 // Clases
 //import DPrendas from './Entities/DPrendas';
 const DPrendas = require('./Entities/DPrendas');
+const DUsers = require('./Entities/DUsers');
+const DMenus = require('./Entities/DMenus');
+const DClosets = require('./Entities/DClosets');
 
 // PARAMETROS
 // Server port
@@ -25,11 +28,11 @@ const server = https.createServer({
 const io = new Server(server);
 // Start server
 server.listen(HTTP_PORT, () => {
-    console.log("Server running on port %PORT%".replace("%PORT%",HTTP_PORT))
+    console.log("Server running on port %PORT%".replace("%PORT%", HTTP_PORT))
 });
 
 // CONEXIÓN A LA BD
-let db = new sqlite3.Database(DB_URL, (err) => {
+db = new sqlite3.Database(DB_URL, (err) => {
     if (err) {
       return console.error(err.message);
     }
@@ -40,38 +43,44 @@ let db = new sqlite3.Database(DB_URL, (err) => {
 io.on('connection', (socket) => {
     console.log((new Date()) + ' => Nueva conexión aceptada')
     sendMenuActions(socket);
-    sendPrendas(socket);
     socket.on('disconnect', () => {
         console.log((new Date()) + ' => Usuario desconectado');
       });
     socket.on('test',(msg) => {
         console.log('Petición tipo test: ' + msg);
         io.emit("mensaje",'Hola desde la API');
-    })
-    socket.on('MenuActions', () => {
-        io.emit("MenuActionsRes", getMenuActions());
     });
-    socket.on('TestClass', () => {
-        var ropa1 = new DPrendas(1,'Pantalon',1,1,2,3,true,1,1,1)
-        socket.emit("TEST", ropa1.TxSelect());
+
+    socket.on('TestPrenda', () => {
+        DPrendas.Find(db, 1)
+            .then(function(registro){
+                socket.emit("TEST", registro.getData());
+            });
     });
+
+    socket.on('TestMenu', () => {
+        DMenus.Find3(db,1)
+            .then(function(registro){
+                socket.emit("TEST", registro);
+            });
+    });
+
+    socket.on('TestClosets', () => {
+        DClosets.Find2(db, 1);
+    });
+
+    socket.on('TestUser', () => {
+        DUsers.Find(db, 1)
+            .then(function(registro){
+                socket.emit("TEST", registro.getData());
+            });
+    });
+
 });
 
 const sendMenuActions = function(socket){
-    db.all("SELECT ID_MENU IdMenu, TX_NAME TxName, TX_PATH TxPath FROM D_MENUS", (error, rows) => {
-        socket.emit("MenuActionsRes", rows);
+    DMenus.FindAll(db)
+    .then(function(registro){
+        socket.emit("MenuActionsRes", registro);
     });
-}
-
-const sendPrendas = function(socket){
-    db.all("SELECT P.ID_PRENDA IdPrenda, P.TX_NAME TxName, P.CD_TYPE CdType FROM D_PRENDAS P WHERE P.CH_ACTIVE = 1", (error, rows) => {
-        socket.emit("AllPrendas", rows);
-    });
-}
-
-const sendTest = function(socket){
-    var ropa1 = new DPrendas(1,'Pantalon',1,1,2,3,true,1,1,1);
-    var salida = ropa1.TxSelect();
-    console.log(salida);
-    socket.emit("TEST", salida);
 }
