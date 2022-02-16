@@ -92,7 +92,7 @@ class RegDB{
      * @param idValue ID de la entidad a buscar
      * @returns Promesa con el resultado de la busqueda
      */
-    static Find(db, idValue){
+    static Id(db, idValue){
         var reg = new this(idValue);
         return reg.Read(db, idValue);
     }
@@ -103,10 +103,10 @@ class RegDB{
      * @param TxWhere Condiciones de búsqueda
      * @returns Lista de registros
      */
-    static FindAll(db, TxWhere){
+    static Find(db, TxWhere){
         var cm = this;
         return new Promise((resolve, reject) => {
-            var cmd = new Commands(db, cm.TxSelect());
+            var cmd = new Commands(db, cm.TxSelect(null, TxWhere));
             cmd.ejecutarSentencia()
                 .then(function(rows){
                     var registros = [];
@@ -125,7 +125,7 @@ class RegDB{
      * @param DicKey ID del registro a buscar. Si no se indica, se generará la consulta para obtener todos.
      * @returns String con la consulta.
      */
-    static TxSelect(DicKey){
+    static TxSelect(DicKey, whereExtra){
         // TODO: Poder añadir condiciones WHERE
         var sql = "";
         var where = "";
@@ -138,6 +138,13 @@ class RegDB{
             }
             sql += sep + this.ListFields[column].TxColumnName;
             sep = '\n,';
+        }
+        if (whereExtra){
+            if (where == ""){
+                // Sustituimos el primer AND por el WHERE si no se ha formado ningún filtro
+                whereExtra = whereExtra.replace("AND", sepWhere);
+            }
+            where += whereExtra;
         }
         return sql + '\nFROM ' + this.TxTable + where
     };

@@ -52,34 +52,41 @@ io.on('connection', (socket) => {
     });
 
     socket.on('TestPrenda', () => {
-        DPrendas.Find(db, 1)
+        DPrendas.Id(db, 1)
             .then(function(registro){
                 socket.emit("TEST", registro.getData());
             });
     });
 
     socket.on('TestMenu', () => {
-        DMenus.Find3(db,1)
+        DMenus.Id(db,1)
             .then(function(registro){
                 socket.emit("TEST", registro);
             });
     });
 
     socket.on('TestClosets', () => {
-        DClosets.Find2(db, 1);
+        DClosets.Id(db, 1);
     });
 
     socket.on('TestUser', () => {
-        DUsers.Find(db, 1)
+        DUsers.Id(db, 1)
             .then(function(registro){
                 socket.emit("TEST", registro.getData());
             });
     });
 
+    socket.on('TestMenuFind', () => {
+        DMenus.Find(db, "AND TX_NAME = 'Inicio'")
+        .then(function(registro){
+            socket.emit("TEST", registro)
+        })
+    });
+
 });
 
 const sendMenuActions = function(socket){
-    DMenus.FindAll(db)
+    DMenus.Find(db)
     .then(function(registro){
         socket.emit("MenuActionsRes", registro);
     });
