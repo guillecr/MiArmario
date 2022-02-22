@@ -1,8 +1,14 @@
+const DBParams = require("./DBParamas");
+
 class Commands{
-    constructor(db, sentencia){
+    constructor(db, sentencia, param){
         this.db = db;
         this.sentencia = sentencia;
+        this.DBParams = param || new DBParams;
     };
+    addParams(param, type){
+        return this.DBParams.addParams(param, type);
+    }
 
 /**
  * Se obtiene una promesa con el resultado de la consulta almacenada en "sentencia" 
@@ -11,7 +17,9 @@ class Commands{
  */
     ejecutarSentencia(){
         return new Promise((resolve, reject) => {
-            db.all(this.sentencia, (error, row) => {
+            var sqlTest = this.DBParams.replaceParams(this.sentencia);
+            console.log(sqlTest)
+            db.all(sqlTest, (error, row) => {
                 resolve(row)
             });
         })

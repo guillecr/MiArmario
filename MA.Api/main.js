@@ -12,6 +12,9 @@ const DUsers = require('./Entities/DUsers');
 const DMenus = require('./Entities/DMenus');
 const DClosets = require('./Entities/DClosets');
 
+const Commands = require('./Utils/Commands');
+const DBParams = require('./Utils/DBParamas');
+
 // PARAMETROS
 // Server port
 const HTTP_PORT = 3000 ;
@@ -77,7 +80,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('TestMenuFind', () => {
-        DMenus.Find(db, "AND TX_NAME = 'Inicio'")
+        var params = new DBParams;
+        DMenus.Find(db, `AND TX_NAME = ${params.addParams("Inicio' OR 1=1;")} OR CH_ACTIVE = ${params.addParams(true)}`, params)
         .then(function(registro){
             socket.emit("TEST", registro)
         })

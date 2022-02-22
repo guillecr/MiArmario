@@ -103,10 +103,10 @@ class RegDB{
      * @param TxWhere Condiciones de búsqueda
      * @returns Lista de registros
      */
-    static Find(db, TxWhere){
+    static Find(db, TxWhere, params){
         var cm = this;
         return new Promise((resolve, reject) => {
-            var cmd = new Commands(db, cm.TxSelect(null, TxWhere));
+            var cmd = new Commands(db, cm.TxSelect(null, TxWhere), params);
             cmd.ejecutarSentencia()
                 .then(function(rows){
                     var registros = [];
@@ -123,10 +123,10 @@ class RegDB{
     /**
      * Calcula la consulta SQL que debe de ejecutarse para realizar una consulta de tipo Select.
      * @param DicKey ID del registro a buscar. Si no se indica, se generará la consulta para obtener todos.
+     * @param whereExtra String con mas condiciónes where
      * @returns String con la consulta.
      */
     static TxSelect(DicKey, whereExtra){
-        // TODO: Poder añadir condiciones WHERE
         var sql = "";
         var where = "";
         var sepWhere = "\nWHERE ";
