@@ -10,21 +10,27 @@ class Param{
                 return this.value;
             case 'boolean':
                 return this.value ? 1: 0;
+            case 'Date':
+                console.log(this.value.getTime())
+                return this.value.getTime();
             case 'string':
                 return this.constructor.quote + this.value.replace(/'/g,"\"") + this.constructor.quote;  
+            default:
+                // TODO: Sistema para poder tener parametros de fechas
+                console.log(this.type)
         }
     }
 }
 class DBParams{
     constructor(){
-        this.params = []
+        this.params = [];
     }
     addParams(param, type){
         var NuParam = this.params.length;
         if (!type){
-            type = typeof param
+            type = typeof param;
         }
-        this.params[NuParam] = new Param(param, type)
+        this.params[NuParam] = new Param(param, type);
         return `:PARAM${NuParam}`;
     }
     replaceParams(sql){

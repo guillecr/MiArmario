@@ -20,7 +20,7 @@ class DClosets extends RegDB{
         TxName: new Fields('TX_NAME', 'String', null , null),
         CdUser: new Fields('CD_USER', 'Long', null , null),
         TxDescription: new Fields('TX_DESCRIPTION', 'String', null , null),
-        CdActive: new Fields('CH_ACTIVE', 'Boolean', null, null),
+        ChActive: new Fields('CH_ACTIVE', 'Boolean', null, null),
         FhCreated: new Fields('FH_CREATED', 'Date', 'IO', null),
         FhModified: new Fields('FH_MODIFIED', 'Date', null, null),
     };

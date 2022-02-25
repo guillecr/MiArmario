@@ -10,6 +10,7 @@ class Commands{
         return this.DBParams.addParams(param, type);
     }
 
+    // TODO: Método de ejecución de consulta mas apto para operaciones insert y update
 /**
  * Se obtiene una promesa con el resultado de la consulta almacenada en "sentencia" 
  * y usando el acceso a la base de datos definido en db
@@ -18,7 +19,7 @@ class Commands{
     ejecutarSentencia(){
         return new Promise((resolve, reject) => {
             var sqlTest = this.DBParams.replaceParams(this.sentencia);
-            console.log(sqlTest)
+            console.log(sqlTest);
             db.all(sqlTest, (error, row) => {
                 resolve(row)
             });

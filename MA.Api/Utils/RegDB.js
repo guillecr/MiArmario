@@ -1,4 +1,5 @@
 const Commands = require("./Commands");
+const DBParamas = require("./DBParamas");
 
 class RegDB{
     constructor(){}
@@ -6,7 +7,7 @@ class RegDB{
     static ListFields = {};
     /**
      * Método para obtener un diccionario de las ID con sus valores del objeto
-     * @returns Collección de IDs con sus valores
+     * @returns Colección de IDs con sus valores
      */
     getId(){
         var dicIDs = {};
@@ -153,15 +154,60 @@ class RegDB{
      * TODO:
      * Calcula la consulta SQL que debe de ejecutarse para realizar una consulta de tipo UPDATE.
      */
-    TxUpdate(){
-        var sql = 'UPDATE ' + this.TxTable + 'SET \n';
+    TxUpdate(params){
+        var sql = 'UPDATE ' + this.constructor.TxTable + ' SET \n';
         var sep = "";
-        for (campo in this){
-            if (this.ListFields.indexOf(campo) && (this.ListFields[campo].CdUsing != 'RO') || this.ListFields[campo].CdUsing != 'IO'){
-                sql += sep + this.ListFields[campo].TxColumnName + ' = ' + this[campo];
+        var TxWhere = "\nWHERE";
+        var sepWhere = "";
+        var listColumns = this.constructor.ListFields;
+        for (var column in listColumns){
+            if (listColumns[column].CdUsing == 'PK'){
+                // TODO: No permite valores tipo String. Se deberia de usar los parámetros.
+                TxWhere += `${sepWhere} = ${params.addParams(this[column])}`;
+                sepWhere = "\n AND ";
+            }
+            else if (listColumns[column].CdUsing != 'RO' && listColumns[column].CdUsing != 'IO'){
+                sql += `${sep} ${listColumns[column].TxColumnName} = ${params.addParams(this[column])}`;
                 sep = '\n,';
             }
         }
+        return sql + TxWhere;
+    };
+
+    /**
+     * TODO: Documentación.
+     */
+    TxInsert(params){
+        var sep = "";
+        var sql = "INSERT INTO " + this.constructor.TxTable + " (\n";
+        var TxColumn = "";
+        var TxValues = "";
+        var listColumns = this.constructor.ListFields;
+        for (var column in listColumns){
+            if (listColumns[column].CdUsing != 'RO' && listColumns[column].CdUsing != 'UO'){
+                TxColumn += sep + listColumns[column].TxColumnName;
+                TxValues += sep + (this[column]? params.addParams(this[column]) : "NULL");
+                sep = "\n,";
+            }
+        }
+        return sql + TxColumn + ")\nVALUES\n(" + TxValues + ")";
+    };
+
+    /**
+     * TODO: Documentación y definir lo que devuelve la función
+     * @param db 
+     * @returns 
+     */
+    Insert(db){
+        var cm = this;
+        return new Promise((resolve, reject) => {
+            var params = new DBParamas();
+            var cmd = new Commands(db, cm.TxInsert(params), params);
+            cmd.ejecutarSentencia()
+                .then(function(rows){
+                    console.log("Resultado: " + rows);
+                });
+        });
     };
 
 };

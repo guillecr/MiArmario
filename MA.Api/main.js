@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('TestMenu', () => {
-        DMenus.Id(db,1)
+        DMenus.Id(db, 1)
             .then(function(registro){
                 socket.emit("TEST", registro);
             });
@@ -79,13 +79,19 @@ io.on('connection', (socket) => {
             });
     });
 
-    socket.on('TestMenuFind', () => {
+    socket.on('TestTxInsert', () => {
         var params = new DBParams;
-        DMenus.Find(db, `AND TX_NAME = ${params.addParams("Inicio' OR 1=1;")} OR CH_ACTIVE = ${params.addParams(true)}`, params)
-        .then(function(registro){
-            socket.emit("TEST", registro)
-        })
+        DMenus.Find(db, `AND TX_NAME = ${params.addParams("Inicio")}`, params)
+            .then(function(registro){
+                var params = new DBParams();
+                console.log(registro[0].TxInsert(params));
+                socket.emit("TEST", registro);
+            })
     });
+    socket.on('TestInsert', () => {
+        var newClosets = new DClosets(null, "Calcetines", 1, "Calcetines cortos", 1, new Date().getTime(), new Date().getTime());
+        newClosets.Insert(db);
+    })
 
 });
 
