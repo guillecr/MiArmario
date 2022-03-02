@@ -68,30 +68,47 @@ io.on('connection', (socket) => {
             });
     });
 
-    socket.on('TestClosets', () => {
-        DClosets.Id(db, 1);
+    socket.on('TestClosets', (idClosets) => {
+        DClosets.Id(db, idClosets)
+            .then(function(registro) {
+                if (registro){
+                    socket.emit("TEST", registro.getData());
+                } else {
+                    socket.emit("TEST", null);
+                }
+            });
     });
 
     socket.on('TestUser', () => {
         DUsers.Id(db, 1)
             .then(function(registro){
-                socket.emit("TEST", registro.getData());
+                if (registro){
+                    socket.emit("TEST", registro.getData());
+                } else {
+                    socket.emit("TEST", null);
+                }
             });
     });
 
-    socket.on('TestTxInsert', () => {
+    socket.on('TestParams', () => {
         var params = new DBParams;
         DMenus.Find(db, `AND TX_NAME = ${params.addParams("Inicio")}`, params)
             .then(function(registro){
-                var params = new DBParams();
-                console.log(registro[0].TxInsert(params));
                 socket.emit("TEST", registro);
             })
     });
     socket.on('TestInsert', () => {
-        var newClosets = new DClosets(null, "Calcetines", 1, "Calcetines cortos", 1, new Date().getTime(), new Date().getTime());
+        var newClosets = new DClosets(null, "Calcetines", 1, "Calcetines cortos", 1);
         newClosets.Insert(db);
-    })
+    });
+    socket.on('TestUpdate', (idClosets) => {
+        DClosets.Id(db, idClosets)
+        .then(function(closet){
+            console.log(closet);
+            closet.CdUser = 10;
+            closet.Update(db);
+        });
+    });
 
 });
 

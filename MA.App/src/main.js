@@ -12,7 +12,6 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 Vue.use(
   new VueSocketIO({
-    debug: true,
     connection: io('https://localhost:3000',{ transports : ['websocket'] }), // transports es importante para CORS
   })
 );
