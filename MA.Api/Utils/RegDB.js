@@ -155,7 +155,6 @@ class RegDB{
         return new Promise((resolve, reject) => {
             var params = new DBParamas();
             var cmd = new Commands(db, cm.TxUpdate(params), params);
-            console.log(params);
             cmd.ejecutarOperacion()
                 .then(function(rows){
                     resolve(rows);
@@ -169,7 +168,6 @@ class RegDB{
      * @param whereExtra String con mas condiciónes where
      * @returns String con la consulta.
      */
-    // TODO: NO USA PARAMETROS
     static TxSelect(DicKey, params, whereExtra){
         var sql = "";
         var where = "";

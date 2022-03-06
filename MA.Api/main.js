@@ -99,14 +99,21 @@ io.on('connection', (socket) => {
     });
     socket.on('TestInsert', () => {
         var newClosets = new DClosets(null, "Calcetines", 1, "Calcetines cortos", 1);
-        newClosets.Insert(db);
+        newClosets.Insert(db)
+            .then(function(result){
+                socket.emit("TEST", registro.affectedID);
+            });
     });
     socket.on('TestUpdate', (idClosets) => {
         DClosets.Id(db, idClosets)
         .then(function(closet){
-            console.log(closet);
             closet.CdUser = 10;
-            closet.Update(db);
+            closet.Update(db)
+                .then(function(result) {
+                    if (result && result.rows > 0){
+                        socket.emit("OK");
+                    }
+                });
         });
     });
 

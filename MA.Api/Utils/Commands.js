@@ -36,18 +36,17 @@ class Commands{
     };
 
     /**
-     * Se obtiene el numero de filas afectadas.
-     * @returns Numero de filas afectadas
+     * Ejecución de bloques de sentencia. Indicado para los procesos de insercción y actyualización de datos.
+     * @returns Objeto con la ID afectada (ID) y con el numero de filas afectadas (rows)
      */
     ejecutarOperacion(){
         return new Promise((resolve, reject) => {
-            this.db.run(this.sentencia, this.params.getParams(), (error, row) => {
+            this.db.run(this.sentencia, this.params.getParams(), function(error) {
                 if (error){
                     console.log("ERROR - Commands.ejecutarOperacion: " + error);
                     reject(error);
                 } else {
-                    // TODO: No se recupera la ID o el número de filas afectadas
-                    resolve({ ID: this.db.lastID });
+                    resolve({ affectedID: this.lastID, rows: this.changes });
                 }
             });
         })
