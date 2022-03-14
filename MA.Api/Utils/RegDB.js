@@ -1,5 +1,6 @@
 const Commands = require("./Commands");
 const DBParamas = require("./DBParamas");
+const LogFile = require("./LogFile");
 
 class RegDB{
     constructor(){}
@@ -90,6 +91,7 @@ class RegDB{
                     }
                 }).catch(function(err){
                     console.log("ERROR READ: " + err);
+                    LogFile.writeLog("ERROR READ: " + err);
                 })
         });
     };
@@ -124,6 +126,8 @@ class RegDB{
                         registros.push(tmp);
                     }
                     resolve(registros);
+                }).catch(function(err){
+                    LogFile.writeLog("ERROR FIND: " + err);
                 });
         })
     };
@@ -131,7 +135,7 @@ class RegDB{
     /**
      * Inserta el registro definido en el objeto.
      * @param db Acceso a la base de datos.
-     * @returns TODO: Numero de filas afectadas o ID del nuevo registro.
+     * @returns ID del nuevo registro.
      */
     Insert(db){
         var cm = this;
@@ -140,7 +144,10 @@ class RegDB{
             var cmd = new Commands(db, cm.TxInsert(params), params);
             cmd.ejecutarOperacion()
                 .then(function(rows){
-                    resolve(rows);
+                    resolve(rows.affectedID);
+                })
+                .catch(function(err){
+                    LogFile.writeLog("ERROR INSERT: " + err);
                 });
         });
     };
@@ -148,7 +155,7 @@ class RegDB{
     /**
      * Actualización del registro definido en el objeto, creando el where con la ID del objeto.
      * @param db Acceso a la base de datos. 
-     * @returns TODO: Definir que devolver
+     * @returns Numero de filas afectadas.
      */
     Update(db){
         var cm = this;
@@ -157,8 +164,10 @@ class RegDB{
             var cmd = new Commands(db, cm.TxUpdate(params), params);
             cmd.ejecutarOperacion()
                 .then(function(rows){
-                    resolve(rows);
-                })
+                    resolve(rows.rows);
+                }).catch(function(err){
+                    LogFile.writeLog("ERROR UPDATE: " + err);
+                });
         })
     }
 
@@ -186,6 +195,7 @@ class RegDB{
                 // Sustituimos el primer AND por el WHERE si no se ha formado ningún filtro
                 whereExtra = whereExtra.replace("AND", sepWhere);
             }
+            
             where += whereExtra;
         }
         return sql + '\nFROM ' + this.TxTable + where

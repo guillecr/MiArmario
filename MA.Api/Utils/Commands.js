@@ -1,4 +1,5 @@
 const DBParams = require("./DBParamas");
+const LogFile = require("./LogFile");
 
 class Commands{
     constructor(db, sentencia, params){
@@ -26,7 +27,7 @@ class Commands{
         return new Promise((resolve, reject) => {
             db.all(this.sentencia, this.params.getParams(), (error, row) => {
                 if (error){
-                    console.log("ERROR - Commands.ejecutarSentencia" + error);
+                    LogFile.writeLog('ERROR - Commands.ejecutarSentencia ' + error);
                     reject(error);
                 } else {
                     resolve(row);
@@ -41,9 +42,9 @@ class Commands{
      */
     ejecutarOperacion(){
         return new Promise((resolve, reject) => {
-            this.db.run(this.sentencia, this.params.getParams(), function(error) {
+            db.run(this.sentencia, this.params.getParams(), function(error) {
                 if (error){
-                    console.log("ERROR - Commands.ejecutarOperacion: " + error);
+                    LogFile.writeLog("ERROR - Commands.ejecutarOperacion: " + error);
                     reject(error);
                 } else {
                     resolve({ affectedID: this.lastID, rows: this.changes });
