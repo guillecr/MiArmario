@@ -90,7 +90,6 @@ class RegDB{
                         resolve(null);
                     }
                 }).catch(function(err){
-                    console.log("ERROR READ: " + err);
                     LogFile.writeLog("ERROR READ: " + err);
                 })
         });
