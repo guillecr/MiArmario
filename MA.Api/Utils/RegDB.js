@@ -73,14 +73,14 @@ class RegDB{
      * @param idValue ID del registro
      * @returns Resultado de la lectura
      */
-    Read(db, idValue){
+    Read(accessDB, idValue){
         var cm = this;
         if (idValue){
             cm.setId(idValue);
         }
         return new Promise((resolve, reject) => {
             var params = new DBParamas();
-            var cmd = new Commands(db, cm.constructor.TxSelect(this.getId(), params), params);
+            var cmd = new Commands(accessDB.db, cm.constructor.TxSelect(this.getId(), params), params);
             cmd.ejecutarSentencia()
                 .then(function(row){
                     if (row.length > 0){
@@ -101,9 +101,9 @@ class RegDB{
      * @param idValue ID de la entidad a buscar
      * @returns Promesa con el resultado de la busqueda
      */
-    static Id(db, idValue){
+    static Id(accessDB, idValue){
         var reg = new this(idValue);
-        return reg.Read(db);
+        return reg.Read(accessDB.db);
     }
 
     /**
@@ -112,10 +112,10 @@ class RegDB{
      * @param TxWhere Condiciones de búsqueda
      * @returns Lista de registros
      */
-    static Find(db, TxWhere, params){
+    static Find(accessDB, TxWhere, params){
         var cm = this;
         return new Promise((resolve, reject) => {
-            var cmd = new Commands(db, cm.TxSelect(null, null, TxWhere), params);
+            var cmd = new Commands(accessDB.db, cm.TxSelect(null, null, TxWhere), params);
             cmd.ejecutarSentencia()
                 .then(function(rows){
                     var registros = [];
@@ -136,13 +136,14 @@ class RegDB{
      * @param db Acceso a la base de datos.
      * @returns ID del nuevo registro.
      */
-    Insert(db){
+    Insert(accessDB){
         var cm = this;
         return new Promise((resolve, reject) => {
             var params = new DBParamas();
-            var cmd = new Commands(db, cm.TxInsert(params), params);
+            var cmd = new Commands(accessDB.db, cm.TxInsert(accessDB.user, params), params);
             cmd.ejecutarOperacion()
-                .then(function(rows){
+                .then(async function(rows){
+                    await cm.Read(accessDB, rows.affectedID);
                     resolve(rows.affectedID);
                 })
                 .catch(function(err){
@@ -153,16 +154,17 @@ class RegDB{
 
     /**
      * Actualización del registro definido en el objeto, creando el where con la ID del objeto.
-     * @param db Acceso a la base de datos. 
+     * @param accessDB Acceso a la base de datos. 
      * @returns Numero de filas afectadas.
      */
-    Update(db){
+    Update(accessDB){
         var cm = this;
         return new Promise((resolve, reject) => {
             var params = new DBParamas();
-            var cmd = new Commands(db, cm.TxUpdate(params), params);
+            var cmd = new Commands(accessDB.db, cm.TxUpdate(accessDB.user, params), params);
             cmd.ejecutarOperacion()
-                .then(function(rows){
+                .then(async function(rows){
+                    await cm.Read(accessDB);
                     resolve(rows.rows);
                 }).catch(function(err){
                     LogFile.writeLog("ERROR UPDATE: " + err);
@@ -202,10 +204,11 @@ class RegDB{
 
     /**
      * Calcula la consulta SQL que debe de ejecutarse para realizar una consulta de tipo UPDATE.
+     * @param CdUser Usuario que realiza la operación
      * @param params Manejador de parámetros
      * @returns String con la consulta
      */
-    TxUpdate(params){
+    TxUpdate(CdUser, params){
         var sql = 'UPDATE ' + this.constructor.TxTable + ' SET \n';
         var sep = "";
         var TxWhere = "\nWHERE";
@@ -220,6 +223,10 @@ class RegDB{
                 if (listColumns[column].TxColumnName == 'FH_MODIFIED'){
                     // La falta de triggers hace que tenga que hacer aquí la operación de manejo de estas columnas
                     sql += `${sep} ${listColumns[column].TxColumnName} = ${params.addParams(new Date())}`;
+                } else if (listColumns[column].TxColumnName == 'CD_MODIFIED_BY'){
+                    // Auditoria de modificado por
+                    sql += `${sep} ${listColumns[column].TxColumnName} = ${params.addParams(CdUser)}`;
+
                 } else {
                     sql += `${sep} ${listColumns[column].TxColumnName} = ${params.addParams(this[column])}`;
                 }
@@ -231,10 +238,11 @@ class RegDB{
 
     /**
      * Calcula la consulta SQL que debe de ejecutarse para realizar una consulta de tipo INSERT.
+     * @param CdUser Usuario que realiza la operación
      * @param params Manejador de parámetros
      * @returns Consulta SQL de insercción
      */
-    TxInsert(params){
+    TxInsert(CdUser, params){
         var sep = "";
         var sql = "INSERT INTO " + this.constructor.TxTable + " (\n";
         var TxColumn = "";
@@ -246,6 +254,11 @@ class RegDB{
                 if (listColumns[column].TxColumnName == 'FH_MODIFIED' || listColumns[column].TxColumnName == 'FH_CREATED'){
                     // La falta de triggers hace que tenga que hacer aquí la operación de manejo de estas columnas
                     TxValues += sep + params.addParams(new Date());
+
+                } else if (listColumns[column].TxColumnName == 'CD_CREATED_BY' || listColumns[column].TxColumnName == 'CD_MODIFIED_BY'){
+                    // Auditoria de creado y modificado por
+                    TxValues += sep + params.addParams(CdUser);
+                    
                 } else {
                     // TODO: El manejo de nulos ya se hace en el manejador de parámetros
                     TxValues += sep + (this[column]? params.addParams(this[column]) : "NULL");
