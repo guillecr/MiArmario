@@ -18,12 +18,15 @@ class CallAPI {
         
         socket.on('LoginIn', async (loginParams) => {
             var params = new DBParams;
-            var user = await DUsers.Find(db, 'AND TX_LOGIN = ' + params.addParams(loginParams.login), params);
+            var tmpAccess = {db:db, user: 2}; // User 2: API_LOGIN_IN
+            var user = await DUsers.Find(tmpAccess, 'AND TX_LOGIN = ' + params.addParams(loginParams.login), params);
             if (user){
                 if (await bcrypt.compare(loginParams.pw,user[0].TxPassword)){
                     // PW correcto
                     accessDB.db = db;
                     accessDB.user = user[0].IdUser;
+                    user[0].FhLastLogin = Date.now();
+                    await user[0].Update(accessDB);
                     LogFile.writeLog(`Usuario logeado: ${user[0].TxLogin} (${user[0].IdUser})`);
                     socket.emit('withAccess', true);
 
@@ -41,7 +44,7 @@ class CallAPI {
 
         socket.on('setPwTEST', async (newPw) => {
             if (CallAPI.withAccessDB(accessDB)){
-                var user = await DUsers.Id(accessDB.db, accessDB.user);
+                var user = await DUsers.Id(accessDB, accessDB.user);
                 user.TxPassword = await bcrypt.hash(newPw, 10);
                 await user.Update(accessDB.db);
                 socket.emit("mensaje", true); 
@@ -64,7 +67,7 @@ class CallAPI {
 
         socket.on('TestPrenda', async () => {
             if (CallAPI.withAccessDB(accessDB)){
-                var prenda = await DPrendas.Id(db,1);
+                var prenda = await DPrendas.Id(accessDB, 1);
                 socket.emit("TEST", prenda.getData());
             }
         });
@@ -72,7 +75,7 @@ class CallAPI {
         socket.on('TestMenu', async () => {
             if (CallAPI.withAccessDB(accessDB)){
                 var menu1 = new DMenus(1);
-                await menu1.Read(db,1);
+                await menu1.Read(accessDB,1);
                 console.log(menu1);
                 socket.emit("TEST", menu1);
             }
@@ -80,14 +83,14 @@ class CallAPI {
 
         socket.on('TestClosets', async (idClosets) => {
             if (CallAPI.withAccessDB(accessDB)){
-                var closet = await DClosets.Id(db, idClosets);
+                var closet = await DClosets.Id(accessDB, idClosets);
                 socket.emit("TEST", (closet)? closet.getData(): null);
             }
         });
 
         socket.on('TestUser', async () => {
             if (CallAPI.withAccessDB(accessDB)){
-                var user = await DUsers.Id(db, 1);
+                var user = await DUsers.Id(accessDB, 1);
                 socket.emit("TEST", (user)? user.getData(): null);
             }
         });
@@ -95,7 +98,7 @@ class CallAPI {
         socket.on('TestParams', async () => {
             if (CallAPI.withAccessDB(accessDB)){
                 var params = new DBParams;
-                var menu = await DMenus.Find(db, `AND TX_NAME = ${params.addParams("Inicio")}`, params);
+                var menu = await DMenus.Find(accessDB, `AND TX_NAME = ${params.addParams("Inicio")}`, params);
                 socket.emit("TEST", menu);
             }
         });
@@ -103,16 +106,24 @@ class CallAPI {
         socket.on('TestInsert', async () => {
             if (CallAPI.withAccessDB(accessDB)){
                 var newClosets = new DClosets(null, "Calcetines", 1, "Calcetines cortos", 1);
-                await newClosets.Insert(db);
-                socket.emit("TEST", result.affectedID);
+                console.log('ANTES:');
+                console.log(newClosets);
+                await newClosets.Insert(accessDB);
+                console.log('DESPUES:');
+                console.log(newClosets);
+                socket.emit("TEST", newClosets);
             }
         });
 
         socket.on('TestUpdate', async (idClosets) => {
             if (CallAPI.withAccessDB(accessDB)){
-                var closet = await DClosets.Id(db, idClosets);
-                closet.user = 10;
-                if (await closet.Update(accessDB.db) > 0){
+                var closet = await DClosets.Id(accessDB, idClosets);
+                console.log("ANTES");
+                console.log(closet);
+                closet.CdUser = 10;
+                if (await closet.Update(accessDB) > 0){
+                    console.log("DESPUES");
+                    console.log(closet);
                     socket.emit("TEST", "OK");
 
                 } else {
@@ -123,6 +134,7 @@ class CallAPI {
         });
     }
 
+    // TODO: Con esta función podemos crear tokens que devolvemos al cliente y verificar la vida de este mismo
     static withAccessDB(accessDB){
         if (!!accessDB.db){
             return true
