@@ -126,7 +126,7 @@ class RegDB{
                     }
                     resolve(registros);
                 }).catch(function(err){
-                    LogFile.writeLog("ERROR FIND: " + err);
+                    LogFile.writeLog("ERROR - RegDB.Find: " + err);
                 });
         })
     };
@@ -147,7 +147,7 @@ class RegDB{
                     resolve(rows.affectedID);
                 })
                 .catch(function(err){
-                    LogFile.writeLog("ERROR INSERT: " + err);
+                    LogFile.writeLog("ERROR - RegDB.Insert: " + err);
                 });
         });
     };
@@ -167,7 +167,7 @@ class RegDB{
                     await cm.Read(accessDB);
                     resolve(rows.rows);
                 }).catch(function(err){
-                    LogFile.writeLog("ERROR UPDATE: " + err);
+                    LogFile.writeLog("ERROR - RegDB.Update: " + err);
                 });
         })
     }

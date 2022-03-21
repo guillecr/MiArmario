@@ -6,6 +6,7 @@ const { Server } = require("socket.io"); // Socket
 const sqlite3 = require('sqlite3').verbose(); // Cliente SQLite3
 const CallAPI = require('./CallAPI'); // Llamadas API
 const LogFile = require('./Utils/LogFile'); // Registros Log
+const URL_PARAMS = 'params.json'; // Archivo de parámetros
 
 const app = express();
 
@@ -35,9 +36,9 @@ const upServer = function(HttpPort, KeyUrl, CertUrl){
 }
 
 // Función de entrada
-const start = function(URL_PARAMS){
+const start = function(UrlParams){
     console.log('Arracando MiArmario.API');
-    fs.readFile(URL_PARAMS, 'utf8' , (err, data) => {
+    fs.readFile(UrlParams, 'utf8' , (err, data) => {
         if (err) {
           console.error(err)
         } else {
@@ -52,4 +53,4 @@ const start = function(URL_PARAMS){
 }
 
 // Entrada
-start('params.json');
+start(URL_PARAMS);

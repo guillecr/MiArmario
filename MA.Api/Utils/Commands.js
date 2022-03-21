@@ -24,12 +24,14 @@ class Commands{
      * @returns Lista de los registros.
      */
     ejecutarSentencia(){
+        var cm = this;
         return new Promise((resolve, reject) => {
             db.all(this.sentencia, this.params.getParams(), (error, row) => {
                 if (error){
                     LogFile.writeLog('ERROR - Commands.ejecutarSentencia ' + error);
                     reject(error);
                 } else {
+                    cm.saveAuditory();
                     resolve(row);
                 }
             });
@@ -41,16 +43,48 @@ class Commands{
      * @returns Objeto con la ID afectada (ID) y con el numero de filas afectadas (rows)
      */
     ejecutarOperacion(){
+        var cm = this;
         return new Promise((resolve, reject) => {
             db.run(this.sentencia, this.params.getParams(), function(error) {
                 if (error){
                     LogFile.writeLog("ERROR - Commands.ejecutarOperacion: " + error);
                     reject(error);
                 } else {
+                    cm.saveAuditory();
                     resolve({ affectedID: this.lastID, rows: this.changes });
                 }
             });
         })
+    }
+
+    /**
+     * Auditoria de las consultas ejecutadas
+     */
+    saveAuditory(){
+        var audiParams = new DBParams;
+        var TxSqlAuditory = this.sentencia;
+        for (var partParam in this.params.getParams()){
+            TxSqlAuditory = TxSqlAuditory.replace(partParam, this.params.getParams()[partParam]);
+        }
+        var sql = `
+        INSERT INTO H_CONSULTATION 
+            (FH_CREATED
+            ,FH_MODIFIED
+            ,CD_CREATED_BY
+            ,CD_MODIFIED_BY
+            ,TX_SQL) 
+        VALUES 
+            (${audiParams.addParams(Date.now())}
+            ,${audiParams.addParams(Date.now())}
+            ,3 -- API_AUDIT
+            ,3 -- API_AUDIT
+            ,${audiParams.addParams(TxSqlAuditory)})`
+        db.run(sql, audiParams.getParams(), function(error) {
+            if (error){
+                LogFile.writeLog("ERROR - Commands.saveAuditory: " + error);
+            }
+        });
+        
     }
 }
 

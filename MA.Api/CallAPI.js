@@ -51,6 +51,28 @@ class CallAPI {
             }
         });
 
+        socket.on('getMenus', async () => {
+            if (CallAPI.withAccessDB(accessDB)){
+                var params = new DBParams;
+                var menus = await DMenus.Find(accessDB, `AND ID_MENU IN (
+                        SELECT PM.CD_MENU
+                        FROM R_PROFILES_MENUS PM
+                            ,R_PROFILES_USERS PU
+                        WHERE PM.CD_PROFILE = PU.CD_PROFILE
+                            AND PU.CD_USER = ${params.addParams(accessDB.user)}
+                            AND PU.CH_ACTIVE = 1
+                            AND PM.CH_ACTIVE = 1)
+                    AND CH_ACTIVE = 1`, params);
+                socket.emit("mensaje", menus); 
+            }
+        });
+
+        socket.on('createUser', async (user) => {
+            if (CallAPI.withAccessDB(accessDB)){
+                var user = new DUsers(null, user.TxName, user.TxLogin)
+            }
+        })
+
         socket.on('access', () => {
             socket.emit('withAccess', CallAPI.withAccessDB(accessDB));
         });
