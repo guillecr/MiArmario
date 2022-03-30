@@ -80,7 +80,7 @@ class RegDB{
         }
         return new Promise((resolve, reject) => {
             var params = new DBParamas();
-            var cmd = new Commands(accessDB.db, cm.constructor.TxSelect(this.getId(), params), params);
+            var cmd = new Commands(accessDB.linkDB, cm.constructor.TxSelect(this.getId(), params), params);
             cmd.ejecutarSentencia()
                 .then(function(row){
                     if (row.length > 0){
@@ -103,7 +103,7 @@ class RegDB{
      */
     static Id(accessDB, idValue){
         var reg = new this(idValue);
-        return reg.Read(accessDB.db);
+        return reg.Read(accessDB);
     }
 
     /**
@@ -115,7 +115,7 @@ class RegDB{
     static Find(accessDB, TxWhere, params){
         var cm = this;
         return new Promise((resolve, reject) => {
-            var cmd = new Commands(accessDB.db, cm.TxSelect(null, null, TxWhere), params);
+            var cmd = new Commands(accessDB.linkDB, cm.TxSelect(null, null, TxWhere), params);
             cmd.ejecutarSentencia()
                 .then(function(rows){
                     var registros = [];
@@ -140,7 +140,7 @@ class RegDB{
         var cm = this;
         return new Promise((resolve, reject) => {
             var params = new DBParamas();
-            var cmd = new Commands(accessDB.db, cm.TxInsert(accessDB.user, params), params);
+            var cmd = new Commands(accessDB.linkDB, cm.TxInsert(accessDB.user, params), params);
             cmd.ejecutarOperacion()
                 .then(async function(rows){
                     await cm.Read(accessDB, rows.affectedID);
@@ -161,7 +161,7 @@ class RegDB{
         var cm = this;
         return new Promise((resolve, reject) => {
             var params = new DBParamas();
-            var cmd = new Commands(accessDB.db, cm.TxUpdate(accessDB.user, params), params);
+            var cmd = new Commands(accessDB.linkDB, cm.TxUpdate(accessDB.user, params), params);
             cmd.ejecutarOperacion()
                 .then(async function(rows){
                     await cm.Read(accessDB);

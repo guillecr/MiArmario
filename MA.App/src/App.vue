@@ -5,7 +5,7 @@
     ></menu-lateral>
     <router-view class="view"></router-view>
     <div id="banConnect">
-      {{conectado}}
+      {{usuario}}
     </div>
   </div>
 </template>
@@ -19,7 +19,8 @@ export default {
   },
   data(){
     return{
-      isConnected: false
+      isConnected: false,
+      user: null
     }
   },
   computed:{
@@ -28,6 +29,13 @@ export default {
     },
     conectado: function(){
       return this.isConnected? 'Conectado':'Desconectado'
+    },
+    usuario: function(){
+      if (!this.isConnected) {
+        return 'Desconectado';
+      } else {
+        return 'Usuario: ' + (this.user? this.user : 'No login');
+      }
     }
    },
   sockets: {
@@ -38,6 +46,27 @@ export default {
 
     disconnect() {
       this.isConnected = false;
+    },
+
+    withAccess(access){
+      if(!access){
+        this.user = null;
+        this.$bvToast.toast(`Usuario rechazado`, {
+          title: 'Error',
+          autoHideDelay: 5000,
+          appendToast: true
+        });
+        
+        if (window.location.href.indexOf('/login') < 0) {
+          this.$router.replace('/login');
+        }
+        
+      } else {
+        this.user = access;
+        this.$router.replace('/');
+        //this.$socket.emit('getMenus');
+      }
+      this.$socket.emit('getMenus');
     },
 
     // Si el servidor nos contesta con la cabecera "mensaje"

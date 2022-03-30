@@ -23,7 +23,7 @@
 <script>
 export default {
     sockets: {
-        MenuActionsRes(data) {
+        Menus(data) {
             this.acciones = data;
         }
     },

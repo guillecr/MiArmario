@@ -1,6 +1,7 @@
 // DEPENDENCIAS
 const fs = require('fs'); // Lectura de archivos
-const https = require('https'); // Servidor HTTPS
+const http = require('http'); // Servidor HTTP
+//const https = require('https'); // Servidor HTTPS
 const express = require('express'); // Aplicación express
 const { Server } = require("socket.io"); // Socket
 const sqlite3 = require('sqlite3').verbose(); // Cliente SQLite3
@@ -9,6 +10,8 @@ const LogFile = require('./Utils/LogFile'); // Registros Log
 const URL_PARAMS = 'params.json'; // Archivo de parámetros
 
 const app = express();
+// const server = http.createServer(app);
+// const io = new Server(server);
 
 const connDB = function(UrlDB){
     // Conexión a la base de datos
@@ -24,15 +27,27 @@ const connDB = function(UrlDB){
 const upServer = function(HttpPort, KeyUrl, CertUrl){
     // Levantar servicio
     console.log('Levantando instancia del servicio');
-    const server = https.createServer({
-        key: fs.readFileSync(KeyUrl),
-        cert: fs.readFileSync(CertUrl)
-    }, app);
+    
+    // SERVIDOR HTTP
+    server = http.createServer(app);
     io = new Server(server);
     server.listen(HttpPort, () => {
         console.log("Server running on port %PORT%".replace("%PORT%", PARAMS.HTTP_PORT))
     });
-    io.on('connection', CallAPI.calls);
+
+    // SERVIDOR HTTPS
+    // serverS = https.createServer({
+    //     key: fs.readFileSync(KeyUrl),
+    //     cert: fs.readFileSync(CertUrl)
+    // }, app);
+    // io = new Server(serverS);
+    // serverS.listen(HttpPort, () => {
+    //     console.log("Server running on port %PORT%".replace("%PORT%", PARAMS.HTTP_PORT))
+    // });
+
+    MaIo = io.of("/miarmario/")
+    //io.on('connection', CallAPI.calls);
+    MaIo.on('connection', CallAPI.calls);
 }
 
 // Función de entrada

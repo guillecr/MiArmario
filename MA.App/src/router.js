@@ -1,6 +1,7 @@
 import VueRouter from 'vue-router';
 import Home from './pages/Home.vue';
 import Init from './pages/Init.vue';
+import Login from './pages/LogIn.vue';
 import FormDPrendas from './pages/FormDPrendas.vue';
 
 const routes = [
@@ -18,6 +19,11 @@ const routes = [
     path: "/addPrenda",
     name: "addPrenda",
     component: FormDPrendas
+  },
+  {
+    path: "/login",
+    name: "login",
+    component: Login
   }
 ];
 

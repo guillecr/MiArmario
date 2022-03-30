@@ -26,7 +26,7 @@ class Commands{
     ejecutarSentencia(){
         var cm = this;
         return new Promise((resolve, reject) => {
-            db.all(this.sentencia, this.params.getParams(), (error, row) => {
+            this.db.all(this.sentencia, this.params.getParams(), (error, row) => {
                 if (error){
                     LogFile.writeLog('ERROR - Commands.ejecutarSentencia ' + error);
                     reject(error);
@@ -45,7 +45,7 @@ class Commands{
     ejecutarOperacion(){
         var cm = this;
         return new Promise((resolve, reject) => {
-            db.run(this.sentencia, this.params.getParams(), function(error) {
+            this.db.run(this.sentencia, this.params.getParams(), function(error) {
                 if (error){
                     LogFile.writeLog("ERROR - Commands.ejecutarOperacion: " + error);
                     reject(error);
@@ -79,7 +79,7 @@ class Commands{
             ,3 -- API_AUDIT
             ,3 -- API_AUDIT
             ,${audiParams.addParams(TxSqlAuditory)})`
-        db.run(sql, audiParams.getParams(), function(error) {
+        this.db.run(sql, audiParams.getParams(), function(error) {
             if (error){
                 LogFile.writeLog("ERROR - Commands.saveAuditory: " + error);
             }

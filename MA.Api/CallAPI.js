@@ -12,23 +12,24 @@ class CallAPI {
 
     static calls(socket){
         // Llamadas IO
-        var accessDB = {db: null, user: null, socket: socket};
+        var accessDB = {linkDB: null, user: null, socket: socket};
         console.log((new Date()) + ' => Nueva conexión aceptada')
         LogFile.writeLog('Nueva conexión aceptada');
-        
+        socket.emit('withAccess', false);
         socket.on('LoginIn', async (loginParams) => {
             var params = new DBParams;
-            var tmpAccess = {db:db, user: 2}; // User 2: API_LOGIN_IN
+            var tmpAccess = {linkDB: db, user: 2}; // User 2: API_LOGIN_IN
             var user = await DUsers.Find(tmpAccess, 'AND TX_LOGIN = ' + params.addParams(loginParams.login), params);
             if (user){
                 if (await bcrypt.compare(loginParams.pw,user[0].TxPassword)){
                     // PW correcto
-                    accessDB.db = db;
+                    accessDB.linkDB = db;
                     accessDB.user = user[0].IdUser;
+                    
                     user[0].FhLastLogin = Date.now();
                     await user[0].Update(accessDB);
                     LogFile.writeLog(`Usuario logeado: ${user[0].TxLogin} (${user[0].IdUser})`);
-                    socket.emit('withAccess', true);
+                    socket.emit('withAccess', user[0].TxLogin);
 
                 } else {
                     // PW incorrecto
@@ -46,25 +47,24 @@ class CallAPI {
             if (CallAPI.withAccessDB(accessDB)){
                 var user = await DUsers.Id(accessDB, accessDB.user);
                 user.TxPassword = await bcrypt.hash(newPw, 10);
-                await user.Update(accessDB.db);
+                await user.Update(accessDB);
                 socket.emit("mensaje", true); 
             }
         });
 
         socket.on('getMenus', async () => {
-            if (CallAPI.withAccessDB(accessDB)){
-                var params = new DBParams;
-                var menus = await DMenus.Find(accessDB, `AND ID_MENU IN (
-                        SELECT PM.CD_MENU
-                        FROM R_PROFILES_MENUS PM
-                            ,R_PROFILES_USERS PU
-                        WHERE PM.CD_PROFILE = PU.CD_PROFILE
-                            AND PU.CD_USER = ${params.addParams(accessDB.user)}
-                            AND PU.CH_ACTIVE = 1
-                            AND PM.CH_ACTIVE = 1)
-                    AND CH_ACTIVE = 1`, params);
-                socket.emit("mensaje", menus); 
-            }
+            var tmpAccess = (accessDB.user? accessDB: {linkDB: db, user: 4}) // 4 => Usuario sin permisos
+            var params = new DBParams;
+            var menus = await DMenus.Find(tmpAccess, `AND ID_MENU IN (
+                    SELECT PM.CD_MENU
+                    FROM R_PROFILES_MENUS PM
+                        ,R_PROFILES_USERS PU
+                    WHERE PM.CD_PROFILE = PU.CD_PROFILE
+                        AND PU.CD_USER = ${params.addParams(tmpAccess.user)}
+                        AND PU.CH_ACTIVE = 1
+                        AND PM.CH_ACTIVE = 1)
+                AND CH_ACTIVE = 1`, params);
+            socket.emit("Menus", menus); 
         });
 
         socket.on('createUser', async (user) => {
@@ -158,7 +158,7 @@ class CallAPI {
 
     // TODO: Con esta función podemos crear tokens que devolvemos al cliente y verificar la vida de este mismo
     static withAccessDB(accessDB){
-        if (!!accessDB.db){
+        if (!!accessDB.linkDB){
             return true
         } else {
             accessDB.socket.emit('withAccess', false);
