@@ -42,13 +42,21 @@ export default {
     connect() {
       // Fired when the socket connects.
       this.isConnected = true;
+      this.$socket.emit('getMenus');
+      var coo = document.cookie.substring(12);
+      if (coo){
+        this.$socket.emit('getSession',{token: coo});
+      }
     },
 
     disconnect() {
       this.isConnected = false;
     },
-
+    token(CdToken){
+      document.cookie = "tokenAccess=" + CdToken;
+    },
     withAccess(access){
+      console.log("Acceso: " + access);
       if(!access){
         this.user = null;
         this.$bvToast.toast(`Usuario rechazado`, {
@@ -57,16 +65,17 @@ export default {
           appendToast: true
         });
         
-        if (window.location.href.indexOf('/login') < 0) {
+        if (window.location.pathname != '/login') {
           this.$router.replace('/login');
-        }
-        
+        }        
       } else {
         this.user = access;
-        this.$router.replace('/');
-        //this.$socket.emit('getMenus');
+        if (window.location.pathname != '/' && window.location.pathname != ''){
+          this.$router.replace('/');
+        }
       }
       this.$socket.emit('getMenus');
+      
     },
 
     // Si el servidor nos contesta con la cabecera "mensaje"
