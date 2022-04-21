@@ -12,6 +12,8 @@
 
 <script>
 import MenuLateral from "./components/MenuLateral.vue";
+import tool from "./tools";
+
 export default {
   name: 'App',
   components: {
@@ -40,12 +42,12 @@ export default {
    },
   sockets: {
     connect() {
-      // Fired when the socket connects.
       this.isConnected = true;
-      this.$socket.emit('getMenus');
-      var coo = document.cookie.substring(12);
+      var coo = tool.getCookie('tokenAccess');
       if (coo){
         this.$socket.emit('getSession',{token: coo});
+      } else {
+        this.$socket.emit('getMenus');
       }
     },
 
@@ -70,15 +72,10 @@ export default {
         }        
       } else {
         this.user = access;
-        if (window.location.pathname != '/' && window.location.pathname != ''){
-          this.$router.replace('/');
-        }
       }
       this.$socket.emit('getMenus');
       
     },
-
-    // Si el servidor nos contesta con la cabecera "mensaje"
     mensaje(data) {
       this.socketMessage = data
     }
@@ -97,7 +94,7 @@ export default {
   margin-top: 60px;
 }
 #banConnect {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   right: 0;
   background-color: #2c3e50;

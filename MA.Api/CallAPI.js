@@ -2,6 +2,7 @@ const DPrendas = require('./Entities/DPrendas');
 const DUsers = require('./Entities/DUsers');
 const DMenus = require('./Entities/DMenus');
 const DClosets = require('./Entities/DClosets');
+const ExtImgs = require('./Entities/ExtImgs');
 
 const Commands = require('./Utils/Commands');
 const DBParams = require('./Utils/DBParamas');
@@ -57,12 +58,56 @@ class CallAPI {
             }
         });
 
-        socket.on('getToken', async () => {
-            socket.emit("mensaje", CallAPI.getToken(accessDB.user));
+        socket.on('getPrendasByArmario', async(idArmario) => {
+            try{
+                var accessDB = CallAPI.getAccessDBByToken(token, socket);
+                var params = new DBParams;
+                var listPrendas = await DPrendas.Find(accessDB,`AND CD_CLOSET = ${params.addParams(idArmario)}
+                    AND CH_ACTIVE = 1`, params);
+                for (var index in listPrendas){
+                    var prenda = listPrendas[index];
+                    var params = new DBParams;
+                    var listImg = await ExtImgs.Find(accessDB,`AND ID_IMG IN (SELECT R.CD_IMG FROM R_PRENDAS_IMGS R WHERE R.CD_PRENDA = ${prenda.IdPrenda})
+                        AND CH_ACTIVE = 1`, params);
+                    if (listImg && listImg.length > 0){
+                        prenda.BiImg = listImg[0].BiStream;
+                    }
+                }
+                socket.emit('getPrendasByArmarioResponse',listPrendas);
+            } catch(ex){
+                LogFile.writeLog('ERROR - getPrendasByArmario: ' + ex.message);
+            }
+        });
+
+        socket.on('getArmario',async (idArmario) => {
+            try{
+                var accessDB = CallAPI.getAccessDBByToken(token, socket);
+                var armario = await DClosets.Id(accessDB, idArmario);
+                socket.emit('getArmarioResponse',armario);
+            } catch(ex){
+                LogFile.writeLog('ERROR - getArmario: ' + ex.message);
+            }
+        });
+        socket.on('getListArmarios', async () => {
+            try{
+                var accessDB = CallAPI.getAccessDBByToken(token, socket);
+                var params = new DBParams;
+                var listArmarios = await DClosets.Find(accessDB, `AND CD_USER = ${params.addParams(accessDB.user)}`, params);
+                var response = [];
+                for (var elm in listArmarios){
+                    response.push({"value":listArmarios[elm].IdClosets, "text":listArmarios[elm].TxName});
+                }
+                socket.emit('getListArmariosResponse', response);
+            } catch(ex){
+                LogFile.writeLog('ERROR - getListArmarios: ' + ex.message);
+            }
         });
 
         socket.on('setPwTEST', async (request) => {
             try {
+                if (await bcrypt.compare(loginParams.pw,user[0].TxPassword)){
+                    
+                }
                 var accessDB = CallAPI.getAccessDBByToken(request.token, socket);
                 var user = await DUsers.Id(accessDB, accessDB.user);
                 user.TxPassword = await bcrypt.hash(newPw, 10);

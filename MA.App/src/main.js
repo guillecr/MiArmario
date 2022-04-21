@@ -4,9 +4,9 @@ import VueRouter from 'vue-router';
 import router from "./router";
 import io from "socket.io-client";
 import VueSocketIO from 'vue-socket.io';
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-vue/dist/bootstrap-vue.css';
 
 const urlServer = 'http://localhost:3000/miarmario/';
 

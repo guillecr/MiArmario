@@ -3,6 +3,7 @@ import Home from './pages/Home.vue';
 import Init from './pages/Init.vue';
 import Login from './pages/LogIn.vue';
 import FormDPrendas from './pages/FormDPrendas.vue';
+import MisPrendas from './pages/MisPrendas.vue';
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: "/login",
     name: "login",
     component: Login
+  },
+  {
+    path: "/misprendas",
+    name: "MisPrendas",
+    component: MisPrendas
   }
 ];
 
