@@ -5,7 +5,7 @@
         </b-jumbotron>
         <b-card id="MisPrendasCardsPrendas" v-for="prenda in listPrendas" :key="prenda.IdPrenda"
             :title="prenda.TxName"
-            :img-src="'data:image/jpeg;base64, ' + prenda.BiImg"
+            :img-src="prenda.BiImg"
             img-alt="Image"
             img-top
             tag="article"
@@ -25,6 +25,8 @@
     }
     #MisPrendasJumnotron{
         background-color: transparent;
+        padding-top: 20px;
+        padding-bottom: 20px;
     }
     #MisPrendasCardsPrendas{
         float: left;
@@ -45,6 +47,16 @@ export default {
             this.listArmarios = listArmarios;
             if (!this.idArmario){
                 this.idArmario = this.listArmarios[0].value;
+            }
+        },
+        getPrendasByArmarioImgResponse(objImg){
+            for (var index in this.listPrendas){
+                var prenda = this.listPrendas[index];
+                if (prenda.IdPrenda == objImg.IdPrenda){
+                    prenda.BiImg = 'data:image/jpeg;base64, ' + objImg.BiImg;
+                    this.$forceUpdate();
+                    break;
+                }
             }
         }
     },

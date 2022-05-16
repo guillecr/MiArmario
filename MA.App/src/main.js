@@ -7,6 +7,7 @@ import VueSocketIO from 'vue-socket.io';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
+import tool from "./tools";
 
 const urlServer = 'http://localhost:3000/miarmario/';
 
@@ -25,6 +26,11 @@ Vue.use(VueRouter);
 Vue.use(new VueSocketIO({
   debug: true,
   connection: io(urlServer,{ 
+    auth: (cb) => {
+      cb({
+        token:tool.getCookie('tokenAccess')
+      });
+    },
     transports : ['websocket']
   }), // transports es importante para CORS
 }));

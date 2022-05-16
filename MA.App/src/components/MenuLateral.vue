@@ -64,8 +64,8 @@ export default {
     background-color: rgb(74, 144, 177);
 }
 .MenuBoton{
-    position: fixed;
-    top:10px;
+    position: absolute;
+    top: 8px;
     left: 10px;
     font-size: 30px;
     color: white;

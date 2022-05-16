@@ -47,7 +47,7 @@ const upServer = function(HttpPort, KeyUrl, CertUrl){
 
     MaIo = io.of("/miarmario/")
     //io.on('connection', CallAPI.calls);
-    MaIo.on('connection', CallAPI.calls);
+    MaIo.on('connection', CallAPI.calls2);
 }
 
 // Función de entrada

@@ -43,21 +43,20 @@ export default {
   sockets: {
     connect() {
       this.isConnected = true;
-      var coo = tool.getCookie('tokenAccess');
-      if (coo){
-        this.$socket.emit('getSession',{token: coo});
-      } else {
-        this.$socket.emit('getMenus');
-      }
     },
 
     disconnect() {
       this.isConnected = false;
     },
+
     token(CdToken){
+      // Al iniciar sesión correctamente, obtendremos la llamada token con el tokem generado
       document.cookie = "tokenAccess=" + CdToken;
     },
+    
     withAccess(access){
+      // El servidor nos responde que tenemos acceso.
+      // El mensaje lo obtenemos al iniciar la conexión, al iniciar sesión o cuando hagamos una llamada sin un token valido
       console.log("Acceso: " + access);
       if(!access){
         this.user = null;
@@ -77,6 +76,7 @@ export default {
       
     },
     mensaje(data) {
+      // TEST
       this.socketMessage = data
     }
   }
