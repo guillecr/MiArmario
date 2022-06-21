@@ -1,9 +1,9 @@
 <template>
-    <div id="MisPrendas">
+    <div id="PagMisPrendas">
         <b-form-select v-model="idArmario" :options="listArmarios"></b-form-select>
-        <b-jumbotron id="MisPrendasJumnotron" :header="objArmario.TxName" :lead="objArmario.TxDescription">
+        <b-jumbotron id="PagMisPrendasJumnotron" :header="objArmario.TxName" :lead="objArmario.TxDescription">
         </b-jumbotron>
-        <b-card id="MisPrendasCardsPrendas" v-for="prenda in listPrendas" :key="prenda.IdPrenda"
+        <b-card id="PagMisPrendasCardsPrendas" v-for="prenda in listPrendas" :key="prenda.IdPrenda"
             :title="prenda.TxName"
             :img-src="prenda.BiImg"
             img-alt="Image"
@@ -19,16 +19,16 @@
     </div>
 </template>
 <style scoped>
-    #MisPrendas{
+    #PagMisPrendas{
         width: 90vw;
         margin-left: 5vw;
     }
-    #MisPrendasJumnotron{
+    #PagMisPrendasJumnotron{
         background-color: transparent;
         padding-top: 20px;
         padding-bottom: 20px;
     }
-    #MisPrendasCardsPrendas{
+    #PagMisPrendasCardsPrendas{
         float: left;
         margin-right: 5px;
     }
@@ -37,19 +37,17 @@
 import tool from "../tools";
 export default {
     sockets: {
-        getPrendasByArmarioResponse(listPrendas) {
-            this.listPrendas = listPrendas;
+        PagMisPrendasGetInfoResponse(response) {
+            this.listPrendas = response.listPrendas;
+            this.objArmario = response.objArmario;
         },
-        getArmarioResponse(objArmario){
-            this.objArmario = objArmario;
-        },
-        getListArmariosResponse(listArmarios){
+        PagMisPrendasGetListArmariosResponse(listArmarios){
             this.listArmarios = listArmarios;
             if (!this.idArmario){
                 this.idArmario = this.listArmarios[0].value;
             }
         },
-        getPrendasByArmarioImgResponse(objImg){
+        PagMisPrendasGetInfoPrendaImgResponse(objImg){
             for (var index in this.listPrendas){
                 var prenda = this.listPrendas[index];
                 if (prenda.IdPrenda == objImg.IdPrenda){
@@ -72,10 +70,13 @@ export default {
     watch: {
         idArmario(newValue){
             if (newValue){
-                this.$socket.emit('getArmario', this.idArmario);
-                this.$socket.emit('getPrendasByArmario', this.idArmario);
+                this.$socket.emit('PagMisPrendasGetInfo', this.idArmario);
+                //this.$socket.emit('getPrendasByArmario', this.idArmario);
             }
         }
+    },
+    created(){
+        this.$socket.emit('PagMisPrendasGetListArmarios');
     },
     methods:{
         test: function(){
@@ -83,9 +84,6 @@ export default {
         }
     },
     async mounted(){
-        // Establecer la sesión tarda mas que realizar la llamada
-        await new Promise(resolve => setTimeout(resolve, 500))
-        this.$socket.emit('getListArmarios');
         var idArmario = tool.getParamsURL('idArmario');
         if (idArmario) {
             this.idArmario = idArmario;

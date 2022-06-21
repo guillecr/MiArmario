@@ -11,13 +11,16 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jwt-simple");
 
 // Páginas
-const MisPrendas = require("./pages/MisPrendas");
+const PagMisPrendas = require("./pages/PagMisPrendas");
+const PagLogin = require("./pages/PagLogin");
+const PagTest = require("./pages/PagTest");
 
 class CallAPI {
 
-    static calls2(socket){
+    static callsDB(socket){
+        // Con esta rutina se puede construir las llamadas definidas en la base de datos.
         var init = CallAPI.calls.toString().substring(14,CallAPI.calls.toString().length-1);
-        var codePrendas = MisPrendas.calls.toString().substring(8, MisPrendas.calls.toString().length-1);
+        var codePrendas = PagMisPrendas.calls.toString().substring(8, PagMisPrendas.calls.toString().length-1);
         var fullCalls = init + "\n" + codePrendas;
         eval(fullCalls);
 
@@ -26,19 +29,19 @@ class CallAPI {
     static calls(socket){
         // Llamadas IO
         var address = socket.request.connection.remoteAddress;
-        var accessDB = { linkDB: db, user: null };
+        socket.accessDB = { linkDB: db, user: null };
         console.log((new Date()) + ` => Nueva conexión aceptada (${address})`)
         LogFile.writeLog(`${new Date()} => Nueva conexión aceptada (${address})`);
         
         // Comprobar acreditación inicial
         if (CallAPI.getTokenInHead(socket)){
             try {
-                accessDB.user = CallAPI.authenticationByToken(socket);
+                socket.accessDB.user = CallAPI.authenticationByToken(socket);
                 // Sin uso de await
-                DUsers.Id(accessDB, accessDB.user)
+                DUsers.Id(socket.accessDB, socket.accessDB.user)
                     .then(function(user){
                         if (!user){
-                            LogFile.writeLog('ERROR - autentificación: Token valido con usuario no localizado. ID User: ' + accessDB.user);
+                            LogFile.writeLog('ERROR - autentificación: Token valido con usuario no localizado. ID User: ' + socket.accessDB.user);
                         } else {
                             socket.emit('withAccess', user.TxLogin);
                         }
@@ -56,37 +59,36 @@ class CallAPI {
             // events: Nombre de la llamada
             // args: Parámetros a la llamada
             // Utilizamos este mecanismo para la autentificación
+            // TODO: En este punto podemos verificar si el usuario tiene permisos para la acción que solicita
             try {
-                accessDB.user = CallAPI.authenticationByToken(socket);
+                socket.accessDB.user = CallAPI.authenticationByToken(socket);
                 next();
             } catch (ex){
                 // Excepciones
                 if (event == 'getMenus'){
-                    //socket.user = 4;
-                    accessDB.user = 4; // 4 => Usuario sin permisos
+                    socket.accessDB.user = 4; // 4 => Usuario sin permisos
                     next();
                 } else if (event == 'LoginIn'){
-                    socket.accessDB = 2; // User 2 0> API_LOGIN_IN
+                    socket.accessDB = 2; // User 2 => API_LOGIN_IN
                     next(); 
                 
                 } else {
                     // Sin autentificación
-                    accessDB.user = null;
+                    socket.accessDB.user = null;
                     socket.emit('withAccess', false);
-                    //return next(new Error("unauthorized event"));
                 }   
             }
         });
 
         socket.on('LoginIn', async (loginParams) => {
             var params = new DBParams;
-            var user = await DUsers.Find(accessDB, 'AND TX_LOGIN = ' + params.addParams(loginParams.login), params);
+            var user = await DUsers.Find(socket.accessDB, 'AND TX_LOGIN = ' + params.addParams(loginParams.login), params);
             if (user){
                 if (await bcrypt.compare(loginParams.pw, user[0].TxPassword)){
                     // PW correcto
                     var token = CallAPI.getToken(user[0].IdUser);                    
                     user[0].FhLastLogin = Date.now();
-                    await user[0].Update(accessDB);
+                    await user[0].Update(socket.accessDB);
 
                     LogFile.writeLog(`Usuario logeado: ${user[0].TxLogin} (${user[0].IdUser})`);
                     socket.emit('withAccess', user[0].TxLogin);
@@ -104,77 +106,15 @@ class CallAPI {
             }
         });
 
-        // socket.on('getPrendasByArmario', async(idArmario) => {
-        //     try {
-        //         var params = new DBParams;
-        //         var listPrendas = await DPrendas.Find(accessDB,`AND CD_CLOSET = ${params.addParams(idArmario)}
-        //             AND CH_ACTIVE = 1`, params);
-        //         // Emitimos la lista de ropa
-        //         socket.emit('getPrendasByArmarioResponse',listPrendas);
-        //         // De uno en uno emitimos las imagenes
-        //         for (var index in listPrendas){
-        //             var prenda = listPrendas[index];
-        //             var params = new DBParams;
-        //             var listImg = await ExtImgs.Find(accessDB,`AND ID_IMG IN (SELECT R.CD_IMG FROM R_PRENDAS_IMGS R WHERE R.CD_PRENDA = ${prenda.IdPrenda})
-        //                 AND CH_ACTIVE = 1`, params);
-        //             if (listImg && listImg.length > 0){
-        //                 socket.emit('getPrendasByArmarioImgResponse',{"IdPrenda":prenda.IdPrenda, "BiImg":listImg[0].BiStream})
-        //             }
-        //         }
-                
-        //     } catch(ex) {
-        //         LogFile.writeLog('ERROR - getPrendasByArmario: ' + ex.message);
-        //     }
-        // });
-
-        socket.on('getArmario',async (idArmario) => {
-            try {
-                var armario = await DClosets.Id(accessDB, idArmario);
-                socket.emit('getArmarioResponse',armario);
-            } catch(ex) {
-                LogFile.writeLog('ERROR - getArmario: ' + ex.message);
-            }
-        });
-        socket.on('getListArmarios', async () => {
-            try {
-                var params = new DBParams;
-                var listArmarios = await DClosets.Find(accessDB, `AND CD_USER = ${params.addParams(accessDB.user)}`, params);
-                var response = [];
-                for (var elm in listArmarios){
-                    response.push({"value":listArmarios[elm].IdClosets, "text":listArmarios[elm].TxName});
-                }
-                socket.emit('getListArmariosResponse', response);
-            } catch(ex) {
-                LogFile.writeLog('ERROR - getListArmarios: ' + ex.message);
-            }
-        });
-
-        // TODO: Por hacer
-        socket.on('setPwTEST', async (request) => {
-            try {
-                if (await bcrypt.compare(loginParams.pw,user[0].TxPassword)){
-                    // Comparamos la contraseña
-                    var user = await DUsers.Id(accessDB, accessDB.user);
-                    user.TxPassword = await bcrypt.hash(request.newPw, 10);
-                    await user.Update(accessDB);
-                    socket.emit("mensaje", true); 
-                } else {
-                    socket.emit("mensaje", false); 
-                }
-            } catch (ex) {
-                LogFile.writeLog('ERROR - setPwTEST: ' + ex.message);
-            }
-        });
-
         socket.on('getMenus', async () => {
             try {
                 var params = new DBParams;
-                var menus = await DMenus.Find(accessDB, `AND ID_MENU IN (
+                var menus = await DMenus.Find(socket.accessDB, `AND ID_MENU IN (
                         SELECT PM.CD_MENU
                         FROM R_PROFILES_MENUS PM
                             ,R_PROFILES_USERS PU
                         WHERE PM.CD_PROFILE = PU.CD_PROFILE
-                            AND PU.CD_USER = ${params.addParams(accessDB.user)}
+                            AND PU.CD_USER = ${params.addParams(socket.accessDB.user)}
                             AND PU.CH_ACTIVE = 1
                             AND PM.CH_ACTIVE = 1)
                     AND CH_ACTIVE = 1`, params);
@@ -187,9 +127,9 @@ class CallAPI {
         socket.on('createUser', async (user) => {
             try {
                 var user = new DUsers(null, user.TxName, user.TxLogin);
-                await user.Insert(accessDB);
+                await user.Insert(socket.accessDB);
             } catch (ex) {
-
+                console.log('Error en createUser: ' + ex.message);
             }
         })
 
@@ -202,91 +142,9 @@ class CallAPI {
             io.emit("mensaje",'Hola desde la API');
         });
 
-        socket.on('TestPrenda', async () => {
-            try {
-                var prenda = await DPrendas.Id(accessDB, 1);
-                socket.emit("TEST", prenda.getData());
-            } catch (ex){
-                LogFile.writeLog('ERROR - TestPrenda: ' + ex.message);
-            }
-        });
-
-        socket.on('TestMenu', async () => {
-            try {
-                var menu1 = new DMenus(1);
-                await menu1.Read(accessDB,1);
-                console.log(menu1);
-                socket.emit("TEST", menu1);
-            } catch (ex){
-                LogFile.writeLog('ERROR - TestMenu: ' + ex.message);
-            }
-        });
-
-        socket.on('TestClosets', async (idClosets) => {
-            try {
-                var closet = await DClosets.Id(accessDB, idClosets);
-                socket.emit("TEST", (closet)? closet.getData(): null);
-            } catch (ex){
-                LogFile.writeLog('ERROR - TestClosets: ' + ex.message);
-            }
-        });
-
-        socket.on('TestUser', async () => {
-            try {
-                //var accessDB = CallAPI.getAccessDBByToken(request.token, socket);
-                var user = await DUsers.Id(accessDB, 1);
-                socket.emit("TEST", (user)? user.getData(): null);
-            } catch (ex){
-                LogFile.writeLog('ERROR - TestUser: ' + ex.message);
-            }
-        });
-
-        socket.on('TestParams', async () => {
-            try {
-                //var accessDB = CallAPI.getAccessDBByToken(request.token, socket);
-                var params = new DBParams;
-                var menu = await DMenus.Find(accessDB, `AND TX_NAME = ${params.addParams("Inicio")}`, params);
-                socket.emit("TEST", menu);
-            } catch (ex){
-                LogFile.writeLog('ERROR - TestParams: ' + ex.message);
-            }
-        });
-
-        socket.on('TestInsert', async () => {
-            try {
-                var accessDB = CallAPI.getAccessDBByToken(request.token, socket);
-                var newClosets = new DClosets(null, "Calcetines", 1, "Calcetines cortos", 1);
-                console.log('ANTES:');
-                console.log(newClosets);
-                await newClosets.Insert(accessDB);
-                console.log('DESPUES:');
-                console.log(newClosets);
-                socket.emit("TEST", newClosets);
-            } catch (ex){
-                LogFile.writeLog('ERROR - TestInsert: ' + ex.message);
-            }
-        });
-
-        socket.on('TestUpdate', async (idClosets) => {
-            try {
-                var accessDB = CallAPI.getAccessDBByToken(request.token, socket);
-                var closet = await DClosets.Id(accessDB, idClosets);
-                console.log("ANTES");
-                console.log(closet);
-                closet.CdUser = 10;
-                if (await closet.Update(accessDB) > 0){
-                    console.log("DESPUES");
-                    console.log(closet);
-                    socket.emit("TEST", "OK");
-
-                } else {
-                    socket.emit("TEST", "ERROR");
-
-                }
-            } catch (ex){
-                LogFile.writeLog('ERROR - TestUpdate: ' + ex.message);
-            }
-        });
+        PagMisPrendas.calls(socket);
+        //PagLogin.calls(socket);
+        PagTest.calls(socket);
     }
 
     static authenticationByToken(socket, token){
@@ -297,9 +155,6 @@ class CallAPI {
         if (user){
             return user;
         } else {
-            // if (socket){
-            //     socket.emit('withAccess', false);
-            // }
             throw {message: 'Token no valido'};
         }
     }

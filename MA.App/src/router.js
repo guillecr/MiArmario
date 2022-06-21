@@ -3,7 +3,7 @@ import Home from './pages/Home.vue';
 import Init from './pages/Init.vue';
 import Login from './pages/LogIn.vue';
 import FormDPrendas from './pages/FormDPrendas.vue';
-import MisPrendas from './pages/MisPrendas.vue';
+import MisPrendas from './pages/PagMisPrendas.vue';
 
 const routes = [
   {
@@ -12,24 +12,9 @@ const routes = [
     component: Init
   },
   {
-    path: "/home",
-    name: "home",
-    component: Home
-  },
-  {
-    path: "/addPrenda",
-    name: "addPrenda",
-    component: FormDPrendas
-  },
-  {
     path: "/login",
     name: "login",
     component: Login
-  },
-  {
-    path: "/misprendas",
-    name: "MisPrendas",
-    component: MisPrendas
   }
 ];
 

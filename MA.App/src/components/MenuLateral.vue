@@ -7,8 +7,8 @@
     <div id="Menu" class="MenuRaiz" :style="{left: (visible?'0':'-225px')}" >
         <div class="MenuContenedor" >
             <div class="MenuLista">
-                <div class="MenuLabel" v-for="accion in acciones" :key="accion.IdMenu" @click="HiddenMenu">
-                        <router-link class="MenuRouterLink" :to="{ name: accion.TxPath }">{{accion.TxName}}</router-link>
+                <div class="MenuLabel" v-for="accion in acciones" :key="accion.IdMenu" @click="NavegationTo(accion.CdName)">
+                    {{accion.TxName}}
                 </div>
             </div>
             <div class="MenuInfo">
@@ -23,16 +23,29 @@
 <script>
 export default {
     sockets: {
-        Menus(data) {
-            this.acciones = data;
+        Menus(paginas) {
+            this.acciones = paginas;
         }
     },
-    data: function(){return{
-        acciones: [],
-        visible: false
-    }},
+    data: function(){
+        return {
+            acciones: [],
+            visible: false
+        }
+    },
     props: {
         version: String,
+    },
+    computed: {
+        listMenus: function(){
+            var list = [];
+            var listRouter = this.$router.getRoutes();
+            for (var i in listRouter){
+                var router = listRouter[i];
+                list[i] = {IdMenu:i, CdName:router.name, TxName:'??'}
+            }
+            return list;
+        }
     },
     methods: {
         ShowMenu: function(){
@@ -46,6 +59,12 @@ export default {
             if (!e){
                 this.visible = false;
             }
+        },
+        NavegationTo: function(CdName){
+            if (this.$route.name != CdName){
+                this.$router.push({ name: CdName });
+            }
+            this.visible = false;
         }
     }
 }
@@ -104,6 +123,7 @@ export default {
     padding: 4px;
     padding-inline-start: 14px;
     color:white;
+    cursor: pointer;
 }
 .MenuLabel:hover{
     background-color:rgba(236, 236, 236, 0.712);

@@ -13,6 +13,11 @@
 <script>
 import MenuLateral from "./components/MenuLateral.vue";
 import tool from "./tools";
+import Home from './pages/Home.vue';
+import Init from './pages/Init.vue';
+import Login from './pages/LogIn.vue';
+import FormDPrendas from './pages/FormDPrendas.vue';
+import PagMisPrendas from './pages/PagMisPrendas.vue';
 
 export default {
   name: 'App',
@@ -53,6 +58,28 @@ export default {
       // Al iniciar sesión correctamente, obtendremos la llamada token con el tokem generado
       document.cookie = "tokenAccess=" + CdToken;
     },
+
+    Menus(ListPaginas){
+      console.log(this.$router.getRoutes());
+      // TODO: La idea sería eliminar todos los existentes y añadir los obtenidos
+      var pagesDisp = {
+        'Home':Home,
+        'Init':Init,
+        'Login':Login,
+        'FormDPrendas':FormDPrendas,
+        'PagMisPrendas':PagMisPrendas
+      }
+      for (var i in ListPaginas){
+        var pag = ListPaginas[i];
+        console.log(pagesDisp[pag.CdComponent]);
+        this.$router.addRoute({ 
+          name: pag.CdName, 
+          path: pag.TxPath, 
+          component: pagesDisp[pag.CdComponent]}
+        );
+      }
+      console.log(this.$router.getRoutes());
+    },
     
     withAccess(access){
       // El servidor nos responde que tenemos acceso.
@@ -66,8 +93,8 @@ export default {
           appendToast: true
         });
         
-        if (window.location.pathname != '/login') {
-          this.$router.replace('/login');
+        if (this.$route.name != 'login') {
+          this.$router.push('/login');
         }        
       } else {
         this.user = access;
