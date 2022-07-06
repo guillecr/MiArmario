@@ -56,6 +56,7 @@ export default {
 
     token(CdToken){
       // Al iniciar sesión correctamente, obtendremos la llamada token con el tokem generado
+      // La cookie solo tendrá utilidad al reconectar con el servidor, evitando al usuario a acreditarse de nuevo.
       document.cookie = "tokenAccess=" + CdToken;
     },
 
@@ -87,17 +88,22 @@ export default {
       console.log("Acceso: " + access);
       if(!access){
         this.user = null;
-        this.$bvToast.toast(`Usuario rechazado`, {
-          title: 'Error',
-          autoHideDelay: 5000,
-          appendToast: true
-        });
-        
+        if (this.$route.name == 'login'){
+          this.$bvToast.toast(`Usuario rechazado`, {
+            title: 'Error',
+            autoHideDelay: 5000,
+            appendToast: true
+          });
+        }
+
         if (this.$route.name != 'login') {
           this.$router.push('/login');
         }        
       } else {
         this.user = access;
+        if (this.$route.name == 'login'){
+          this.$router.push('/');
+        }
       }
       this.$socket.emit('getMenus');
       
