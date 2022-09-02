@@ -108,7 +108,6 @@ class CallAPI {
         });
 
         socket.on('getMenus', async () => {
-            console.log(socket.accessDB.user);
             try {
                 var params = new DBParams;
                 var menus = await DMenus.Find(socket.accessDB, `AND ID_MENU IN (

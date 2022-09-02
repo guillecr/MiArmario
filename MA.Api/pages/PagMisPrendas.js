@@ -12,6 +12,31 @@ class MisPrendas {
     static calls(socket){
         socket.on('PagMisPrendasGetInfo', async(idArmario) => {
             try {
+                var params = new DBParams;
+                var armario = await DClosets.Id(socket.accessDB, idArmario);
+                socket.emit('PagMisPrendasGetInfoArmario', {objArmario: armario});
+                params = new DBParams;
+                var listPrendas = await DPrendas.Find(socket.accessDB,`AND CD_CLOSET = ${params.addParams(idArmario)}
+                    AND CH_ACTIVE = 1`, params);
+                
+                for (var index in listPrendas){
+                    var prenda = listPrendas[index];
+                    var params = new DBParams;
+                    var listImg = await ExtImgs.Find(socket.accessDB,`AND ID_IMG IN (SELECT R.CD_IMG FROM R_PRENDAS_IMGS R WHERE R.CD_PRENDA = ${prenda.IdPrenda})
+                        AND CH_ACTIVE = 1`, params);
+                    if (listImg && listImg.length > 0){
+                        listPrendas[index].BiImg = 'data:image/jpeg;base64, ' + listImg[0].BiStream;
+                        //socket.emit('PagMisPrendasGetInfoPrendaImgResponse',{"IdPrenda":prenda.IdPrenda, "BiImg":listImg[0].BiStream})
+                    }
+                    socket.emit('PagMisPrendasGetInfoPrenda', {"ObjPrenda": listPrendas[index]})
+                }
+            } catch(ex) {
+                LogFile.writeLog('ERROR - PagMisPrendasGetInfo2: ' + ex.message);
+            }
+            
+        });
+        socket.on('PagMisPrendasGetInfoOld', async(idArmario) => {
+            try {
                 // Obtenemos la información del armario
                 var params = new DBParams;
                 var armario = await DClosets.Id(socket.accessDB, idArmario);

@@ -4,7 +4,7 @@
   "description": "Api para el cliente im.App",
   "main": "main.js",
   "scripts": {
-    "run": "node ./main.js"
+    "start": "node --max-http-header-size=16384 ./main.js"
   },
   "author": "Guillermo C.R.",
   "license": "ISC",

@@ -3,7 +3,7 @@
         <b-form-select v-model="idArmario" :options="listArmarios"></b-form-select>
         <b-jumbotron id="PagMisPrendasJumnotron" :header="objArmario.TxName" :lead="objArmario.TxDescription">
         </b-jumbotron>
-        <b-card id="PagMisPrendasCardsPrendas" v-for="prenda in listPrendas" :key="prenda.IdPrenda"
+        <!-- <b-card id="PagMisPrendasCardsPrendas" v-for="prenda in listPrendas" :key="prenda.IdPrenda"
             :title="prenda.TxName"
             :img-src="prenda.BiImg"
             img-alt="Image"
@@ -15,7 +15,8 @@
             <b-card-text>
                 Estado <b-badge>{{prenda.TxState}}</b-badge>
             </b-card-text>
-        </b-card>
+        </b-card> -->
+        <listcards :list="listPrendas"></listcards>
     </div>
 </template>
 <style scoped>
@@ -35,28 +36,38 @@
 </style>
 <script>
 import tool from "../tools";
+import listcards from "../components/ListCards.vue";
 export default {
+    components: {
+        listcards
+    },
     sockets: {
-        PagMisPrendasGetInfoResponse(response) {
-            this.listPrendas = response.listPrendas;
-            this.objArmario = response.objArmario;
-        },
         PagMisPrendasGetListArmariosResponse(listArmarios){
             this.listArmarios = listArmarios;
             if (!this.idArmario){
                 this.idArmario = this.listArmarios[0].value;
             }
         },
-        PagMisPrendasGetInfoPrendaImgResponse(objImg){
-            for (var index in this.listPrendas){
-                var prenda = this.listPrendas[index];
-                if (prenda.IdPrenda == objImg.IdPrenda){
-                    prenda.BiImg = 'data:image/jpeg;base64, ' + objImg.BiImg;
-                    this.$forceUpdate();
-                    break;
-                }
-            }
+        PagMisPrendasGetInfoArmario(response){
+            this.objArmario = response.objArmario;
+        },
+        PagMisPrendasGetInfoPrenda(response){
+            this.listPrendas.push(response.ObjPrenda);
         }
+        // PagMisPrendasGetInfoResponse(response) {
+        //     this.listPrendas = response.listPrendas;
+        //     this.objArmario = response.objArmario;
+        // },
+        // PagMisPrendasGetInfoPrendaImgResponse(objImg){
+        //     for (var index in this.listPrendas){
+        //         var prenda = this.listPrendas[index];
+        //         if (prenda.IdPrenda == objImg.IdPrenda){
+        //             prenda.BiImg = 'data:image/jpeg;base64, ' + objImg.BiImg;
+        //             this.$forceUpdate();
+        //             break;
+        //         }
+        //     }
+        // }
     },
     data(){
         return {
@@ -70,18 +81,13 @@ export default {
     watch: {
         idArmario(newValue){
             if (newValue){
+                this.listPrendas = [];
                 this.$socket.emit('PagMisPrendasGetInfo', this.idArmario);
-                //this.$socket.emit('getPrendasByArmario', this.idArmario);
             }
         }
     },
     created(){
         this.$socket.emit('PagMisPrendasGetListArmarios');
-    },
-    methods:{
-        test: function(){
-            tool.getParamsURL('test');
-        }
     },
     async mounted(){
         var idArmario = tool.getParamsURL('idArmario');
