@@ -18,6 +18,8 @@ import Init from './pages/Init.vue';
 import Login from './pages/LogIn.vue';
 import FormDPrendas from './pages/FormDPrendas.vue';
 import PagMisPrendas from './pages/PagMisPrendas.vue';
+import PagFormMisPrendas from './pages/PagFormMisPrendas.vue';
+import PagFormDesigner from "./pages/PagFormDesigner.vue";
 
 export default {
   name: 'App',
@@ -68,7 +70,9 @@ export default {
         'Init':Init,
         'Login':Login,
         'FormDPrendas':FormDPrendas,
-        'PagMisPrendas':PagMisPrendas
+        'PagMisPrendas':PagMisPrendas,
+        'PagFormMisPrendas':PagFormMisPrendas,
+        'PagFormDesigner': PagFormDesigner
       }
       for (var i in ListPaginas){
         var pag = ListPaginas[i];
@@ -124,7 +128,8 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  padding-top: 60px;
+  height: 100vh;
 }
 #banConnect {
   position: fixed;
@@ -137,5 +142,8 @@ export default {
   padding: 3px;
   padding-right: 7px;
   z-index: 10;
+}
+.view {
+  height: 100%;
 }
 </style>

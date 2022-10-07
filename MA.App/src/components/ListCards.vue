@@ -6,8 +6,8 @@
 </style>
 <template>
     <div ref="ListCarts">
-        <!-- elm.IdPrenda como ejemplo. La idea será que tenga un campo key -->
-        <b-card id="ListCartsElm" v-for="elm in list" :key="elm.IdPrenda"
+        <!-- Hay que indicar cual es la clave. La idea será que tenga un campo key -->
+        <b-card id="ListCartsElm" v-for="elm in list" :key="elm[txKey]"
             :title="elm.TxName"
             :img-src="elm.BiImg"
             img-alt="Image"
@@ -25,7 +25,8 @@
 <script>
     export default {
         props: {
-            list: Array
+            list: Array,
+            txKey: String
         }
     }
 </script>

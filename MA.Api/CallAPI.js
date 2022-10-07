@@ -2,6 +2,8 @@ const DPrendas = require('./Entities/DPrendas');
 const DUsers = require('./Entities/DUsers');
 const DMenus = require('./Entities/DMenus');
 const DClosets = require('./Entities/DClosets');
+const DForms = require('./Entities/DForms');
+const DFormFields = require('./Entities/DFormFields');
 const ExtImgs = require('./Entities/ExtImgs');
 
 const Commands = require('./Utils/Commands');
@@ -14,6 +16,8 @@ const jwt = require("jwt-simple");
 const PagMisPrendas = require("./pages/PagMisPrendas");
 const PagLogin = require("./pages/PagLogin");
 const PagTest = require("./pages/PagTest");
+const DynamicForm = require('./Componets/DynamicForm');
+const PagFormDesigner = require('./pages/PagFormDesigner');
 
 class CallAPI {
 
@@ -125,6 +129,17 @@ class CallAPI {
             }
         });
 
+        // socket.on('getDynamicForm', async (IdForm) => {
+        //     try {
+        //         var params = new DBParams;
+        //         var objForm = await DForms.Id(socket.accessDB, IdForm);
+        //         var listFormFields = await DFormFields.Find(socket.accessDB, 'AND CD_FORM = ' + params.addParams(objForm.IdForm) + 'AND CH_ACTIVE = 1', params);
+        //         socket.emit("getDynamicFormResponse", {objForm: objForm, listFormField: listFormFields });
+        //     } catch (ex) {
+        //         console.log('ERROR - getDynamicForm: ' + ex.message);
+        //     }
+        // });
+
         socket.on('createUser', async (user) => {
             try {
                 var user = new DUsers(null, user.TxName, user.TxLogin);
@@ -132,7 +147,7 @@ class CallAPI {
             } catch (ex) {
                 console.log('Error en createUser: ' + ex.message);
             }
-        })
+        });
 
         socket.on('disconnect', () => {
             console.log((new Date()) + ' => Usuario desconectado');
@@ -146,6 +161,18 @@ class CallAPI {
         PagMisPrendas.calls(socket);
         //PagLogin.calls(socket);
         PagTest.calls(socket);
+        PagFormDesigner.calls(socket);
+        DynamicForm.calls(socket);
+        // socket.on("DynamicFormGetInfo", async(IdForm) => {
+        //     try{
+        //         var params = new DBParams
+        //         var listFields = await DFormFields.Find(socket.accessDB, `AND CD_FORM = ${params.addParams(IdForm)} AND CH_ACTIVE = 1`, params);
+        //         socket.emit("DynamicFormGetInfoResponse", listFields);
+        //     }
+        //     catch(ex) {
+        //         LogFile.writeLog('ERROR - DynamicFormGetInfo: ' + ex.message);
+        //     }
+        // });
     }
 
     static authenticationByToken(socket, token){
