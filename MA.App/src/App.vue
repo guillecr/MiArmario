@@ -141,7 +141,7 @@ export default {
   color: white;
   padding: 3px;
   padding-right: 7px;
-  z-index: 10;
+  z-index: 100;
 }
 .view {
   height: 100%;

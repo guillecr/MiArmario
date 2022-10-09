@@ -8,7 +8,7 @@
     .DynamicFormElement {
         position: absolute;
         margin: 0;
-        z-index: 0;
+        z-index: 50;
     }
     .DynamicFormElementText {
         height: 26px;
@@ -32,6 +32,18 @@
         cursor: n-resize;
         z-index: 50;
     }
+    .DynamicFormPropeties {
+        position: fixed;
+        right: 0;
+        bottom: 30px;
+        border: 1px solid black;
+        border-radius: 5px;
+        padding: 3px;
+        height: 450px;
+        width: 250px;
+        background-color: white;
+        z-index: 50;
+    }
 
 </style>
 
@@ -42,13 +54,55 @@
             width:this.widthForm + 'px'}
         "
     >
-        <b-btn variant="success" class="FormButtom" style="position: absolute; top: 0; left: 500px; width: 70px;" @click="saveForm">Guardar</b-btn>
-        <b-btn class="FormButtom" style="position: absolute; top: 0; left: 575px; width: 120px;" @click="addCtrl">Añadir control</b-btn>
+        <b-form-checkbox v-if="adminMode"
+            id="checkbox-edit"
+            style="position: absolute; top: 0; left: 400px; width: 50px;"
+            v-model="formEdit"
+            name="checkbox-edit"
+            :value="true"
+            :unchecked-value="false"
+        >Editar</b-form-checkbox>
+        <b-btn v-if="formEdit" variant="success" class="FormButtom" style="position: absolute; top: 0; left: 500px; width: 70px;" @click="saveForm">Guardar</b-btn>
+        <b-btn v-if="formEdit" class="FormButtom" style="position: absolute; top: 0; left: 575px; width: 120px;" @click="addCtrl">Añadir control</b-btn>
+
+        <!-- Caja de propiedades -->
+        <div v-if="formEdit && ctrlActive && ctrlActive.length && ctrlActive[0]" 
+            class="DynamicFormPropeties"
+            :style="{visible: (chVisiblePropeties)?'visible':''}">
+            <label>Propiedades</label>
+            <b-btn 
+                variant="danger" 
+                size="sm"
+                style="
+                    position: absolute;
+                    width:36px;
+                    height:24px;
+                    top:10;
+                    right: 10px;"
+                @click="ctrlActive=[]"
+            ><span class="fi fi-rr-cross-small" style=""></span></b-btn>
+            <label class="DynamicFormElement"
+                :style="{
+                    position: 'absolute',
+                    left:'10px',
+                    top:'40px'}"
+                >Nombre
+                <input class="DynamicFormElementText" 
+                    type="text"
+                    :style="{width:'160px'}"
+                    v-model="ctrlActive[0].TxLabel" />
+            
+            </label>
+        </div>
+        <!-- Fin de caja de propiedades -->
+
         <label class="DynamicFormElement" v-for="elm in ctrls" :key="elm.IdFormFields"
             :style="{left:elm.NuPosX + 'px'
                 ,top:elm.NuPosY + 'px'
-                ,height:elm.NuHeight + 'px'}"
+                ,height:elm.NuHeight + 'px'
+                ,cursor: ((adminMode && formEdit)? 'all-scroll':'auto')}"
             @mousedown.stop="mouseDownMove(elm, $event, $event.target.parentElement)"
+            @click="selectCtrl(elm)"
         >
                 
                 <label class="DynamicFormLabel"
@@ -58,27 +112,28 @@
                 </label>
 
             <input class="DynamicFormElementText" 
-                type="text" 
+                type="text"
                 :style="{width:elm.NuWidth + 'px'}"
+                :disabled="adminMode && formEdit"
                 v-if="elm.CdType=='TEXT'" 
                 v-model="objForm[elm.CdField]" 
             />
             
-            <div v-if="adminMode" class="DynamicFormResizeX"
+            <div v-if="adminMode && formEdit" class="DynamicFormResizeX"
                 :style="{
                     top:((elm.NuHeight / 2) - 6) + 'px',
                     left:(elm.NuWidthLabel - 3) + 'px'
                 }"
                 @mousedown="mouseDownLabel(elm, $event, $event.target.parentElement)"
             ></div>
-            <div v-if="adminMode" class="DynamicFormResizeX"
+            <div v-if="adminMode && formEdit" class="DynamicFormResizeX"
                 :style="{
                     top:((elm.NuHeight / 2) - 6) + 'px',
                     left:(elm.NuWidthLabel + elm.NuWidth - 6) + 'px'
                 }"
                 @mousedown="mouseDownSizeX(elm, $event, $event.target.parentElement)"
             ></div>
-            <div v-if="adminMode" class="DynamicFormResizeY"
+            <div v-if="adminMode && formEdit" class="DynamicFormResizeY"
                 :style="{
                     top:(elm.NuHeight - 3) + 'px',
                     left:(elm.NuWidthLabel + (elm.NuWidth / 2) - 6) + 'px'
@@ -101,13 +156,14 @@ export default {
         return {
             ctrls: [],
             ctrlActive: [],
+            formEdit: false,
             mousePosX: null,
             gridSizeX: 10,
             gridSizeY: 13,
             sizeRef: 0,
             posXRef: 0,
-            posYRef: 0
-
+            posYRef: 0,
+            chVisiblePropeties: true
         }
     },
     computed: {
@@ -134,6 +190,12 @@ export default {
         }
     },
     methods: {
+        selectCtrl: function(ctrl) {
+            if (this.adminMode && this.formEdit) {
+                this.ctrlActive = [ctrl];
+                this.chVisiblePropeties = true;
+            }
+        },
         addCtrl: function () {
             this.ctrls.push({
                 CdType: 'TEXT',
@@ -153,11 +215,13 @@ export default {
             this.$socket.emit("DynamicFormSaveForm", {CdForm: this.idForm, ctrls: this.ctrls});
         },
         mouseDownMove: function (ctrl, ev, elm){
-            this.posXRef = ctrl.NuPosX - ev.clientX;
-            this.posYRef = ctrl.NuPosY - ev.clientY;
-            this.ctrlActive = [ctrl];
-            document.addEventListener('mousemove', this.mouseMove);
-            document.addEventListener('mouseup', this.mouseUp);
+            if (this.adminMode && this.formEdit){
+                this.posXRef = ctrl.NuPosX - ev.clientX;
+                this.posYRef = ctrl.NuPosY - ev.clientY;
+                this.ctrlActive = [ctrl];
+                document.addEventListener('mousemove', this.mouseMove);
+                document.addEventListener('mouseup', this.mouseUp);    
+            }
             return tool.pauseEvent(ev);
         },
         mouseMove: function(ev){
@@ -212,13 +276,24 @@ export default {
         }
     },
     sockets:{
-        DynamicFormGetInfoResponse(response){
+        DynamicFormGetInfoResponse(response) {
             this.ctrls = response;
+        },
+        DynamicFormSaveFormRespone(response) {
+            if (response) {
+                this.$bvToast.toast(`Guardado correctamente`, {
+                title: 'Guardado de formulario',
+                autoHideDelay: 5000,
+                appendToast: true
+            });
+            }
         }
     },
     watch:{
         idForm: function (newId) {
             this.$socket.emit("DynamicFormGetInfo", newId);
+            this.ctrlActive = [];
+            this.formEdit = false;
         }
     },
     mounted() {
