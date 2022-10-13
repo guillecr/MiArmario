@@ -1,7 +1,7 @@
 {
-  "name": "im.api",
+  "name": "ma.api",
   "version": "0.1.0",
-  "description": "Api para el cliente im.App",
+  "description": "Api para el cliente MA.App",
   "main": "main.js",
   "scripts": {
     "start": "node --max-http-header-size=16384 ./main.js"

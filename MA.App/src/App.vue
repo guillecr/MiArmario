@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <menu-lateral 
+    <menu-lateral
       :version="version"
     ></menu-lateral>
     <router-view class="view"></router-view>
@@ -15,7 +15,7 @@ import MenuLateral from "./components/MenuLateral.vue";
 import tool from "./tools";
 import Home from './pages/Home.vue';
 import Init from './pages/Init.vue';
-import Login from './pages/LogIn.vue';
+import Login from './pages/Login.vue';
 import FormDPrendas from './pages/FormDPrendas.vue';
 import PagMisPrendas from './pages/PagMisPrendas.vue';
 import PagFormMisPrendas from './pages/PagFormMisPrendas.vue';
@@ -29,7 +29,8 @@ export default {
   data(){
     return{
       isConnected: false,
-      user: null
+      user: null,
+      listPages: {}
     }
   },
   computed:{
@@ -62,8 +63,9 @@ export default {
       document.cookie = "tokenAccess=" + CdToken;
     },
 
-    Menus(ListPaginas){
+    async Menus(ListPaginas){
       console.log(this.$router.getRoutes());
+      var cm = this;
       // TODO: La idea sería eliminar todos los existentes y añadir los obtenidos
       var pagesDisp = {
         'Home':Home,
@@ -74,18 +76,32 @@ export default {
         'PagFormMisPrendas':PagFormMisPrendas,
         'PagFormDesigner': PagFormDesigner
       }
+
+      // cm.listPages["Home"] = await import(`./pages/${url}.vue`);
       for (var i in ListPaginas){
+        debugger;
         var pag = ListPaginas[i];
-        console.log(pagesDisp[pag.CdComponent]);
-        this.$router.addRoute({ 
-          name: pag.CdName, 
-          path: pag.TxPath, 
-          component: pagesDisp[pag.CdComponent]}
+        var module = await import(`./pages/${pag.CdComponent}.vue`);
+        this.$router.addRoute({
+          name: pag.CdName,
+          path: pag.TxPath,
+          component: module}
         );
+        debugger;
       }
+
+      // for (var i in ListPaginas){
+      //   var pag = ListPaginas[i];
+      //   console.log(pagesDisp[pag.CdComponent]);
+      //   this.$router.addRoute({
+      //     name: pag.CdName,
+      //     path: pag.TxPath,
+      //     component: pagesDisp[pag.CdComponent]}
+      //   );
+      // }
       console.log(this.$router.getRoutes());
     },
-    
+
     withAccess(access){
       // El servidor nos responde que tenemos acceso.
       // El mensaje lo obtenemos al iniciar la conexión, al iniciar sesión o cuando hagamos una llamada sin un token valido
@@ -102,7 +118,7 @@ export default {
 
         if (this.$route.name != 'login') {
           this.$router.push('/login');
-        }        
+        }
       } else {
         this.user = access;
         if (this.$route.name == 'login'){
@@ -110,7 +126,7 @@ export default {
         }
       }
       this.$socket.emit('getMenus');
-      
+
     },
     mensaje(data) {
       // TEST
