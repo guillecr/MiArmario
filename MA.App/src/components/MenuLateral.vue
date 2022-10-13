@@ -7,7 +7,7 @@
     <div id="Menu" class="MenuRaiz" :style="{left: (visible?'0':'-225px')}" >
         <div class="MenuContenedor" >
             <div class="MenuLista">
-                <div class="MenuLabel" v-for="accion in acciones" :key="accion.IdMenu" @click="NavegationTo(accion.CdName)">
+                <div class="MenuLabel" v-for="accion in acciones" :key="accion.IdMenu" @click="NavegationTo(accion.CdComponent)">
                     {{accion.TxName}}
                 </div>
             </div>
@@ -35,17 +35,6 @@ export default {
     },
     props: {
         version: String,
-    },
-    computed: {
-        listMenus: function(){
-            var list = [];
-            var listRouter = this.$router.getRoutes();
-            for (var i in listRouter){
-                var router = listRouter[i];
-                list[i] = {IdMenu:i, CdName:router.name, TxName:'??'}
-            }
-            return list;
-        }
     },
     methods: {
         ShowMenu: function(){

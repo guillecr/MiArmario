@@ -12,14 +12,6 @@
 
 <script>
 import MenuLateral from "./components/MenuLateral.vue";
-import tool from "./tools";
-import Home from './pages/Home.vue';
-import Init from './pages/Init.vue';
-import Login from './pages/Login.vue';
-import FormDPrendas from './pages/FormDPrendas.vue';
-import PagMisPrendas from './pages/PagMisPrendas.vue';
-import PagFormMisPrendas from './pages/PagFormMisPrendas.vue';
-import PagFormDesigner from "./pages/PagFormDesigner.vue";
 
 export default {
   name: 'App',
@@ -63,52 +55,23 @@ export default {
       document.cookie = "tokenAccess=" + CdToken;
     },
 
-    async Menus(ListPaginas){
-      console.log(this.$router.getRoutes());
-      var cm = this;
-      // TODO: La idea sería eliminar todos los existentes y añadir los obtenidos
-      var pagesDisp = {
-        'Home':Home,
-        'Init':Init,
-        'Login':Login,
-        'FormDPrendas':FormDPrendas,
-        'PagMisPrendas':PagMisPrendas,
-        'PagFormMisPrendas':PagFormMisPrendas,
-        'PagFormDesigner': PagFormDesigner
-      }
-
-      // cm.listPages["Home"] = await import(`./pages/${url}.vue`);
+    Menus(ListPaginas){
       for (var i in ListPaginas){
-        debugger;
         var pag = ListPaginas[i];
-        var module = await import(`./pages/${pag.CdComponent}.vue`);
         this.$router.addRoute({
-          name: pag.CdName,
+          name: pag.CdComponent,
           path: pag.TxPath,
-          component: module}
+          component: require(`./pages/${pag.CdComponent}`).default}
         );
-        debugger;
       }
-
-      // for (var i in ListPaginas){
-      //   var pag = ListPaginas[i];
-      //   console.log(pagesDisp[pag.CdComponent]);
-      //   this.$router.addRoute({
-      //     name: pag.CdName,
-      //     path: pag.TxPath,
-      //     component: pagesDisp[pag.CdComponent]}
-      //   );
-      // }
-      console.log(this.$router.getRoutes());
     },
 
     withAccess(access){
       // El servidor nos responde que tenemos acceso.
       // El mensaje lo obtenemos al iniciar la conexión, al iniciar sesión o cuando hagamos una llamada sin un token valido
-      console.log("Acceso: " + access);
       if(!access){
         this.user = null;
-        if (this.$route.name == 'login'){
+        if (this.$route.name == 'Login'){
           this.$bvToast.toast(`Usuario rechazado`, {
             title: 'Error',
             autoHideDelay: 5000,
@@ -116,12 +79,12 @@ export default {
           });
         }
 
-        if (this.$route.name != 'login') {
+        if (this.$route.name != 'Login') {
           this.$router.push('/login');
         }
       } else {
         this.user = access;
-        if (this.$route.name == 'login'){
+        if (this.$route.name == 'Login'){
           this.$router.push('/');
         }
       }
