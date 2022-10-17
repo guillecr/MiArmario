@@ -50,8 +50,13 @@ class RegDB{
      */
     setColumns(source){
         for(var camp in this.constructor.ListFields){
-            var column = this.constructor.ListFields[camp].TxColumnName;
-            this[camp] = source[column];
+            var field = this.constructor.ListFields[camp];
+            var column = field.TxColumnName;
+            if (field.CdType == 'Boolean'){
+                this[camp] = !!source[column];
+            } else {
+                this[camp] = source[column];
+            }
         }
     };
 

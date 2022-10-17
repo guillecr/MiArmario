@@ -12,6 +12,10 @@
     }
     .DynamicFormElementText {
         height: 26px;
+        display: initial;
+    }
+    .DynamicFormElementCheck {
+        display: initial;
     }
     .DynamicFormLabel {
         text-align: left;
@@ -68,8 +72,15 @@
         <!-- Caja de propiedades -->
         <div v-if="formEdit && ctrlActive && ctrlActive.length && ctrlActive[0]" 
             class="DynamicFormPropeties"
-            :style="{visible: (chVisiblePropeties)?'visible':''}">
-            <label>Propiedades</label>
+            :style="{
+                visible: (chVisiblePropeties)?'visible':'',
+                height: (ChMiminicePropeties)? '40px':'450px'
+                }">
+            <label 
+                style="position: absolute; 
+                    top:10px;
+                    left:10px;"
+            >Propiedades</label>
             <b-btn 
                 variant="danger" 
                 size="sm"
@@ -77,21 +88,65 @@
                     position: absolute;
                     width:36px;
                     height:24px;
-                    top:10;
+                    top:10px;
                     right: 10px;"
                 @click="ctrlActive=[]"
-            ><span class="fi fi-rr-cross-small" style=""></span></b-btn>
+            ><span class="fi fi-rr-cross-small"></span></b-btn>
+            <b-btn 
+                variant="secondary" 
+                size="sm"
+                style="
+                    position: absolute;
+                    width:36px;
+                    height:24px;
+                    top:10px;
+                    right: 48px;"
+                @click="MiminicePropeties"
+            ><span class="fi fi-rr-minus-small"></span></b-btn>
+            <hr style="position: absolute;
+                top:40px;
+                width: 97%;
+                margin: 0;"/>
+
+            <!-- Campo de tipo -->
             <label class="DynamicFormElement"
                 :style="{
                     position: 'absolute',
                     left:'10px',
-                    top:'40px'}"
-                >Nombre
-                <input class="DynamicFormElementText" 
+                    top:'50px'}"
+                ><label class="DynamicFormLabel" style="width:70px;">Tipo</label>
+                <b-form-select class="DynamicFormElementText" 
                     type="text"
-                    :style="{width:'160px'}"
-                    v-model="ctrlActive[0].TxLabel" />
+                    :options="ListTypesCtrls"
+                    size="sm"
+                    :style="{width:'150px'}"
+                    v-model="ctrlActive[0].CdType" />
+            </label>
             
+            <!-- Cambpo de cabecera -->
+            <label class="DynamicFormElement"
+                :style="{
+                    position: 'absolute',
+                    left:'10px',
+                    top:'78px'}"
+                ><label class="DynamicFormLabel" style="width:70px;">Cabecera</label>
+                <b-form-input class="DynamicFormElementText" 
+                    type="text"
+                    :style="{width:'150px'}"
+                    v-model="ctrlActive[0].TxLabel" />
+            </label>
+
+            <!-- Campo de fieldName-->
+            <label class="DynamicFormElement"
+                :style="{
+                    position: 'absolute',
+                    left:'10px',
+                    top:'106px'}"
+                ><label class="DynamicFormLabel" style="width:70px;">Campo</label>
+                <b-form-input class="DynamicFormElementText" 
+                    type="text"
+                    :style="{width:'150px'}"
+                    v-model="ctrlActive[0].CdField" />
             </label>
         </div>
         <!-- Fin de caja de propiedades -->
@@ -111,29 +166,46 @@
                     {{elm.TxLabel}}
                 </label>
 
-            <input class="DynamicFormElementText" 
+            <b-form-input class="DynamicFormElementText" 
                 type="text"
                 :style="{width:elm.NuWidth + 'px'}"
                 :disabled="adminMode && formEdit"
                 v-if="elm.CdType=='TEXT'" 
                 v-model="objForm[elm.CdField]" 
             />
+
+            <b-form-checkbox class="DynamicFormElementCheck"
+                v-if="elm.CdType=='CHECK'"
+                :disabled="adminMode && formEdit"
+                v-model="objForm[elm.CdField]"     
+            ></b-form-checkbox>
             
-            <div v-if="adminMode && formEdit" class="DynamicFormResizeX"
+            <div class="DynamicFormResizeX" 
+                v-if="adminMode && formEdit && (
+                    elm.CdType == 'TEXT' ||
+                    elm.CdType == 'LABEL' ||
+                    elm.CdType == 'CHECK'
+                )" 
                 :style="{
                     top:((elm.NuHeight / 2) - 6) + 'px',
                     left:(elm.NuWidthLabel - 3) + 'px'
                 }"
                 @mousedown="mouseDownLabel(elm, $event, $event.target.parentElement)"
             ></div>
-            <div v-if="adminMode && formEdit" class="DynamicFormResizeX"
+            <div class="DynamicFormResizeX"
+                v-if="adminMode && formEdit && (
+                    elm.CdType == 'TEXT'
+                )" 
                 :style="{
                     top:((elm.NuHeight / 2) - 6) + 'px',
                     left:(elm.NuWidthLabel + elm.NuWidth - 6) + 'px'
                 }"
                 @mousedown="mouseDownSizeX(elm, $event, $event.target.parentElement)"
             ></div>
-            <div v-if="adminMode && formEdit" class="DynamicFormResizeY"
+            <div 
+                v-if="adminMode && formEdit && (
+                    elm.CdType == 'TEXT'
+                )" class="DynamicFormResizeY"
                 :style="{
                     top:(elm.NuHeight - 3) + 'px',
                     left:(elm.NuWidthLabel + (elm.NuWidth / 2) - 6) + 'px'
@@ -163,7 +235,13 @@ export default {
             sizeRef: 0,
             posXRef: 0,
             posYRef: 0,
-            chVisiblePropeties: true
+            chVisiblePropeties: true,
+            ChMiminicePropeties: false,
+            ListTypesCtrls:[
+                {value:'TEXT', text:'TEXT'},
+                {value:'LABEL', text:'LABEL'},
+                {value:'CHECK', text:'CHECK'}
+            ]
         }
     },
     computed: {
@@ -190,6 +268,9 @@ export default {
         }
     },
     methods: {
+        MiminicePropeties: function(){
+            this.ChMiminicePropeties = !this.ChMiminicePropeties;
+        },
         selectCtrl: function(ctrl) {
             if (this.adminMode && this.formEdit) {
                 this.ctrlActive = [ctrl];

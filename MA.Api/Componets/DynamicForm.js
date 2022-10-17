@@ -32,7 +32,7 @@ class DynamicForm {
                         newField.TxLabel = ctrl.TxLabel;
                         newField.TxVisible = ctrl.TxVisible;
                         newField.TxDisabled = ctrl.TxDisabled;
-                        newField.CdField = socket.CdField;
+                        newField.CdField = ctrl.CdField;
                         newField.ChActive = true;
                         if (ctrl.IdFormFields) {
                             newField.IdFormFields = ctrl.IdFormFields;
