@@ -36,6 +36,17 @@
         cursor: n-resize;
         z-index: 50;
     }
+    .DynamicFormMove {
+        position: absolute;
+        background-color: rgba(85, 85, 85, 0.3);
+        border: 1px dotted rgb(85, 85, 85);
+        border-radius: 3px;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        cursor: all-scroll;
+        z-index: 40;
+    }
     .DynamicFormPropeties {
         position: fixed;
         right: 0;
@@ -44,7 +55,7 @@
         border-radius: 5px;
         padding: 3px;
         height: 450px;
-        width: 250px;
+        width: 300px;
         background-color: white;
         z-index: 50;
     }
@@ -68,6 +79,7 @@
         >Editar</b-form-checkbox>
         <b-btn v-if="formEdit" variant="success" class="FormButtom" style="position: absolute; top: 0; left: 500px; width: 70px;" @click="saveForm">Guardar</b-btn>
         <b-btn v-if="formEdit" class="FormButtom" style="position: absolute; top: 0; left: 575px; width: 120px;" @click="addCtrl">Añadir control</b-btn>
+        <b-btn v-if="formEdit" variant="danger" class="FormButtom" style="position: absolute; top: 0; left: 700px; width: 120px;" @click="deleteCtrl">Eliminar control</b-btn>
 
         <!-- Caja de propiedades -->
         <div v-if="formEdit && ctrlActive && ctrlActive.length && ctrlActive[0]" 
@@ -114,7 +126,7 @@
                     position: 'absolute',
                     left:'10px',
                     top:'50px'}"
-                ><label class="DynamicFormLabel" style="width:70px;">Tipo</label>
+                ><label class="DynamicFormLabel" style="width:100px;">Tipo</label>
                 <b-form-select class="DynamicFormElementText" 
                     type="text"
                     :options="ListTypesCtrls"
@@ -129,7 +141,7 @@
                     position: 'absolute',
                     left:'10px',
                     top:'78px'}"
-                ><label class="DynamicFormLabel" style="width:70px;">Cabecera</label>
+                ><label class="DynamicFormLabel" style="width:100px;">Cabecera</label>
                 <b-form-input class="DynamicFormElementText" 
                     type="text"
                     :style="{width:'150px'}"
@@ -142,11 +154,50 @@
                     position: 'absolute',
                     left:'10px',
                     top:'106px'}"
-                ><label class="DynamicFormLabel" style="width:70px;">Campo</label>
+                ><label class="DynamicFormLabel" style="width:100px;">Campo</label>
                 <b-form-input class="DynamicFormElementText" 
                     type="text"
                     :style="{width:'150px'}"
                     v-model="ctrlActive[0].CdField" />
+            </label>
+
+            <!-- Campo visible -->
+            <label class="DynamicFormElement"
+                :style="{
+                    position: 'absolute',
+                    left:'10px',
+                    top:'134px'
+                }"><label class="DynamicFormLabel" style="width:100px;">Visible</label>
+                <b-form-input class="DynamicFormElementText" 
+                    type="text"
+                    :style="{width:'150px'}"
+                    v-model="ctrlActive[0].TxVisible" />
+            </label>
+
+            <!-- Deshabilitado -->
+            <label class="DynamicFormElement"
+                :style="{
+                    position: 'absolute',
+                    left:'10px',
+                    top:'162px'
+                }"><label class="DynamicFormLabel" style="width:100px;">Deshabilitado</label>
+                <b-form-input class="DynamicFormElementText" 
+                    type="text"
+                    :style="{width:'150px'}"
+                    v-model="ctrlActive[0].TxDisabled" />
+            </label>
+
+            <!-- SQL Lista -->
+            <label class="DynamicFormElement"
+                :style="{
+                    position: 'absolute',
+                    left:'10px',
+                    top:'190px'
+                }"><label class="DynamicFormLabel" style="width:100px;">Lista</label>
+                <b-form-input class="DynamicFormElementText" 
+                    type="text"
+                    :style="{width:'150px'}"
+                    v-model="ctrlActive[0].TxSqlList" />
             </label>
         </div>
         <!-- Fin de caja de propiedades -->
@@ -155,35 +206,43 @@
             :style="{left:elm.NuPosX + 'px'
                 ,top:elm.NuPosY + 'px'
                 ,height:elm.NuHeight + 'px'
+                ,display:(calcVisibility(elm)? '':'none')
                 ,cursor: ((adminMode && formEdit)? 'all-scroll':'auto')}"
-            @mousedown.stop="mouseDownMove(elm, $event, $event.target.parentElement)"
+            
             @click="selectCtrl(elm)"
         >
                 
-                <label class="DynamicFormLabel"
-                    :style="{width:elm.NuWidthLabel + 'px'}"
-                >
-                    {{elm.TxLabel}}
-                </label>
+            <label class="DynamicFormLabel" :style="{width:elm.NuWidthLabel + 'px'}">
+                {{elm.TxLabel}}
+            </label>
 
-            <b-form-input class="DynamicFormElementText" 
+            <b-form-input class="DynamicFormElementText"
+                v-if="elm.CdType=='TEXT'" 
                 type="text"
                 :style="{width:elm.NuWidth + 'px'}"
-                :disabled="adminMode && formEdit"
-                v-if="elm.CdType=='TEXT'" 
+                :disabled="calcDisabled(elm)"
                 v-model="objForm[elm.CdField]" 
             />
 
             <b-form-checkbox class="DynamicFormElementCheck"
                 v-if="elm.CdType=='CHECK'"
-                :disabled="adminMode && formEdit"
+                :disabled="calcDisabled(elm)"
                 v-model="objForm[elm.CdField]"     
             ></b-form-checkbox>
+
+            <b-form-select class="DynamicFormElementText" 
+                v-if="elm.CdType=='LST'"
+                type="text"
+                :options="getListFill(elm)"
+                size="sm"
+                :style="{width:elm.NuWidth + 'px'}"
+                v-model="objForm[elm.CdField]" />
             
             <div class="DynamicFormResizeX" 
                 v-if="adminMode && formEdit && (
                     elm.CdType == 'TEXT' ||
                     elm.CdType == 'LABEL' ||
+                    elm.CdType == 'LST' ||
                     elm.CdType == 'CHECK'
                 )" 
                 :style="{
@@ -192,9 +251,14 @@
                 }"
                 @mousedown="mouseDownLabel(elm, $event, $event.target.parentElement)"
             ></div>
+            <div class="DynamicFormMove"
+                v-if="adminMode && formEdit"
+                @mousedown.stop="mouseDownMove(elm, $event, $event.target.parentElement)">
+            </div>
             <div class="DynamicFormResizeX"
                 v-if="adminMode && formEdit && (
-                    elm.CdType == 'TEXT'
+                    elm.CdType == 'TEXT' ||
+                    elm.CdType == 'LST'
                 )" 
                 :style="{
                     top:((elm.NuHeight / 2) - 6) + 'px',
@@ -240,6 +304,7 @@ export default {
             ListTypesCtrls:[
                 {value:'TEXT', text:'TEXT'},
                 {value:'LABEL', text:'LABEL'},
+                {value:'LST', text:'LST'},
                 {value:'CHECK', text:'CHECK'}
             ]
         }
@@ -268,6 +333,53 @@ export default {
         }
     },
     methods: {
+        getCtrl: function(IdFormField){
+            for (var i in this.ctrls){
+                if (this.ctrls[i].IdFormField == IdFormField) {
+                    return this.ctrls[i];
+                }
+            }
+            return null;
+        },
+        getListFill: function(ctrl){
+            if (ctrl.ListFill){
+                return ctrl.ListFill;
+            }            
+        },
+        refreshListFill: function(ctrl){
+            this.$socket.emit("DynamicFormGetListFill", ctrl.IdFormField);
+        },
+        refreshAllListFill: function(){
+            for (var i in this.ctrls){
+                if (this.ctrls[i].CdType == 'LST'){
+                    this.refreshListFill(this.ctrls[i]);
+                }
+            }
+        },
+        calcEval: function(exp) {
+            var frm = this.objForm;
+            var cm = this;
+            return eval(exp);
+        },
+        calcVisibility: function(ctrl) {
+            if (this.formEdit) {
+                return true;
+            }
+            if (ctrl && ctrl.TxVisible){
+                return !!this.calcEval(ctrl.TxVisible);
+            }
+            return false;
+        },
+        calcDisabled: function(ctrl) {
+            if (this.formEdit){
+                return true;
+            }
+            if (ctrl && typeof ctrl.TxDisabled != 'undefined') {
+                return !!this.calcEval(ctrl.TxDisabled);
+            }
+            return true;
+        },
+        
         MiminicePropeties: function(){
             this.ChMiminicePropeties = !this.ChMiminicePropeties;
         },
@@ -290,6 +402,9 @@ export default {
                 TxDisabled: '0',
                 TxVisible: '1'
             });
+        },
+        deleteCtrl: function () {
+            this.ctrls.splice(this.ctrls.indexOf(this.ctrlActive[0]), 1);
         },
         saveForm: function () {
             // TODO: Crear una acción a la respuesta
@@ -359,14 +474,25 @@ export default {
     sockets:{
         DynamicFormGetInfoResponse(response) {
             this.ctrls = response;
+            //this.refreshAllListFill();
         },
         DynamicFormSaveFormRespone(response) {
             if (response) {
                 this.$bvToast.toast(`Guardado correctamente`, {
-                title: 'Guardado de formulario',
-                autoHideDelay: 5000,
-                appendToast: true
-            });
+                    title: 'Guardado de formulario',
+                    autoHideDelay: 5000,
+                    appendToast: true
+                });
+                //this.refreshAllListFill();
+            }
+        },
+        DynamicFormGetListFillResponse(response) {
+            // TODO: El control no refresca la lista
+            if (response.IdFormField){
+                var ctrl = this.getCtrl(response.IdFormField);
+                debugger;
+                ctrl.listFill = response.ListFill;
+                this.$forceUpdate();
             }
         }
     },

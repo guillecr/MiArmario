@@ -2,7 +2,7 @@ const RegDB = require('../Utils/RegDB');
 const Fields = require('../Utils/Fields');
 
 class DFormFields extends RegDB{
-    constructor(IdFormFields,
+    constructor(IdFormField,
         ChActive,
         FhCreated,
         FhModified,
@@ -20,10 +20,11 @@ class DFormFields extends RegDB{
         TxColumnName,
         TxDisabled,
         TxVisible,
+        TxSqlList,
         TxObservations
     ){
         super();
-        this.IdFormFields = IdFormFields;
+        this.IdFormField = IdFormField;
         this.ChActive = ChActive;
         this.FhCreated = FhCreated;
         this.FhModified = FhModified;
@@ -41,13 +42,14 @@ class DFormFields extends RegDB{
         this.TxColumnName = TxColumnName;
         this.TxDisabled = TxDisabled;
         this.TxVisible = TxVisible;
+        this.TxSqlList = TxSqlList;
         this.TxObservations = TxObservations;
     };
 
     static TxTable = 'D_FORM_FIELDS';
 
     static ListFields = {
-        IdFormFields: new Fields('ID_FORM_FIELD','Number' ,'PK' , null),
+        IdFormField: new Fields('ID_FORM_FIELD','Number' ,'PK' , null),
         FhCreated: new Fields('FH_CREATED', 'Date', 'IO', null),
         FhModified: new Fields('FH_MODIFIED', 'Date', null, null),
         CdModifiedBy: new Fields('CD_MODIFIED_BY', 'Number', null, null),
@@ -65,6 +67,7 @@ class DFormFields extends RegDB{
         TxColumnName: new Fields('TX_COLUMN_NAME', 'String', null, null),
         TxDisabled: new Fields('TX_DISABLED', 'String', null, null),
         TxVisible: new Fields('TX_VISIBLE', 'String', null, null),
+        TxSqlList: new Fields('TX_SQL_LIST', 'String', null, null),
         TxObservations: new Fields('TX_OBSERVATIONS', 'String', null , null)
     };
 }

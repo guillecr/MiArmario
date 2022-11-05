@@ -39,7 +39,7 @@ class Commands{
     };
 
     /**
-     * Ejecución de bloques de sentencia. Indicado para los procesos de insercción y actyualización de datos.
+     * Ejecución de bloques de sentencia. Indicado para los procesos de insercción y actualización de datos.
      * @returns Objeto con la ID afectada (ID) y con el numero de filas afectadas (rows)
      */
     ejecutarOperacion(){
