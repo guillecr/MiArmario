@@ -1,6 +1,12 @@
 const DBParams = require("./DBParamas");
 const LogFile = require("./LogFile");
 
+/**
+ * Constructor de la clase comando
+ * @param {Database} db Acceso a la base de datos
+ * @param {String} sentencia Sentencia SQL a ejecutar
+ * @param {DBParams} params Parámetros de la sentencia
+ */
 class Commands{
     constructor(db, sentencia, params){
         this.db = db;

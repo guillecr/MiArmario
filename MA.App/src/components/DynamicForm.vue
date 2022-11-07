@@ -379,7 +379,6 @@ export default {
             }
             return true;
         },
-        
         MiminicePropeties: function(){
             this.ChMiminicePropeties = !this.ChMiminicePropeties;
         },
@@ -398,7 +397,7 @@ export default {
                 NuWidthLabel: 60,
                 NuWidth: 20,
                 NuHeight: 26,
-                CdField: 'TxTester',
+                CdField: '',
                 TxDisabled: '0',
                 TxVisible: '1'
             });
@@ -474,7 +473,6 @@ export default {
     sockets:{
         DynamicFormGetInfoResponse(response) {
             this.ctrls = response;
-            //this.refreshAllListFill();
         },
         DynamicFormSaveFormRespone(response) {
             if (response) {
@@ -483,16 +481,6 @@ export default {
                     autoHideDelay: 5000,
                     appendToast: true
                 });
-                //this.refreshAllListFill();
-            }
-        },
-        DynamicFormGetListFillResponse(response) {
-            // TODO: El control no refresca la lista
-            if (response.IdFormField){
-                var ctrl = this.getCtrl(response.IdFormField);
-                debugger;
-                ctrl.listFill = response.ListFill;
-                this.$forceUpdate();
             }
         }
     },

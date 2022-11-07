@@ -102,8 +102,8 @@ class RegDB{
 
     /**
      * Método estatico para obtener la entidad del registro buscado
-     * @param db Acceso a la base de datos
-     * @param idValue ID de la entidad a buscar
+     * @param {Database} db Acceso a la base de datos
+     * @param {Object} idValue ID de la entidad a buscar
      * @returns Promesa con el resultado de la busqueda
      */
     static Id(accessDB, idValue){
@@ -113,8 +113,8 @@ class RegDB{
 
     /**
      * Método interno para recuperar todas los registros de una entidad
-     * @param db Acceso a la base de datos
-     * @param TxWhere Condiciones de búsqueda
+     * @param {Database} db Acceso a la base de datos
+     * @param {String} TxWhere Condiciones de búsqueda
      * @returns Lista de registros
      */
     static Find(accessDB, TxWhere, params){
@@ -138,8 +138,8 @@ class RegDB{
 
     /**
      * Inserta el registro definido en el objeto.
-     * @param db Acceso a la base de datos.
-     * @returns ID del nuevo registro.
+     * @param {accessDB} accessDB Acceso a la base de datos.
+     * @returns {Promise} Promesa con el ID del nuevo registro.
      */
     Insert(accessDB){
         var cm = this;
@@ -159,7 +159,7 @@ class RegDB{
 
     /**
      * Actualización del registro definido en el objeto, creando el where con la ID del objeto.
-     * @param accessDB Acceso a la base de datos. 
+     * @param {accessDB} accessDB Acceso a la base de datos. 
      * @returns Numero de filas afectadas.
      */
     Update(accessDB){
@@ -179,9 +179,9 @@ class RegDB{
 
     /**
      * Calcula la consulta SQL que debe de ejecutarse para realizar una consulta de tipo Select.
-     * @param DicKey ID del registro a buscar. Si no se indica, se generará la consulta para obtener todos.
-     * @param whereExtra String con mas condiciónes where
-     * @returns String con la consulta.
+     * @param {Object} DicKey IDs del registro a buscar. Si no se indica, se generará la consulta para obtener todos.
+     * @param {String} whereExtra String con condiciones para el where
+     * @returns {String} Consulta contruida.
      */
     static TxSelect(DicKey, params, whereExtra){
         var sql = "";
@@ -209,9 +209,9 @@ class RegDB{
 
     /**
      * Calcula la consulta SQL que debe de ejecutarse para realizar una consulta de tipo UPDATE.
-     * @param CdUser Usuario que realiza la operación
-     * @param params Manejador de parámetros
-     * @returns String con la consulta
+     * @param {Number} CdUser Usuario que realiza la operación
+     * @param {DBParamas} params Manejador de parámetros
+     * @returns {String} Consulta construida.
      */
     TxUpdate(CdUser, params){
         var sql = 'UPDATE ' + this.constructor.TxTable + ' SET \n';
@@ -243,8 +243,8 @@ class RegDB{
 
     /**
      * Calcula la consulta SQL que debe de ejecutarse para realizar una consulta de tipo INSERT.
-     * @param CdUser Usuario que realiza la operación
-     * @param params Manejador de parámetros
+     * @param {Number} CdUser Usuario que realiza la operación
+     * @param {DBParamas} params Manejador de parámetros
      * @returns Consulta SQL de insercción
      */
     TxInsert(CdUser, params){
@@ -265,8 +265,7 @@ class RegDB{
                     TxValues += sep + params.addParams(CdUser);
                     
                 } else {
-                    // TODO: El manejo de nulos ya se hace en el manejador de parámetros
-                    TxValues += sep + (this[column]? params.addParams(this[column]) : "NULL");
+                    TxValues += sep + params.addParams(this[column]);
                 }
                 sep = "\n,";
             }

@@ -12,7 +12,12 @@ class DBParams{
     addParams(param, type, name){
         var nameParam = name || "$PARAM" + Object.keys(this.listParams).length;
         if (!param){
-            param = 'NULL';
+            if (type == 'String'){
+                param = '';
+            } else {
+                param = null; // Los campos vacios serán cadenas vacias
+            }
+            
         }
         this.listParams[nameParam] = param;
         return nameParam;

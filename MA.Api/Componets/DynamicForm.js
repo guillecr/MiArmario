@@ -34,25 +34,25 @@ class DynamicForm {
         });
 
         socket.on("DynamicFormSaveForm", async(req) => {
-            // TODO: Asignación de valores muy bruta. Mejorarlo para hacerlo dinamico
             try{
                 if (req && req.CdForm && req.ctrls && req.ctrls.length > 0 ) {
+                    // Desactivamos todos los controles actuales
+                    var params = new DBParams();
+                    var sentencia = `
+                        UPDATE D_FORM_FIELDS
+                        SET CD_MODIFIED_BY = ${params.addParams(socket.accessDB.user)}
+                            ,CH_ACTIVE = 0
+                        WHERE CD_FORM = ${params.addParams(req.CdForm)}
+                    `;
+                    var cmd = new Commands(db,sentencia, params);
+                    await cmd.ejecutarOperacion();
+
                     for (var indx in req.ctrls){
                         var ctrl = req.ctrls[indx];
                         var newField = new DFormFields;
-                        newField.CdForm = req.CdForm;
-                        newField.CdType = ctrl.CdType;
-                        newField.NuHeight = ctrl.NuHeight;
-                        newField.NuWidth = ctrl.NuWidth;
-                        newField.NuPosX = ctrl.NuPosX;
-                        newField.NuPosY = ctrl.NuPosY;
-                        newField.NuWidthLabel = ctrl.NuWidthLabel;
-                        newField.TxLabel = ctrl.TxLabel;
-                        newField.TxVisible = ctrl.TxVisible;
-                        newField.TxDisabled = ctrl.TxDisabled;
-                        newField.CdField = ctrl.CdField;
-                        newField.TxSqlList = ctrl.TxSqlList;
-                        newField.ChActive = true;
+                        ctrl.CdForm = req.CdForm;
+                        ctrl.ChActive = true;
+                        newField.setObject(ctrl);
                         if (ctrl.IdFormField) {
                             newField.IdFormField = ctrl.IdFormField;
                             newField.Update(socket.accessDB);
