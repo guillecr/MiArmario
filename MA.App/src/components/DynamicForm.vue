@@ -20,7 +20,7 @@
     .DynamicFormLabel {
         text-align: left;
     }
-    .DynamicFormResizeX {
+    .DynamicFormResizeX, .DynamicFormResizeLabel {
         border: 1px dotted rgb(85, 85, 85);
         width: 8px;
         height: 12px;
@@ -28,11 +28,26 @@
         cursor: e-resize;
         z-index: 50;
     }
+    .DynamicFormResizeLabel {
+        top: 0;
+        bottom: 0;
+        margin: auto;
+    }
+    .DynamicFormResizeX {
+        top:0;
+        bottom: 0;
+        margin: auto;
+        right: -4px;
+    }
     .DynamicFormResizeY {
         border: 1px dotted rgb(85, 85, 85);
         width: 12px;
         height: 8px;
         position: absolute;
+        bottom: -4px;
+        left: 0;
+        right: 0;
+        margin: auto;
         cursor: n-resize;
         z-index: 50;
     }
@@ -212,9 +227,28 @@
             @click="selectCtrl(elm)"
         >
                 
-            <label class="DynamicFormLabel" :style="{width:elm.NuWidthLabel + 'px'}">
-                {{elm.TxLabel}}
+            <label class="DynamicFormLabel"
+                v-if="elm.CdType != 'BTN'"
+                :style="{width: elm.NuWidthLabel + 'px'}">
+                {{elm.TxLabel}}                
             </label>
+            <div class="DynamicFormResizeLabel" 
+                v-if="adminMode && formEdit && (
+                    elm.CdType == 'TEXT' ||
+                    elm.CdType == 'LABEL' ||
+                    elm.CdType == 'LST' ||
+                    elm.CdType == 'CHECK'
+                )"
+                :style="{left:(elm.NuWidthLabel - 4) + 'px'}"
+                @mousedown="mouseDownLabel(elm, $event, $event.target.parentElement)"
+            ></div>
+            
+
+            <b-btn class="FormButtom"
+                v-if="elm.CdType=='BTN'"
+                :disabled="calcDisabled(elm)"
+                :style="{width:elm.NuWidth + 'px'}"
+            >{{elm.TxLabel}}</b-btn>
 
             <b-form-input class="DynamicFormElementText"
                 v-if="elm.CdType=='TEXT'" 
@@ -237,20 +271,6 @@
                 size="sm"
                 :style="{width:elm.NuWidth + 'px'}"
                 v-model="objForm[elm.CdField]" />
-            
-            <div class="DynamicFormResizeX" 
-                v-if="adminMode && formEdit && (
-                    elm.CdType == 'TEXT' ||
-                    elm.CdType == 'LABEL' ||
-                    elm.CdType == 'LST' ||
-                    elm.CdType == 'CHECK'
-                )" 
-                :style="{
-                    top:((elm.NuHeight / 2) - 6) + 'px',
-                    left:(elm.NuWidthLabel - 3) + 'px'
-                }"
-                @mousedown="mouseDownLabel(elm, $event, $event.target.parentElement)"
-            ></div>
             <div class="DynamicFormMove"
                 v-if="adminMode && formEdit"
                 @mousedown.stop="mouseDownMove(elm, $event, $event.target.parentElement)">
@@ -258,22 +278,15 @@
             <div class="DynamicFormResizeX"
                 v-if="adminMode && formEdit && (
                     elm.CdType == 'TEXT' ||
-                    elm.CdType == 'LST'
-                )" 
-                :style="{
-                    top:((elm.NuHeight / 2) - 6) + 'px',
-                    left:(elm.NuWidthLabel + elm.NuWidth - 6) + 'px'
-                }"
+                    elm.CdType == 'LST' ||
+                    elm.CdType=='BTN'
+                )"
                 @mousedown="mouseDownSizeX(elm, $event, $event.target.parentElement)"
             ></div>
             <div 
                 v-if="adminMode && formEdit && (
-                    elm.CdType == 'TEXT'
+                    elm.CdType == 'LABEL'
                 )" class="DynamicFormResizeY"
-                :style="{
-                    top:(elm.NuHeight - 3) + 'px',
-                    left:(elm.NuWidthLabel + (elm.NuWidth / 2) - 6) + 'px'
-                }"
 
             ></div>
         </label>
@@ -305,7 +318,8 @@ export default {
                 {value:'TEXT', text:'TEXT'},
                 {value:'LABEL', text:'LABEL'},
                 {value:'LST', text:'LST'},
-                {value:'CHECK', text:'CHECK'}
+                {value:'CHECK', text:'CHECK'},
+                {value:'BTN', text:'BOTÓN'}
             ]
         }
     },
@@ -394,8 +408,8 @@ export default {
                 TxLabel: 'Nuevo',
                 NuPosY: 10,
                 NuPosX: 10,
+                NuWidth: 50,
                 NuWidthLabel: 60,
-                NuWidth: 20,
                 NuHeight: 26,
                 CdField: '',
                 TxDisabled: '0',
@@ -438,7 +452,7 @@ export default {
         mouseDownLabel: function (ctrl, ev, elm) {
             this.ctrlActive = [ctrl];
             this.mousePosX = ev.clientX;
-            this.sizeRef = [ctrl.NuWidthLabel];
+            this.sizeRef = [ctrl.NuWidthLabel || 60];
             document.addEventListener('mousemove', this.mouseSizeLabel);
             document.addEventListener('mouseup', this.mouseUp);
             return tool.pauseEvent(ev);

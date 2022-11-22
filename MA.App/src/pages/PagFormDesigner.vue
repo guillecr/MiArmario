@@ -21,13 +21,11 @@
 
 <template>
   <div id="PagFormDesigner">
-    <div class="PagFormDesignerTableForms">
-        <b-table striped hover 
-            :items="listForms" 
+    <div  class="PagFormDesignerTableForms">
+        <DynamicList
+            idList="LIST_PRUEBA"
             @row-selected="formSelected" 
-            selectable 
-            select-mode="single"
-        ></b-table>
+        ></DynamicList>
     </div>
 
     <div class="PagFormDesignerToggle">
@@ -48,32 +46,29 @@
 <script>
 
 import DynamicForm from '../components/DynamicForm.vue';
+import DynamicList from '../components/DynamicList.vue';
+
 export default {
     components:{
-        DynamicForm
-    },
-    sockets:{
-        PagFormDesignerGetListFormsResponse(listForms){
-            this.listForms = listForms;
-        }
+        DynamicForm,
+        DynamicList
     },
     data() {
         return {
+            defColumns: [],
             listForms: [],
             objFormPag: {},
+            listLoad: false,
             formSelect: null
         }
     },
     methods:{
         formSelected(row){
-            this.formSelect = row[0].IdFormulario;
+            this.formSelect = row.IdForm;
             if (row) {
                 document.getElementById("PagFormDesignerForm").scrollIntoView();
             }
         }
-    },
-    mounted(){
-        this.$socket.emit("PagFormDesignerGetListForms");
     }
 
 }

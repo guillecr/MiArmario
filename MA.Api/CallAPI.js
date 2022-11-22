@@ -16,8 +16,12 @@ const jwt = require("jwt-simple");
 const PagMisPrendas = require("./pages/PagMisPrendas");
 const PagLogin = require("./pages/PagLogin");
 const PagTest = require("./pages/PagTest");
-const DynamicForm = require('./Componets/DynamicForm');
 const PagFormDesigner = require('./pages/PagFormDesigner');
+
+// Componentes
+const DynamicForm = require('./Componets/DynamicForm');
+const DynamicList = require('./Componets/DynamicList');
+
 
 class CallAPI {
 
@@ -163,16 +167,7 @@ class CallAPI {
         PagTest.calls(socket);
         PagFormDesigner.calls(socket);
         DynamicForm.calls(socket);
-        // socket.on("DynamicFormGetInfo", async(IdForm) => {
-        //     try{
-        //         var params = new DBParams
-        //         var listFields = await DFormFields.Find(socket.accessDB, `AND CD_FORM = ${params.addParams(IdForm)} AND CH_ACTIVE = 1`, params);
-        //         socket.emit("DynamicFormGetInfoResponse", listFields);
-        //     }
-        //     catch(ex) {
-        //         LogFile.writeLog('ERROR - DynamicFormGetInfo: ' + ex.message);
-        //     }
-        // });
+        DynamicList.calls(socket);
     }
 
     static authenticationByToken(socket, token){
