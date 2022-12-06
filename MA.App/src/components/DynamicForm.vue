@@ -299,7 +299,10 @@ export default {
     props:{
         idForm: String,
         objForm: Object,
-        adminMode: Boolean
+        adminMode: {
+            type: Boolean,
+            default: false
+        }
     },
     data: function(){
         return {

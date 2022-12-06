@@ -77,6 +77,12 @@ export default {
             autoHideDelay: 5000,
             appendToast: true
           });
+        } else {
+          this.$bvToast.toast(`Sesión caducada`, {
+            title: 'Error',
+            autoHideDelay: 5000,
+            appendToast: true
+          });
         }
 
         if (this.$route.name != 'Login') {

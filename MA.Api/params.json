@@ -4,5 +4,6 @@
     "CERT_URL": "./my_cert.crt",
     "LOG_PATH": "./log.txt",
     "HTTP_PORT": 3000,
-    "TOKEN_KEY": "s26g18KP28"
+    "TOKEN_KEY": "s26g18KP28",
+    "TIME_TOKEN_SESIONS": 60
 }
