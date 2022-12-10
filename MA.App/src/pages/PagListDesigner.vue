@@ -38,6 +38,7 @@
             v-if="true"
             idForm="FORM_D_LIST"
             :objForm="objFormPag"
+            @save-list="saveList($event)"
         />
     </div>
   </div>
@@ -63,6 +64,18 @@ export default {
     sockets: {
         PagListDesignerGetListInfoResponse(data){
             this.objFormPag = data;
+        },
+        PagListDesignerSaveResponse(response){
+            console.log(response);
+            var msg = "Error en el guardado";
+            if (response) {
+                msg = "Guardado correctamente"
+            }
+            this.$bvToast.toast(msg, {
+                title: 'Guardado de lista',
+                autoHideDelay: 5000,
+                appendToast: true
+            });
         }
     },
     methods:{
@@ -74,6 +87,9 @@ export default {
                     document.getElementById("appDetail").scrollIntoView();
                 }
             }
+        },
+        saveList(lst){
+            this.$socket.emit("PagListDesignerSave", lst);
         }
     }
 

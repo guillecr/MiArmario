@@ -19,6 +19,7 @@
     }
     .DynamicFormLabel {
         text-align: left;
+        margin-bottom: 0;
     }
     .DynamicFormResizeX, .DynamicFormResizeLabel {
         border: 1px dotted rgb(85, 85, 85);
@@ -69,10 +70,10 @@
         border: 1px solid black;
         border-radius: 5px;
         padding: 3px;
-        height: 450px;
+        height: 460px;
         width: 300px;
         background-color: white;
-        z-index: 50;
+        z-index: 100;
     }
 
 </style>
@@ -101,7 +102,7 @@
             class="DynamicFormPropeties"
             :style="{
                 visible: (chVisiblePropeties)?'visible':'',
-                height: (ChMiminicePropeties)? '40px':'450px'
+                height: (ChMiminicePropeties)? '40px':''
                 }">
             <label 
                 style="position: absolute; 
@@ -150,7 +151,7 @@
                     v-model="ctrlActive[0].CdType" />
             </label>
             
-            <!-- Cambpo de cabecera -->
+            <!-- Campo de cabecera -->
             <label class="DynamicFormElement"
                 :style="{
                     position: 'absolute',
@@ -208,11 +209,24 @@
                     position: 'absolute',
                     left:'10px',
                     top:'190px'
-                }"><label class="DynamicFormLabel" style="width:100px;">Lista</label>
-                <b-form-input class="DynamicFormElementText" 
-                    type="text"
-                    :style="{width:'150px'}"
+                }"><label class="DynamicFormLabel" style="width:250px;display: block;">Lista</label>
+                <b-form-textarea class="DynamicFormElementText" 
+                    no-resize
+                    :style="{height:'104px'}"
                     v-model="ctrlActive[0].TxSqlList" />
+            </label>
+
+            <!-- Acción -->
+            <label class="DynamicFormElement"
+                :style="{
+                    position: 'absolute',
+                    left:'10px',
+                    top:'320px'
+                }"><label class="DynamicFormLabel" style="width:250px;display: block;">Acción</label>
+                <b-form-textarea class="DynamicFormElementText" 
+                    no-resize
+                    :style="{height:'104px'}"
+                    v-model="ctrlActive[0].TxAction" />
             </label>
         </div>
         <!-- Fin de caja de propiedades -->
@@ -221,6 +235,7 @@
             :style="{left:elm.NuPosX + 'px'
                 ,top:elm.NuPosY + 'px'
                 ,height:elm.NuHeight + 'px'
+                ,width:(elm.CdType == 'MULTILINE')?elm.NuWidth + 'px':''
                 ,display:(calcVisibility(elm)? '':'none')
                 ,cursor: ((adminMode && formEdit)? 'all-scroll':'auto')}"
             
@@ -229,7 +244,8 @@
                 
             <label class="DynamicFormLabel"
                 v-if="elm.CdType != 'BTN'"
-                :style="{width: elm.NuWidthLabel + 'px'}">
+                :style="{width: elm.NuWidthLabel + 'px'
+                    ,display: (elm.CdType == 'MULTILINE')?'block':''}">
                 {{elm.TxLabel}}                
             </label>
             <div class="DynamicFormResizeLabel" 
@@ -248,6 +264,7 @@
                 v-if="elm.CdType=='BTN'"
                 :disabled="calcDisabled(elm)"
                 :style="{width:elm.NuWidth + 'px'}"
+                @click="calcAction(elm.TxAction)"
             >{{elm.TxLabel}}</b-btn>
 
             <b-form-input class="DynamicFormElementText"
@@ -271,6 +288,14 @@
                 size="sm"
                 :style="{width:elm.NuWidth + 'px'}"
                 v-model="objForm[elm.CdField]" />
+
+            <b-form-textarea class="DynamicFormElementMultiline"
+                v-if="elm.CdType=='MULTILINE'"
+                no-resize
+                :style="{height:(elm.NuHeight - 2 * gridSizeY) + 'px'}"
+                :disabled="calcDisabled(elm)"
+                v-model="objForm[elm.CdField]" />
+
             <div class="DynamicFormMove"
                 v-if="adminMode && formEdit"
                 @mousedown.stop="mouseDownMove(elm, $event, $event.target.parentElement)">
@@ -279,15 +304,17 @@
                 v-if="adminMode && formEdit && (
                     elm.CdType == 'TEXT' ||
                     elm.CdType == 'LST' ||
-                    elm.CdType=='BTN'
+                    elm.CdType == 'BTN' ||
+                    elm.CdType == 'MULTILINE'
                 )"
                 @mousedown="mouseDownSizeX(elm, $event, $event.target.parentElement)"
             ></div>
             <div 
                 v-if="adminMode && formEdit && (
-                    elm.CdType == 'LABEL'
+                    elm.CdType == 'LABEL' ||
+                    elm.CdType == 'MULTILINE'
                 )" class="DynamicFormResizeY"
-
+                @mousedown="mouseDownSizeY(elm, $event, $event.target.parentElement)"
             ></div>
         </label>
     </div>
@@ -310,6 +337,7 @@ export default {
             ctrlActive: [],
             formEdit: false,
             mousePosX: null,
+            mousePosY: null,
             gridSizeX: 10,
             gridSizeY: 13,
             sizeRef: 0,
@@ -318,11 +346,12 @@ export default {
             chVisiblePropeties: true,
             ChMiminicePropeties: false,
             ListTypesCtrls:[
-                {value:'TEXT', text:'TEXT'},
-                {value:'LABEL', text:'LABEL'},
-                {value:'LST', text:'LST'},
-                {value:'CHECK', text:'CHECK'},
-                {value:'BTN', text:'BOTÓN'}
+                {value:'TEXT', text:'Texto'},
+                {value:'LABEL', text:'Etiqueta'},
+                {value:'LST', text:'Lista'},
+                {value:'CHECK', text:'Check'},
+                {value:'BTN', text:'Botón'},
+                {value:'MULTILINE', text:'Multilinea'}
             ]
         }
     },
@@ -396,6 +425,9 @@ export default {
             }
             return true;
         },
+        calcAction: function(exp){
+            this.calcEval(exp);
+        },
         MiminicePropeties: function(){
             this.ChMiminicePropeties = !this.ChMiminicePropeties;
         },
@@ -452,6 +484,15 @@ export default {
             document.addEventListener('mouseup', this.mouseUp);
             return tool.pauseEvent(ev);
         },
+        mouseDownSizeY: function (ctrl, ev, elm){
+            document.activeElement.getBoundingClientRect();
+            this.ctrlActive = [ctrl];
+            this.mousePosY = ev.clientY;
+            this.sizeRef = ctrl.NuHeight;
+            document.addEventListener('mousemove', this.mouseSizeY);
+            document.addEventListener('mouseup', this.mouseUp);
+            return tool.pauseEvent(ev);
+        },
         mouseDownLabel: function (ctrl, ev, elm) {
             this.ctrlActive = [ctrl];
             this.mousePosX = ev.clientX;
@@ -469,6 +510,15 @@ export default {
                 return tool.pauseEvent(ev);
             }
         },
+        mouseSizeY: function (ev) {
+            var difSize = ev.clientY - this.mousePosY;
+            var newSize = (difSize - difSize % this.gridSizeY) + this.sizeRef;
+            for (var idx in this.ctrlActive){
+                var ctrl = this.ctrlActive[idx];
+                ctrl.NuHeight = newSize;
+                return tool.pauseEvent(ev);
+            }
+        },
         mouseSizeLabel: function (ev) {
             var difSize = ev.clientX - this.mousePosX;
             for (var idx in this.ctrlActive){
@@ -482,6 +532,7 @@ export default {
         mouseUp: function (ev) {
             document.removeEventListener('mousemove', this.mouseSizeLabel);
             document.removeEventListener('mousemove', this.mouseSizeX);
+            document.removeEventListener('mousemove', this.mouseSizeY);
             document.removeEventListener('mousemove', this.mouseMove);
             document.removeEventListener('mouseup', this.mouseUp);
             return tool.pauseEvent(ev);

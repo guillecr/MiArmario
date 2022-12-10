@@ -153,6 +153,7 @@ class RegDB{
                 })
                 .catch(function(err){
                     LogFile.writeLog("ERROR - RegDB.Insert: " + err);
+                    resolve(0);
                 });
         });
     };
@@ -160,7 +161,7 @@ class RegDB{
     /**
      * Actualización del registro definido en el objeto, creando el where con la ID del objeto.
      * @param {accessDB} accessDB Acceso a la base de datos. 
-     * @returns Numero de filas afectadas.
+     * @returns {Promise} Promesacon el número de filas afectadas.
      */
     Update(accessDB){
         var cm = this;
@@ -172,9 +173,27 @@ class RegDB{
                     await cm.Read(accessDB);
                     resolve(rows.rows);
                 }).catch(function(err){
+                    resolve(0);
                     LogFile.writeLog("ERROR - RegDB.Update: " + err);
                 });
         })
+    }
+
+    /**
+     * Inserta o actualizar el registro definido en el objeto.
+     * @param {accessDB} accessDB Acceso a la base de datos.
+     * @returns {Promise} Promesa con el ID del registro.
+     */
+    Upset(accessDB){
+        var cm = this;
+        return new Promise( async(resolve, reject) => {
+            if (await this.Update(accessDB) == 0) {
+                console.log("Insertado");
+                await this.Insert(accessDB);
+            }
+            console.log(this.getId());
+            resolve(this.getId());
+        });
     }
 
     /**

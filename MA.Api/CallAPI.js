@@ -1,12 +1,6 @@
-const DPrendas = require('./Entities/DPrendas');
 const DUsers = require('./Entities/DUsers');
 const DMenus = require('./Entities/DMenus');
-const DClosets = require('./Entities/DClosets');
-const DForms = require('./Entities/DForms');
-const DFormFields = require('./Entities/DFormFields');
-const ExtImgs = require('./Entities/ExtImgs');
 
-const Commands = require('./Utils/Commands');
 const DBParams = require('./Utils/DBParamas');
 const LogFile = require('./Utils/LogFile');
 
@@ -121,7 +115,6 @@ class CallAPI {
         });
 
         socket.on('getMenus', async () => {
-            console.log("Usuario para getMenus: " + socket.accessDB.user);
             try {
                 var params = new DBParams;
                 var menus = await DMenus.Find(socket.accessDB, `AND ID_MENU IN (

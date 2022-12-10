@@ -59,7 +59,7 @@ export default {
       for (var i in ListPaginas){
         var pag = ListPaginas[i];
         this.$router.addRoute({
-          name: pag.CdComponent,
+          name: pag.TxName,
           path: pag.TxPath,
           component: require(`./pages/${pag.CdComponent}`).default}
         );

@@ -3,11 +3,12 @@
     <div class="MenuToggel">
         <i alt="Menu" class="fi fi-rr-apps MenuBoton" @click="ShowMenu"/>
         <!-- <span class="MenuBoton" @click="ShowMenu"></span> -->
+        {{pageName}}
     </div>
     <div id="Menu" class="MenuRaiz" :style="{left: (visible?'0':'-225px')}" >
         <div class="MenuContenedor" >
             <div class="MenuLista">
-                <div class="MenuLabel" v-for="accion in acciones" :key="accion.IdMenu" @click="NavegationTo(accion.CdComponent)">
+                <div class="MenuLabel" v-for="accion in acciones" :key="accion.IdMenu" @click="NavegationTo(accion.TxPath)">
                     {{accion.TxName}}
                 </div>
             </div>
@@ -36,6 +37,11 @@ export default {
     props: {
         version: String,
     },
+    computed: {
+        pageName: function(){
+            return this.$route.name;
+        }
+    },
     methods: {
         ShowMenu: function(){
             this.visible = !this.visible;
@@ -49,9 +55,9 @@ export default {
                 this.visible = false;
             }
         },
-        NavegationTo: function(CdName){
-            if (this.$route.name != CdName){
-                this.$router.push({ name: CdName });
+        NavegationTo: function(TxPath){
+            if (this.$route.path != TxPath){
+                this.$router.push({ path: TxPath });
             }
             this.visible = false;
         }
@@ -70,6 +76,11 @@ export default {
     margin: 2px;
     height: 50px;
     background-color: rgb(74, 144, 177);
+    color: white;
+    font-size: 24px;
+    text-align: left;
+    padding-left: 60px;
+    padding-top: 7px;
 }
 .MenuBoton{
     position: absolute;

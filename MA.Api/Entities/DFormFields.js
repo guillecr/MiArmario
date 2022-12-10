@@ -21,6 +21,7 @@ class DFormFields extends RegDB{
         TxDisabled,
         TxVisible,
         TxSqlList,
+        TxAction,
         TxObservations
     ){
         super();
@@ -43,6 +44,7 @@ class DFormFields extends RegDB{
         this.TxDisabled = TxDisabled;
         this.TxVisible = TxVisible;
         this.TxSqlList = TxSqlList;
+        this.TxAction = TxAction
         this.TxObservations = TxObservations;
     };
 
@@ -68,6 +70,7 @@ class DFormFields extends RegDB{
         TxDisabled: new Fields('TX_DISABLED', 'String', null, null),
         TxVisible: new Fields('TX_VISIBLE', 'String', null, null),
         TxSqlList: new Fields('TX_SQL_LIST', 'String', null, null),
+        TxAction: new Fields('TX_ACTION', 'String', null, null),
         TxObservations: new Fields('TX_OBSERVATIONS', 'String', null , null)
     };
 }
