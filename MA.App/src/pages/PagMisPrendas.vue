@@ -24,6 +24,7 @@
 <script>
 import tool from "../tools";
 import listcards from "../components/ListCards.vue";
+import tools from "../tools";
 
 export default {
     components: {
@@ -41,6 +42,9 @@ export default {
         },
         PagMisPrendasGetInfoPrenda(response){
             this.listPrendas.push(response.ObjPrenda);
+        },
+        PagMisPrendasGetInfoPrendaAllResponse(response){
+            console.log(response);
         }
     },
     data(){
@@ -49,19 +53,30 @@ export default {
             txArmario:null,
             listPrendas:[],
             objArmario:{},
-            listArmarios: []
+            listArmarios: [],
+            serviceName:"PagMisPrendas"
         }
     },
     watch: {
         idArmario(newValue){
             if (newValue){
                 this.listPrendas = [];
-                this.$socket.emit('PagMisPrendasGetInfo', this.idArmario);
+                var cm = this;
+                tool.emitCall(this, 'GetInfo', this.idArmario, function(response){
+                    cm.objArmario = response.objArmario;
+                    cm.listPrendas = response.lstPrenda;
+                });
             }
         }
     },
     created(){
-        this.$socket.emit('PagMisPrendasGetListArmarios');
+        var cm = this;
+        tools.emitCall(this, 'GetListArmarios', null, function(request){
+            cm.listArmarios = request;
+            if (!cm.idArmario){
+                cm.idArmario = cm.listArmarios[0].value;
+            }
+        });
     },
     async mounted(){
         var idArmario = tool.getParamsURL('idArmario');

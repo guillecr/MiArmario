@@ -1,24 +1,19 @@
 const LogFile = require('../Utils/LogFile');
 const DPrendas = require('../Entities/DPrendas');
-const DUsers = require('../Entities/DUsers');
-const DMenus = require('../Entities/DMenus');
 const DClosets = require('../Entities/DClosets');
 const ExtImgs = require('../Entities/ExtImgs');
 
-const Commands = require('../Utils/Commands');
 const DBParams = require('../Utils/DBParamas');
 
 class MisPrendas {
     static calls(socket){
-        socket.on('PagMisPrendasGetInfo', async(idArmario) => {
+        socket.on('PagMisPrendas.GetInfo', async(idArmario) => {
             try {
                 var params = new DBParams;
                 var armario = await DClosets.Id(socket.accessDB, idArmario);
-                socket.emit('PagMisPrendasGetInfoArmario', {objArmario: armario});
                 params = new DBParams;
                 var listPrendas = await DPrendas.Find(socket.accessDB,`AND CD_CLOSET = ${params.addParams(idArmario)}
                     AND CH_ACTIVE = 1`, params);
-                
                 for (var index in listPrendas){
                     var prenda = listPrendas[index];
                     var params = new DBParams;
@@ -26,16 +21,15 @@ class MisPrendas {
                         AND CH_ACTIVE = 1`, params);
                     if (listImg && listImg.length > 0){
                         listPrendas[index].BiImg = 'data:image/jpeg;base64, ' + listImg[0].BiStream;
-                        //socket.emit('PagMisPrendasGetInfoPrendaImgResponse',{"IdPrenda":prenda.IdPrenda, "BiImg":listImg[0].BiStream})
                     }
-                    socket.emit('PagMisPrendasGetInfoPrenda', {"ObjPrenda": listPrendas[index]})
                 }
+                socket.emit('PagMisPrendas.GetInfo.Response', {"objArmario": armario, "lstPrenda": listPrendas});
             } catch(ex) {
-                LogFile.writeLog('ERROR - PagMisPrendasGetInfo2: ' + ex.message);
+                LogFile.writeLog('ERROR - PagMisPrendas.GetInfo: ' + ex.message);
             }
             
         });
-        socket.on('PagMisPrendasGetListArmarios', async () => {
+        socket.on('PagMisPrendas.GetListArmarios', async () => {
             try {
                 var params = new DBParams;
                 var listArmarios = await DClosets.Find(socket.accessDB, `AND CD_USER = ${params.addParams(socket.accessDB.user)}`, params);
@@ -43,16 +37,16 @@ class MisPrendas {
                 for (var elm in listArmarios){
                     response.push({"value":listArmarios[elm].IdClosets, "text":listArmarios[elm].TxName});
                 }
-                socket.emit('PagMisPrendasGetListArmariosResponse', response);
+                socket.emit('PagMisPrendas.GetListArmarios.Response', response);
             } catch(ex) {
-                LogFile.writeLog('ERROR - PagMisPrendasGetListArmarios: ' + ex.message);
+                LogFile.writeLog('ERROR - PagMisPrendas.GetListArmarios: ' + ex.message);
             }
         });
-        socket.on('PagMisPrendasGetInfoPrenda', async (idPrenda) => {
+        socket.on('PagMisPrendas.GetInfoPrenda', async (idPrenda) => {
             try{
-                socket.emit('PagMisPrendasGetInfoPrendaResponse', await DPrendas.Id(socket.accessDB, idPrenda));
+                socket.emit('PagMisPrendas.GetInfoPrenda.Response', await DPrendas.Id(socket.accessDB, idPrenda));
             } catch(ex) {
-                LogFile.writeLog('ERROR - PagMisPrendasGetInfoPrenda: ' + ex.message);
+                LogFile.writeLog('ERROR - PagMisPrendas.GetInfoPrenda: ' + ex.message);
             }
         })
     }

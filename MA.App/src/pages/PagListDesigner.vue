@@ -48,6 +48,7 @@
 
 import DynamicForm from '../components/DynamicForm.vue';
 import DynamicList from '../components/DynamicList.vue';
+import tools from '../tools';
 
 export default {
     components:{
@@ -58,14 +59,12 @@ export default {
         return {
             objFormPag: {},
             listLoad: false,
-            listSelect: null
+            listSelect: null,
+            serviceName: 'PagListDesigner'
         }
     },
     sockets: {
-        PagListDesignerGetListInfoResponse(data){
-            this.objFormPag = data;
-        },
-        PagListDesignerSaveResponse(response){
+        PagListDesigner_SaveResponse(response){
             console.log(response);
             var msg = "Error en el guardado";
             if (response) {
@@ -82,17 +81,31 @@ export default {
         setSelectedList(row){
             if (row && row.IdList) {      
                 this.listSelect = row;
-                this.$socket.emit("PagListDesignerGetListInfo", this.listSelect.IdList);
+                var cm = this;
+                tools.emitCall(this, "GetListInfo", this.listSelect.IdList, function(response){
+                    cm.objFormPag = response;
+                });
                 if (row) {
                     document.getElementById("appDetail").scrollIntoView();
                 }
             }
         },
         saveList(lst){
-            this.$socket.emit("PagListDesignerSave", lst);
+            var cm = this;
+            tools.emitCall(this, "PagListDesigner", "Save", lst, this.saveListResponse);
+        },
+        saveListResponse(response) {
+            var msg = "Error en el guardado";
+            if (response) {
+                msg = "Guardado correctamente"
+            }
+            this.$bvToast.toast(msg, {
+                title: 'Guardado de lista',
+                autoHideDelay: 5000,
+                appendToast: true
+            });
         }
     }
-
 }
 </script>
 

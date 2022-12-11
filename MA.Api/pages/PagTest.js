@@ -1,6 +1,29 @@
+const DMenus = require('../Entities/DMenus');
+const DBParams = require('../Utils/DBParamas');
 const LogFile = require('../Utils/LogFile');
 
 class PagTest {
+
+    static async getMenus2(socket){
+        console.log('getMenus2');
+        try {
+            var params = new DBParams;
+            // var menus = await DMenus.Find(socket.accessDB, `AND ID_MENU IN (
+            //         SELECT PM.CD_MENU
+            //         FROM R_PROFILES_MENUS PM
+            //             ,R_PROFILES_USERS PU
+            //         WHERE PM.CD_PROFILE = PU.CD_PROFILE
+            //             AND PU.CD_USER = ${params.addParams(socket.accessDB.user)}
+            //             AND PU.CH_ACTIVE = 1
+            //             AND PM.CH_ACTIVE = 1)
+            //     AND CH_ACTIVE = 1`, params);
+            // console.log(menus);
+            // socket.emit("Menus", menus); 
+        } catch (ex) {
+            LogFile.writeLog('ERROR - getMenus: ' + ex.message);
+        }
+    }
+
     static calls(socket){
         // TODO: Por hacer
         socket.on('setPwTEST', async (request) => {

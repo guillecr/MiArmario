@@ -65,6 +65,7 @@ class CallAPI {
                             socket.accessDB.user = null;
                         } else {
                             socket.accessDB.user = user.IdUser; // Damos permisos
+                            socket.accessDB.login = user.TxLogin;
                             socket.emit('withAccess', user.TxLogin);
                         }
                     });                
@@ -90,8 +91,10 @@ class CallAPI {
             // events: Nombre de la llamada
             // args: Parámetros a la llamada
             // Utilizamos este mecanismo para la autentificación
+            // Dentro de next() podemos definir una función que se ejecute antes del evento
             // TODO: En este punto podemos verificar si el usuario tiene permisos para la acción que solicita
             try {
+                LogFile.writeLog(`${socket.accessDB.login}: ${event}`);
                 if (CallAPI.authenticationByToken(CallAPI.getTokenInHead(socket), address)){
                     // Conexión acreditada
                     next();

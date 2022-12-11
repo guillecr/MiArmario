@@ -23,6 +23,15 @@ const tools = {
         e.cancelBbble = true;
         e.returnValue = false;
         return false;
+    },
+    emitCall(component, eventName, request, callBack){
+        // Creamos la subscripción a la respuesta del servicio llamado. Cuando obtengamos la respuesta, nos desubscribimos.
+        var serviceNameFull = `${component.serviceName}.${eventName}`;
+        component.sockets.subscribe(`${serviceNameFull}.Response`, function(response){
+            component.sockets.unsubscribe(`${serviceNameFull}.Response`);
+            callBack(response);
+        });
+        component.$socket.emit(serviceNameFull, request);
     }
 }
 

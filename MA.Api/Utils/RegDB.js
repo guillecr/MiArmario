@@ -188,10 +188,8 @@ class RegDB{
         var cm = this;
         return new Promise( async(resolve, reject) => {
             if (await this.Update(accessDB) == 0) {
-                console.log("Insertado");
                 await this.Insert(accessDB);
             }
-            console.log(this.getId());
             resolve(this.getId());
         });
     }
