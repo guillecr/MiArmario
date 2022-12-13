@@ -2,6 +2,7 @@
   <div id="app">
     <menu-lateral
       :version="version"
+      :appName="appName"
     ></menu-lateral>
     <router-view class="view"></router-view>
     <div id="banConnect">
@@ -27,7 +28,10 @@ export default {
   },
   computed:{
     version: function(){
-      return JSON.stringify(require('../package-lock.json').version).replace(/"/g,"");
+      return JSON.stringify(require('../package.json').version).replace(/"/g,"");
+    },
+    appName: function(){
+      return JSON.stringify(require('../package.json').namePublic).replace(/"/g,"");
     },
     conectado: function(){
       return this.isConnected? 'Conectado':'Desconectado'

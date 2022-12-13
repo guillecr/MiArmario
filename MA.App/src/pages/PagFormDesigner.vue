@@ -14,25 +14,27 @@
 .PagFormDesignerTableForms {
     height: 96%;
     padding: 8px;
-} .PagFormDesignerForm {
+} 
+.PagFormDesignerForm {
     height: 100%;
 }
 </style>
 
 <template>
   <div id="PagFormDesigner">
-    <div  class="PagFormDesignerTableForms">
+    <div  class="PagGenericList">
         <DynamicList
             idList="LIST_PRUEBA"
             @row-selected="formSelected" 
         ></DynamicList>
     </div>
 
-    <div class="PagFormDesignerToggle">
+    <div class="PagGenericToggle">
+        <span class="fi-rr-angle-left" onclick="document.getElementById('app').scrollIntoView(true);"></span>
         <p>Formulario</p>
     </div>
 
-    <div class="PagFormDesignerForm" id="PagFormDesignerForm">
+    <div class="PagGenericForm" id="PagFormDesignerForm">
         <DynamicForm 
             v-if="formSelect"
             :idForm="formSelect"

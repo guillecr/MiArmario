@@ -25,7 +25,7 @@ class DMenus extends RegDB{
         CdModifiedBy: new Fields('CD_MODIFIED_BY', 'Number', null, null),
         TxName: new Fields('TX_NAME', 'String', null , null),
         TxPath: new Fields('TX_PATH', 'Number', null , null),
-        CdActive: new Fields('CH_ACTIVE', 'Boolean', null, null),
+        ChActive: new Fields('CH_ACTIVE', 'Boolean', null, null),
         CdComponent: new Fields('CD_COMPONENT', 'String', null, null)
     };
 

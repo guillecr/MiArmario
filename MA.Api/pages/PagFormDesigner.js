@@ -1,9 +1,6 @@
-const DForms = require('../Entities/DForms');
-const LogFile = require('../Utils/LogFile');
+const CallService = require('../Utils/CallService');
 
-class PagFormDesigner {
-    static calls(socket){
-    }
+class PagFormDesigner extends CallService{
 }
 
 module.exports = PagFormDesigner;

@@ -36,6 +36,7 @@ export default {
     },
     props: {
         version: String,
+        appName: String
     },
     computed: {
         pageName: function(){
@@ -58,6 +59,7 @@ export default {
         NavegationTo: function(TxPath){
             if (this.$route.path != TxPath){
                 this.$router.push({ path: TxPath });
+                document.title = this.appName + " - " + this.pageName;
             }
             this.visible = false;
         }

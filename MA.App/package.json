@@ -1,5 +1,6 @@
 {
   "name": "ma.app",
+  "namePublic": "MiArmario",
   "version": "0.1.0",
   "private": true,
   "scripts": {

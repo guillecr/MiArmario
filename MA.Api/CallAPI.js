@@ -15,6 +15,7 @@ const DynamicForm = require('./Componets/DynamicForm');
 const DynamicList = require('./Componets/DynamicList');
 const PagListDesigner = require('./pages/PagListDesigner');
 const TokenManager = require('./Utils/TokenManager');
+const PagMenus = require('./pages/PagMenus');
 
 
 class CallAPI {
@@ -94,7 +95,7 @@ class CallAPI {
             // Dentro de next() podemos definir una función que se ejecute antes del evento
             // TODO: En este punto podemos verificar si el usuario tiene permisos para la acción que solicita
             try {
-                LogFile.writeLog(`${socket.accessDB.login}: ${event}`);
+                //LogFile.writeLog(`${socket.accessDB.login}: ${event}`);
                 if (CallAPI.authenticationByToken(CallAPI.getTokenInHead(socket), address)){
                     // Conexión acreditada
                     next();
@@ -153,13 +154,14 @@ class CallAPI {
             io.emit("mensaje",'Hola desde la API');
         });
 
-        PagMisPrendas.calls(socket);
-        PagLogin.calls(socket);
-        PagTest.calls(socket);
-        PagFormDesigner.calls(socket);
+        PagMisPrendas.createCalls(socket);
+        PagLogin.calls(socket); // Clase especial
+        //PagTest.calls(socket);
+        PagFormDesigner.createCalls(socket);
         DynamicForm.calls(socket);
         DynamicList.calls(socket);
-        PagListDesigner.calls(socket);
+        PagListDesigner.createCalls(socket);
+        PagMenus.createCalls(socket);
     }
 
 

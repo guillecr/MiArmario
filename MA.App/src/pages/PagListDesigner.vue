@@ -30,6 +30,7 @@
     </div>
 
     <div class="PagListDesignerToggle">
+        <span class="fi-rr-angle-left" onclick="document.getElementById('app').scrollIntoView(true);"></span>
         <p>{{(listSelect)?listSelect.TxName:'Nuevo'}}</p>
     </div>
 
@@ -92,7 +93,7 @@ export default {
         },
         saveList(lst){
             var cm = this;
-            tools.emitCall(this, "PagListDesigner", "Save", lst, this.saveListResponse);
+            tools.emitCall(this, "Save", lst, this.saveListResponse);
         },
         saveListResponse(response) {
             var msg = "Error en el guardado";
