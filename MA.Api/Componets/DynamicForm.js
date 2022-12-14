@@ -1,11 +1,87 @@
 const DFormFields = require('../Entities/DFormFields');
+const CallService = require('../Utils/CallService');
 const Commands = require('../Utils/Commands');
 const DBParams = require('../Utils/DBParamas');
 const LogFile = require('../Utils/LogFile');
 
-class DynamicForm {
+class DynamicForm extends CallService {
+    static async GetInfo(accessDB,IdForm){
+        var params = new DBParams
+        var listFields = await DFormFields.Find(accessDB, `AND CD_FORM = ${params.addParams(IdForm)} AND CH_ACTIVE = 1`, params);
+        for (var i in listFields){
+            var elm = listFields[i];
+            if (elm.CdType == 'LST'){
+                var params = new DBParams
+                var cmd = new Commands(accessDB.linkDB, elm.TxSqlList, params);
+                var result = await cmd.ejecutarSentencia();
+                elm.ListFill = [];
+                for (var indx in result){
+                    var row = result[indx];
+                    var elmList = {};
+                    for (var j = 0; j < 2; j++){
+                        elmList[j] = row[Object.keys(row)[j]];
+                    }
+                    elm.ListFill.push({"value": elmList[0], "text": elmList[1]});
+                }
+            }
+        }
+        return listFields;
+    }
+
+    static async SaveForm(accessDB, req){
+        if (req && req.CdForm && req.ctrls && req.ctrls.length > 0 ) {
+            // Desactivamos todos los controles actuales
+            var params = new DBParams();
+            var sentencia = `
+                UPDATE D_FORM_FIELDS
+                SET CD_MODIFIED_BY = ${params.addParams(accessDB.user)}
+                    ,CH_ACTIVE = 0
+                WHERE CD_FORM = ${params.addParams(req.CdForm)}
+            `;
+            var cmd = new Commands(db,sentencia, params);
+            await cmd.ejecutarOperacion();
+
+            for (var indx in req.ctrls){
+                var ctrl = req.ctrls[indx];
+                var newField = new DFormFields;
+                ctrl.CdForm = req.CdForm;
+                ctrl.ChActive = true;
+                newField.setObject(ctrl);
+                if (ctrl.IdFormField) {
+                    newField.IdFormField = ctrl.IdFormField;
+                    newField.Update(accessDB);
+                } else {
+                    newField.Insert(accessDB);
+                }
+            }
+        }
+        return true;
+    }
+
+    static async GetListFill(accessDB, IdFormField){
+        if (IdFormField) {
+            var elm = await DFormFields.Id(accessDB, IdFormField);
+            if (elm && elm.TxSqlList && elm.TxSqlList.startsWith("SELECT ")) {
+                // TODO: Permitir incluir un parámetro a sustituir para hacer listas dependientes
+                var params = new DBParams
+                var cmd = new Commands(accessDB.linkDB, elm.TxSqlList, params);
+                var result = await cmd.ejecutarSentencia();
+                var listFill = [];
+                for (var indx in result){
+                    var row = result[indx];
+                    var elm = {};
+                    for (var j = 0; j < 2; j++){
+                        elm[j] = row[Object.keys(row)[j]];
+                    }
+                    listFill.push({"value": elm[0], "text": elm[1]});
+                }
+                return {"IdFormField": IdFormField, "ListFill": listFill};
+            }
+        }
+    }
+
     static calls(socket){
-        socket.on("DynamicFormGetInfo", async(IdForm) => {
+        socket.on("DynamicForm.GetInfo", async(IdForm) => {
             try{
                 var params = new DBParams
                 var listFields = await DFormFields.Find(socket.accessDB, `AND CD_FORM = ${params.addParams(IdForm)} AND CH_ACTIVE = 1`, params);

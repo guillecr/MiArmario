@@ -9,6 +9,7 @@
 
 <script>
 
+import tools from '../tools';
 import ListView from './ListView.vue';
 
 export default {
@@ -17,6 +18,7 @@ export default {
     },
     data() {
         return {
+            serviceName:'DynamicList',
             defColumns: [],
             objList: [],
             selectable: true
@@ -30,18 +32,15 @@ export default {
             this.$emit('row-selected', row);
         }
     },
-    sockets: {
-        DynamicListGetInfoResponse(response){
-            this.defColumns = response.defColumns;
-            this.selectable = response.selectable
-        },
-        DynamicListGetValuesResponse(response){
-            this.objList = response;
-        }
-    },
     mounted(){
-        this.$socket.emit("DynamicListGetInfo", this.idList);
-        this.$socket.emit("DynamicListGetValues", this.idList);
+        var cm = this;
+        tools.emitCall(this, "GetInfo", this.idList, function(response) {
+            cm.defColumns = response.defColumns;
+            cm.selectable = response.selectable
+        });
+        tools.emitCall(this, "GetValues", this.idList, function(response) {
+            cm.objList = response;
+        });
     }
 
 }

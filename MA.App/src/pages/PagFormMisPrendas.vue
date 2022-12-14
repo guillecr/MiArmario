@@ -13,12 +13,14 @@
 
 import tool from "../tools";
 import DynamicForm from '../components/DynamicForm.vue';
+import tools from "../tools";
 export default {
   components:{
     DynamicForm
   },
   data: function(){
     return {
+      serviceName:"PagMisPrendas",
       objPrenda:{},
       objFormPag:{
         TxTest: "Ejemplo",
@@ -27,17 +29,15 @@ export default {
       idPrenda:null
     }
   },
-  sockets:{
-    PagMisPrendasGetInfoPrendaResponse(objPrenda){
-      this.objPrenda = objPrenda;
-    }
-  },
   mounted: function(){
     this.idPrenda = tool.getParamsURL('idPrenda');
     if (this.idPrenda == null){
       this.idPrenda = 1;
     } 
-    this.$socket.emit("PagMisPrendasGetInfoPrenda", this.idPrenda);
+    var cm = this;
+    tools.emitCall(this, "GetInfoPrenda", this.idPrenda, function(response) {
+      cm.objPrenda = response;
+    });
   }
 }
 </script>

@@ -321,6 +321,7 @@
 </template>
 <script>
 
+import tools from "../tools";
 import tool from "../tools";
 export default {
     props:{
@@ -333,6 +334,7 @@ export default {
     },
     data: function(){
         return {
+            serviceName:'DynamicForm',
             ctrls: [],
             ctrlActive: [],
             formEdit: false,
@@ -393,7 +395,11 @@ export default {
             }            
         },
         refreshListFill: function(ctrl){
-            this.$socket.emit("DynamicFormGetListFill", ctrl.IdFormField);
+            tools.emitCall(this, 'GetListFill',ctrl.IdFormField, function(response){
+                // TODO: Cuidado si se da el caso de enviar varias peticiones de diferentes controles a la vez
+                // TODO: No funciona
+                ctrl.ListFill = response.listFill;
+            });
         },
         refreshAllListFill: function(){
             for (var i in this.ctrls){
@@ -455,8 +461,18 @@ export default {
             this.ctrls.splice(this.ctrls.indexOf(this.ctrlActive[0]), 1);
         },
         saveForm: function () {
-            // TODO: Crear una acción a la respuesta
-            this.$socket.emit("DynamicFormSaveForm", {CdForm: this.idForm, ctrls: this.ctrls});
+            var cm = this;
+            tool.emitCall(this, "SaveForm", {CdForm: this.idForm, ctrls: this.ctrls}, function(response) {
+                var msg = 'Error en el guardado';
+                if (response) {
+                    msg = 'Guardado correctamente';
+                }
+                cm.$bvToast.toast(msg, {
+                    title: 'Guardado de formulario',
+                    autoHideDelay: 5000,
+                    appendToast: true
+                });
+            });
         },
         mouseDownMove: function (ctrl, ev, elm){
             if (this.adminMode && this.formEdit){
@@ -538,29 +554,21 @@ export default {
             return tool.pauseEvent(ev);
         }
     },
-    sockets:{
-        DynamicFormGetInfoResponse(response) {
-            this.ctrls = response;
-        },
-        DynamicFormSaveFormRespone(response) {
-            if (response) {
-                this.$bvToast.toast(`Guardado correctamente`, {
-                    title: 'Guardado de formulario',
-                    autoHideDelay: 5000,
-                    appendToast: true
-                });
-            }
-        }
-    },
     watch:{
         idForm: function (newId) {
-            this.$socket.emit("DynamicFormGetInfo", newId);
+            var cm = this;
+            tool.emitCall(this, "GetInfo", newId, function(response) {
+                cm.ctrls = response;
+            });
             this.ctrlActive = [];
             this.formEdit = false;
         }
     },
     mounted() {
-        this.$socket.emit("DynamicFormGetInfo", this.idForm);
+        var cm = this;
+        tool.emitCall(this, "GetInfo", this.idForm, function(response) {
+            cm.ctrls = response;
+        });
     }
 }
 </script>
