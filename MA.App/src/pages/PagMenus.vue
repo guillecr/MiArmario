@@ -54,12 +54,15 @@ export default {
                     cm.objSelected = {};
                 }
             })
+        } else {
+            // Caso de nuevo
+            this.objSelected = {};
         }
     }
   },
   methods: {
     setSelected(key){
-        if (key && key.IdMenu){
+        if (key){
             this.keySelected = key.IdMenu;
             document.getElementById("appDetail").scrollIntoView();
         }

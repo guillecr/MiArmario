@@ -1,10 +1,32 @@
+<style>
+    .DynamicListButton {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+        margin-right: 5px;
+        float: left;
+    }
+    .DynamicListLstButtons {
+        margin: 8px;
+        padding-left: 10px;
+        height: 26px;
+    }
+</style>
 <template>
-    <ListView
-        :defColumns="defColumns"
-        :objList="objList"
-        @row-selected="rowSelected" 
-        :selectable = "selectable"
-    ></ListView>
+    <div class="DynamicList">
+        <div class="DynamicListLstButtons">
+            <b-btn class="FormButtom DynamicListButton" v-for="btn in defButtons" 
+            :key="btn.IdListButton"
+            :variant="btn.CdVariant"
+            @click="actionButton(btn)"
+            >{{ btn.TxLabel }}</b-btn>
+        </div>
+        <ListView
+            :defColumns="defColumns"
+            :objList="objList"
+            @row-selected="rowSelected" 
+            :selectable = "selectable"
+        ></ListView>
+    </div>
 </template>
 
 <script>
@@ -20,6 +42,7 @@ export default {
         return {
             serviceName:'DynamicList',
             defColumns: [],
+            defButtons:[],
             objList: [],
             selectable: true
         }
@@ -30,13 +53,22 @@ export default {
     methods: {
         rowSelected(row){
             this.$emit('row-selected', row);
-        }
+        },
+        actionButton(btn){
+            this.calcEval(btn.TxAction);
+        },
+        calcEval: function(exp) {
+            var frm = this.objForm;
+            var cm = this;
+            return eval(exp);
+        },
     },
     mounted(){
         var cm = this;
         tools.emitCall(this, "GetInfo", this.idList, function(response) {
             cm.defColumns = response.defColumns;
-            cm.selectable = response.selectable
+            cm.selectable = response.selectable;
+            cm.defButtons = response.defButtons;
         });
         tools.emitCall(this, "GetValues", this.idList, function(response) {
             cm.objList = response;

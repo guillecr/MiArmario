@@ -82,8 +82,8 @@
     <div class="DynamicFormDiv" 
         :style="{
             height:this.heightForm + 'px',
-            width:this.widthForm + 'px'}
-        "
+            width:this.widthForm + 'px'
+        }"
     >
         <b-form-checkbox v-if="adminMode"
             id="checkbox-edit"

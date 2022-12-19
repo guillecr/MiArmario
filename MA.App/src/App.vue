@@ -111,6 +111,7 @@ export default {
 
 <style>
 @import '../src/assets/icons_uicons/css/uicons-regular-rounded.css';
+@import '../src/assets/style.css';
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
