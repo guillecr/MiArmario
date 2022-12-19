@@ -48,7 +48,13 @@ export default {
         }
     },
     props: {
-        idList: String
+        idList: String,
+        initFilter: Object
+    },
+    watch:{
+        initFilter: function(){
+            this.refreshData();
+        }
     },
     methods: {
         rowSelected(row){
@@ -62,6 +68,12 @@ export default {
             var cm = this;
             return eval(exp);
         },
+        refreshData(){
+            var cm = this;
+            tools.emitCall(this, "GetValues", {idList: this.idList, flt:this.initFilter}, function(response) {
+                cm.objList = response;
+            });
+        }
     },
     mounted(){
         var cm = this;
@@ -70,9 +82,10 @@ export default {
             cm.selectable = response.selectable;
             cm.defButtons = response.defButtons;
         });
-        tools.emitCall(this, "GetValues", this.idList, function(response) {
-            cm.objList = response;
-        });
+        this.refreshData();
+        // tools.emitCall(this, "GetValues", {idList: this.idList, flt:this.initFilter}, function(response) {
+        //     cm.objList = response;
+        // });
     }
 
 }

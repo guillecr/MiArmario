@@ -17,11 +17,12 @@ class Commands{
     /**
      * Añadir parametros a una consulta
      * @param {Object} param 
-     * @param {String} type 
+     * @param {String} type
+     * @param {String} name
      * @returns Nombre del parametro
      */
-    addParams(param, type){
-        return this.params.addParams(param, type);
+    addParams(param, type, name){
+        return this.params.addParams(param, type, name);
     }
 
     /**

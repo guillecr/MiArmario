@@ -2,7 +2,7 @@ const RegDB = require('../Utils/RegDB');
 const Fields = require('../Utils/Fields');
 
 class DListFields extends RegDB{
-    constructor(IdListField, CdCreatedBy, CdModifiedBy, FhCreated, FhModified, CdList, CdFieldName, TxLabel, ChSortable, CdVariant, TxStyle, ChActive){
+    constructor(IdListField, CdCreatedBy, CdModifiedBy, FhCreated, FhModified, CdList, CdFieldName, TxLabel, ChSortable, CdVariant, TxStyle, ChActive, CdFilterName, TxFilterSql, NuOrder){
         super();
         this.IdListField = IdListField;
         this.CdCreatedBy = CdCreatedBy;
@@ -16,6 +16,9 @@ class DListFields extends RegDB{
         this.CdVariant = CdVariant;
         this.TxStyle = TxStyle;
         this.ChActive = ChActive;
+        this.CdFilterName = CdFilterName;
+        this.TxFilterSql = TxFilterSql;
+        this.NuOrder = NuOrder;
     };
 
     static TxTable = 'D_LIST_FIELDS';
@@ -32,7 +35,10 @@ class DListFields extends RegDB{
         ChSortable: new Fields('CH_SORTABLE', 'Boolean', null , null),
         CdVariant: new Fields('CD_VARIANT', 'String', null , null),
         TxStyle: new Fields('TX_STYLE', 'String', null , null),
-        ChActive: new Fields('CH_ACTIVE', 'Boolean', null, null)
+        ChActive: new Fields('CH_ACTIVE', 'Boolean', null, null),
+        CdFilterName: new Fields('CD_FILTER_NAME', 'String', null, null),
+        TxFilterSql: new Fields('TX_FILTER_SQL', 'String', null, null),
+        NuOrder: new Fields('NU_ORDER', 'Number', null, null)
     };
 }
 
