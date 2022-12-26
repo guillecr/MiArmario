@@ -22,6 +22,15 @@
 
 <template>
   <div id="PagListDesigner">
+    <dlg-dynamic-form :style="{display:(chShowDlg)?'':'none'}"
+        idForm="FORM_DLG_LIST_FIELD"
+        :nuPosXInit="100"
+        :nuPosYInit="1100"
+        txTitle="Prueba"
+        :objFrom="objFieldList"
+        @close="chShowDlg = false"
+        @finalize="saveField"
+    />
     <div class="PagListDesignerListLists">
         <DynamicList
             idList="LIST_D_LISTS"
@@ -48,6 +57,7 @@
                 <DynamicList
                     idList="LIST_D_LIST_FIELDS"
                     :initFilter="{fltCdList: listSelect.IdList}"
+                    @row-selected="showField"
                 ></DynamicList>
             </b-tab>
         </b-tabs>
@@ -58,38 +68,37 @@
 
 <script>
 
+import DlgDynamicForm from '../components/DlgDynamicForm.vue';
 import DynamicForm from '../components/DynamicForm.vue';
 import DynamicList from '../components/DynamicList.vue';
+
 import tools from '../tools';
 
 export default {
     components:{
         DynamicForm,
-        DynamicList
+        DynamicList,
+        DlgDynamicForm
     },
     data() {
         return {
             objFormPag: {},
             listLoad: false,
             listSelect: null,
-            serviceName: 'PagListDesigner'
-        }
-    },
-    sockets: {
-        PagListDesigner_SaveResponse(response){
-            console.log(response);
-            var msg = "Error en el guardado";
-            if (response) {
-                msg = "Guardado correctamente"
-            }
-            this.$bvToast.toast(msg, {
-                title: 'Guardado de lista',
-                autoHideDelay: 5000,
-                appendToast: true
-            });
+            serviceName: 'PagListDesigner',
+            callBackDlg: null,
+            objFieldList: {},
+            chShowDlg: false
         }
     },
     methods:{
+        saveField(field){
+            this.chShowDlg = false;
+        },
+        showField(row){
+            this.objFieldList = row;
+            this.chShowDlg = true;
+        },
         setSelectedList(row){
             if (row && row.IdList) {      
                 this.listSelect = row;

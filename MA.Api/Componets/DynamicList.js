@@ -4,7 +4,6 @@ const DLists = require('../Entities/DLists');
 const CallService = require('../Utils/CallService');
 const Commands = require('../Utils/Commands');
 const DBParams = require('../Utils/DBParamas');
-const LogFile = require('../Utils/LogFile');
 
 class DynamicList extends CallService {
     static async GetInfo(accessDB, IdList) {

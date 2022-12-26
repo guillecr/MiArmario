@@ -1,8 +1,8 @@
 <style scoped>
     .DynamicFormDiv {
         position: relative;
-        left: 13px;
-        top: 13px;
+        /* left: 13px;
+        top: 13px; */
         width: 100vw;
     }
     .DynamicFormElement {
@@ -79,7 +79,7 @@
 </style>
 
 <template>
-    <div class="DynamicFormDiv" 
+    <div class="DynamicFormDiv"
         :style="{
             height:this.heightForm + 'px',
             width:this.widthForm + 'px'
@@ -98,19 +98,19 @@
         <b-btn v-if="formEdit" variant="danger" class="FormButtom" style="position: absolute; top: 0; left: 700px; width: 120px;" @click="deleteCtrl">Eliminar control</b-btn>
 
         <!-- Caja de propiedades -->
-        <div v-if="formEdit && ctrlActive && ctrlActive.length && ctrlActive[0]" 
+        <div v-if="formEdit && ctrlActive && ctrlActive.length && ctrlActive[0]"
             class="DynamicFormPropeties"
             :style="{
                 visible: (chVisiblePropeties)?'visible':'',
                 height: (ChMiminicePropeties)? '40px':''
                 }">
-            <label 
-                style="position: absolute; 
+            <label
+                style="position: absolute;
                     top:10px;
                     left:10px;"
             >Propiedades</label>
-            <b-btn 
-                variant="danger" 
+            <b-btn
+                variant="danger"
                 size="sm"
                 style="
                     position: absolute;
@@ -120,8 +120,8 @@
                     right: 10px;"
                 @click="ctrlActive=[]"
             ><span class="fi fi-rr-cross-small"></span></b-btn>
-            <b-btn 
-                variant="secondary" 
+            <b-btn
+                variant="secondary"
                 size="sm"
                 style="
                     position: absolute;
@@ -143,14 +143,14 @@
                     left:'10px',
                     top:'50px'}"
                 ><label class="DynamicFormLabel" style="width:100px;">Tipo</label>
-                <b-form-select class="DynamicFormElementText" 
+                <b-form-select class="DynamicFormElementText"
                     type="text"
                     :options="ListTypesCtrls"
                     size="sm"
                     :style="{width:'150px'}"
                     v-model="ctrlActive[0].CdType" />
             </label>
-            
+
             <!-- Campo de cabecera -->
             <label class="DynamicFormElement"
                 :style="{
@@ -158,7 +158,7 @@
                     left:'10px',
                     top:'78px'}"
                 ><label class="DynamicFormLabel" style="width:100px;">Cabecera</label>
-                <b-form-input class="DynamicFormElementText" 
+                <b-form-input class="DynamicFormElementText"
                     type="text"
                     :style="{width:'150px'}"
                     v-model="ctrlActive[0].TxLabel" />
@@ -171,7 +171,7 @@
                     left:'10px',
                     top:'106px'}"
                 ><label class="DynamicFormLabel" style="width:100px;">Campo</label>
-                <b-form-input class="DynamicFormElementText" 
+                <b-form-input class="DynamicFormElementText"
                     type="text"
                     :style="{width:'150px'}"
                     v-model="ctrlActive[0].CdField" />
@@ -184,7 +184,7 @@
                     left:'10px',
                     top:'134px'
                 }"><label class="DynamicFormLabel" style="width:100px;">Visible</label>
-                <b-form-input class="DynamicFormElementText" 
+                <b-form-input class="DynamicFormElementText"
                     type="text"
                     :style="{width:'150px'}"
                     v-model="ctrlActive[0].TxVisible" />
@@ -197,7 +197,7 @@
                     left:'10px',
                     top:'162px'
                 }"><label class="DynamicFormLabel" style="width:100px;">Deshabilitado</label>
-                <b-form-input class="DynamicFormElementText" 
+                <b-form-input class="DynamicFormElementText"
                     type="text"
                     :style="{width:'150px'}"
                     v-model="ctrlActive[0].TxDisabled" />
@@ -210,7 +210,7 @@
                     left:'10px',
                     top:'190px'
                 }"><label class="DynamicFormLabel" style="width:250px;display: block;">Lista</label>
-                <b-form-textarea class="DynamicFormElementText" 
+                <b-form-textarea class="DynamicFormElementText"
                     no-resize
                     :style="{height:'104px'}"
                     v-model="ctrlActive[0].TxSqlList" />
@@ -223,7 +223,7 @@
                     left:'10px',
                     top:'320px'
                 }"><label class="DynamicFormLabel" style="width:250px;display: block;">Acción</label>
-                <b-form-textarea class="DynamicFormElementText" 
+                <b-form-textarea class="DynamicFormElementText"
                     no-resize
                     :style="{height:'104px'}"
                     v-model="ctrlActive[0].TxAction" />
@@ -238,17 +238,17 @@
                 ,width:(elm.CdType == 'MULTILINE')?elm.NuWidth + 'px':''
                 ,display:(calcVisibility(elm)? '':'none')
                 ,cursor: ((adminMode && formEdit)? 'all-scroll':'auto')}"
-            
+
             @click="selectCtrl(elm)"
         >
-                
+
             <label class="DynamicFormLabel"
                 v-if="elm.CdType != 'BTN'"
                 :style="{width: elm.NuWidthLabel + 'px'
                     ,display: (elm.CdType == 'MULTILINE')?'block':''}">
-                {{elm.TxLabel}}                
+                {{elm.TxLabel}}
             </label>
-            <div class="DynamicFormResizeLabel" 
+            <div class="DynamicFormResizeLabel"
                 v-if="adminMode && formEdit && (
                     elm.CdType == 'TEXT' ||
                     elm.CdType == 'LABEL' ||
@@ -258,7 +258,7 @@
                 :style="{left:(elm.NuWidthLabel - 4) + 'px'}"
                 @mousedown="mouseDownLabel(elm, $event, $event.target.parentElement)"
             ></div>
-            
+
 
             <b-btn class="FormButtom"
                 v-if="elm.CdType=='BTN'"
@@ -268,20 +268,20 @@
             >{{elm.TxLabel}}</b-btn>
 
             <b-form-input class="DynamicFormElementText"
-                v-if="elm.CdType=='TEXT'" 
+                v-if="elm.CdType=='TEXT'"
                 type="text"
                 :style="{width:elm.NuWidth + 'px'}"
                 :disabled="calcDisabled(elm)"
-                v-model="objForm[elm.CdField]" 
+                v-model="objForm[elm.CdField]"
             />
 
             <b-form-checkbox class="DynamicFormElementCheck"
                 v-if="elm.CdType=='CHECK'"
                 :disabled="calcDisabled(elm)"
-                v-model="objForm[elm.CdField]"     
+                v-model="objForm[elm.CdField]"
             ></b-form-checkbox>
 
-            <b-form-select class="DynamicFormElementText" 
+            <b-form-select class="DynamicFormElementText"
                 v-if="elm.CdType=='LST'"
                 type="text"
                 :options="getListFill(elm)"
@@ -309,7 +309,7 @@
                 )"
                 @mousedown="mouseDownSizeX(elm, $event, $event.target.parentElement)"
             ></div>
-            <div 
+            <div
                 v-if="adminMode && formEdit && (
                     elm.CdType == 'LABEL' ||
                     elm.CdType == 'MULTILINE'
@@ -392,7 +392,7 @@ export default {
         getListFill: function(ctrl){
             if (ctrl.ListFill){
                 return ctrl.ListFill;
-            }            
+            }
         },
         refreshListFill: function(ctrl){
             tools.emitCall(this, 'GetListFill',ctrl.IdFormField, function(response){
@@ -480,7 +480,7 @@ export default {
                 this.posYRef = ctrl.NuPosY - ev.clientY;
                 this.ctrlActive = [ctrl];
                 document.addEventListener('mousemove', this.mouseMove);
-                document.addEventListener('mouseup', this.mouseUp);    
+                document.addEventListener('mouseup', this.mouseUp);
             }
             return tool.pauseEvent(ev);
         },
