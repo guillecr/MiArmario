@@ -1,7 +1,7 @@
 <style>
     .DynamicListButton {
-        padding-left: 5px !important;
-        padding-right: 5px !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
         margin-right: 5px;
         float: left;
     }
@@ -13,11 +13,17 @@
 </style>
 <template>
     <div class="DynamicList">
+        
         <div class="DynamicListLstButtons">
+            <b-btn class="FormButtom DynamicListButton"
+                variant="primary"
+                style="padding-top: 4px !important;" 
+                @click="refreshData"
+            ><span class="fi-rr-refresh"></span></b-btn>
             <b-btn class="FormButtom DynamicListButton" v-for="btn in defButtons" 
-            :key="btn.IdListButton"
-            :variant="btn.CdVariant"
-            @click="actionButton(btn)"
+                :key="btn.IdListButton"
+                :variant="btn.CdVariant"
+                @click="actionButton(btn)"
             >{{ btn.TxLabel }}</b-btn>
         </div>
         <ListView
@@ -25,14 +31,15 @@
             :objList="objList"
             @row-selected="rowSelected" 
             :selectable = "selectable"
+            :isBusy="isBusy"
         ></ListView>
     </div>
 </template>
 
 <script>
 
-import tools from '../tools';
 import ListView from './ListView.vue';
+import SocketEmit from '../SocketEmit';
 
 export default {
     components:{
@@ -40,11 +47,13 @@ export default {
     },
     data() {
         return {
+            sEmit: new SocketEmit(this.$socket, this.sockets, 'DynamicList'),
             serviceName:'DynamicList',
             defColumns: [],
             defButtons:[],
             objList: [],
-            selectable: true
+            isBusy: false,
+            selectable: true            
         }
     },
     props: {
@@ -70,14 +79,16 @@ export default {
         },
         refreshData(){
             var cm = this;
-            tools.emitCall(this, "GetValues", {idList: this.idList, flt:this.initFilter}, function(response) {
+            this.sEmit.emitCall("GetValues", {idList: this.idList, flt:this.initFilter}, function(response) {
                 cm.objList = response;
             });
         }
     },
     mounted(){
         var cm = this;
-        tools.emitCall(this, "GetInfo", this.idList, function(response) {
+        this.isBusy = true;
+        this.sEmit.emitCall("GetInfo", this.idList, function(response) {
+            cm.isBusy = false;
             cm.defColumns = response.defColumns;
             cm.selectable = response.selectable;
             cm.defButtons = response.defButtons;

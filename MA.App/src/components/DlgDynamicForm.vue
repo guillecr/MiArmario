@@ -22,7 +22,7 @@
     }
     .DlgDynamicFormFrm {
         position: relative;
-        margin-bottom: 10px;
+        margin: 15px;
     }
 </style>
 
@@ -48,7 +48,7 @@
                 @click="$emit('close')"
             ><span class="fi fi-rr-cross-small"></span></b-btn>
         </div>
-        <DynamicForm class="DlgDynamicFormFrm"
+        <dynamic-form class="DlgDynamicFormFrm"
             :idForm="idForm"
             :objForm="objFrom"
             @close="$emit('close')"

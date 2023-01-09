@@ -37,6 +37,18 @@ class PagMisPrendas extends CallService {
     static async GetInfoPrenda(accessDB, idPrenda) {
         return await DPrendas.Id(accessDB, idPrenda);
     }
+    
+    static async SavePrenda(accessDB, prenda){
+        var prendaDb = new DPrendas;
+        prendaDb.setObject(prenda);
+        var response;
+        if (prendaDb.IdPrenda) {
+            response = prendaDb.Update(accessDB);
+        } else {
+            response = prendaDb.Insert(accessDB);
+        }
+        return response;
+    }
 }
 
 module.exports = PagMisPrendas;

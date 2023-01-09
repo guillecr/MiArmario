@@ -13,6 +13,27 @@
     .DynamicFormElementText {
         height: 26px;
         display: initial;
+        padding-left: 10px;
+        font-size: 14px;
+        
+    }
+    .DynamicFormElementList{
+        height: 26px;
+        display: initial;
+        padding-top: 0;
+        padding-bottom: 0;
+        padding-left: 10px;
+        font-size: 14px;
+    }
+    .DynamicFormElementDate {
+        height: 26px;
+        display: initial;
+        font-size: 14px;
+    }
+    .DynamicFormElementDatetime{
+        height: 26px;
+        display: initial;
+        font-size: 14px;
     }
     .DynamicFormElementCheck {
         display: initial;
@@ -20,6 +41,7 @@
     .DynamicFormLabel {
         text-align: left;
         margin-bottom: 0;
+        font-size: 14px;
     }
     .DynamicFormResizeX, .DynamicFormResizeLabel {
         border: 1px dotted rgb(85, 85, 85);
@@ -251,6 +273,8 @@
             <div class="DynamicFormResizeLabel"
                 v-if="adminMode && formEdit && (
                     elm.CdType == 'TEXT' ||
+                    elm.CdType == 'DATE' ||
+                    elm.CdType == 'DATETIME' ||
                     elm.CdType == 'LABEL' ||
                     elm.CdType == 'LST' ||
                     elm.CdType == 'CHECK'
@@ -258,7 +282,6 @@
                 :style="{left:(elm.NuWidthLabel - 4) + 'px'}"
                 @mousedown="mouseDownLabel(elm, $event, $event.target.parentElement)"
             ></div>
-
 
             <b-btn class="FormButtom"
                 v-if="elm.CdType=='BTN'"
@@ -274,6 +297,20 @@
                 :disabled="calcDisabled(elm)"
                 v-model="objForm[elm.CdField]"
             />
+            <b-form-input class="DynamicFormElementDate"
+                v-if="elm.CdType=='DATE'"
+                type="date"
+                :style="{width:NuWidthDate + 'px'}"
+                :disabled="calcDisabled(elm)"
+                v-model="objForm[elm.CdField]"
+            />
+            <b-form-input class="DynamicFormElementDatetime"
+                v-if="elm.CdType=='DATETIME'"
+                type="datetime-local"
+                :style="{width:NuWidthDateTime + 'px'}"
+                :disabled="calcDisabled(elm)"
+                v-model="objForm[elm.CdField]"
+            />
 
             <b-form-checkbox class="DynamicFormElementCheck"
                 v-if="elm.CdType=='CHECK'"
@@ -281,7 +318,7 @@
                 v-model="objForm[elm.CdField]"
             ></b-form-checkbox>
 
-            <b-form-select class="DynamicFormElementText"
+            <b-form-select class="DynamicFormElementList"
                 v-if="elm.CdType=='LST'"
                 type="text"
                 :options="getListFill(elm)"
@@ -322,7 +359,8 @@
 <script>
 
 import tools from "../tools";
-import tool from "../tools";
+import SocketEmit from "../SocketEmit";
+
 export default {
     props:{
         idForm: String,
@@ -334,6 +372,7 @@ export default {
     },
     data: function(){
         return {
+            sEmit: new SocketEmit(this.$socket, this.sockets, 'DynamicForm'),
             serviceName:'DynamicForm',
             ctrls: [],
             ctrlActive: [],
@@ -347,8 +386,12 @@ export default {
             posYRef: 0,
             chVisiblePropeties: true,
             ChMiminicePropeties: false,
+            NuWidthDate: 140,
+            NuWidthDateTime: 190,
             ListTypesCtrls:[
                 {value:'TEXT', text:'Texto'},
+                {value:'DATE', text:'Fecha'},
+                {value:'DATETIME', text:'Tiempo'},
                 {value:'LABEL', text:'Etiqueta'},
                 {value:'LST', text:'Lista'},
                 {value:'CHECK', text:'Check'},
@@ -362,6 +405,7 @@ export default {
             var nuHeight = 0;
             for (const elm in this.ctrls) {
                 var ctrl = this.ctrls[elm];
+
                 if (ctrl.NuPosY + (ctrl.NuHeight || 26) > nuHeight) { // El tamaño mínimo de los controles es 26
                     nuHeight = ctrl.NuPosY + (ctrl.NuHeight || 26);
                 }
@@ -369,12 +413,22 @@ export default {
             return nuHeight;
         },
         widthForm() {
-            var nuWidth = 0;
-            for (const elm in this.ctrls) {
-                var ctrl = this.ctrls[elm];
-                var maxWidthCtrl = ctrl.NuPosX + (ctrl.NuWidth || 0) + (ctrl.NuWidthLabel || 0);
-                if (maxWidthCtrl > nuWidth) { // El tamaño mínimo de los controles es 26
-                    nuWidth = maxWidthCtrl;
+            var nuWidth = 1000;
+            if (!this.adminMode){
+                nuWidth = 0;
+                for (const elm in this.ctrls) {
+                    var ctrl = this.ctrls[elm];
+                    
+                    if (ctrl.Cdtype == 'DATE'){
+                        ctrl.NuWidth = this.NuWidthDate;
+                    } else if (ctrl.CdType == 'DATETIME'){
+                        ctrl.NuWidth = this.NuWidthDateTime;
+                    }
+
+                    var maxWidthCtrl = ctrl.NuPosX + (ctrl.NuWidth || 0) + (ctrl.NuWidthLabel || 0);
+                    if (maxWidthCtrl > nuWidth) {
+                        nuWidth = maxWidthCtrl;
+                    }
                 }
             }
             return nuWidth;
@@ -395,7 +449,7 @@ export default {
             }
         },
         refreshListFill: function(ctrl){
-            tools.emitCall(this, 'GetListFill',ctrl.IdFormField, function(response){
+            this.sEmit.emitCall('GetListFill', ctrl.IdFormField, function(response){
                 // TODO: Cuidado si se da el caso de enviar varias peticiones de diferentes controles a la vez
                 // TODO: No funciona
                 ctrl.ListFill = response.listFill;
@@ -462,7 +516,7 @@ export default {
         },
         saveForm: function () {
             var cm = this;
-            tool.emitCall(this, "SaveForm", {CdForm: this.idForm, ctrls: this.ctrls}, function(response) {
+            this.sEmit.emitCall("SaveForm", {CdForm: this.idForm, ctrls: this.ctrls}, function(response) {
                 var msg = 'Error en el guardado';
                 if (response) {
                     msg = 'Guardado correctamente';
@@ -482,14 +536,14 @@ export default {
                 document.addEventListener('mousemove', this.mouseMove);
                 document.addEventListener('mouseup', this.mouseUp);
             }
-            return tool.pauseEvent(ev);
+            return tools.pauseEvent(ev);
         },
         mouseMove: function(ev){
             var posx = this.posXRef + ev.clientX;
             var posy = this.posYRef + ev.clientY;
             this.ctrlActive[0].NuPosX = posx - posx % this.gridSizeX;
             this.ctrlActive[0].NuPosY = posy - posy % this.gridSizeY;
-            return tool.pauseEvent(ev);
+            return tools.pauseEvent(ev);
         },
         mouseDownSizeX: function (ctrl, ev, elm) {
             document.activeElement.getBoundingClientRect();
@@ -498,7 +552,7 @@ export default {
             this.sizeRef = ctrl.NuWidth;
             document.addEventListener('mousemove', this.mouseSizeX);
             document.addEventListener('mouseup', this.mouseUp);
-            return tool.pauseEvent(ev);
+            return tools.pauseEvent(ev);
         },
         mouseDownSizeY: function (ctrl, ev, elm){
             document.activeElement.getBoundingClientRect();
@@ -507,7 +561,7 @@ export default {
             this.sizeRef = ctrl.NuHeight;
             document.addEventListener('mousemove', this.mouseSizeY);
             document.addEventListener('mouseup', this.mouseUp);
-            return tool.pauseEvent(ev);
+            return tools.pauseEvent(ev);
         },
         mouseDownLabel: function (ctrl, ev, elm) {
             this.ctrlActive = [ctrl];
@@ -515,7 +569,7 @@ export default {
             this.sizeRef = [ctrl.NuWidthLabel || 60];
             document.addEventListener('mousemove', this.mouseSizeLabel);
             document.addEventListener('mouseup', this.mouseUp);
-            return tool.pauseEvent(ev);
+            return tools.pauseEvent(ev);
         },
         mouseSizeX: function (ev) {
             var difSize = ev.clientX - this.mousePosX;
@@ -523,7 +577,7 @@ export default {
             for (var idx in this.ctrlActive){
                 var ctrl = this.ctrlActive[idx];
                 ctrl.NuWidth = newSize;
-                return tool.pauseEvent(ev);
+                return tools.pauseEvent(ev);
             }
         },
         mouseSizeY: function (ev) {
@@ -532,7 +586,7 @@ export default {
             for (var idx in this.ctrlActive){
                 var ctrl = this.ctrlActive[idx];
                 ctrl.NuHeight = newSize;
-                return tool.pauseEvent(ev);
+                return tools.pauseEvent(ev);
             }
         },
         mouseSizeLabel: function (ev) {
@@ -542,7 +596,7 @@ export default {
                 var ctrl = this.ctrlActive[idx];
                 ctrl.NuWidthLabel = newSize;
             }
-            return tool.pauseEvent(ev);
+            return tools.pauseEvent(ev);
 
         },
         mouseUp: function (ev) {
@@ -551,13 +605,13 @@ export default {
             document.removeEventListener('mousemove', this.mouseSizeY);
             document.removeEventListener('mousemove', this.mouseMove);
             document.removeEventListener('mouseup', this.mouseUp);
-            return tool.pauseEvent(ev);
+            return tools.pauseEvent(ev);
         }
     },
     watch:{
         idForm: function (newId) {
             var cm = this;
-            tool.emitCall(this, "GetInfo", newId, function(response) {
+            this.sEmit.emitCall("GetInfo", newId, function(response) {
                 cm.ctrls = response;
             });
             this.ctrlActive = [];
@@ -566,7 +620,7 @@ export default {
     },
     mounted() {
         var cm = this;
-        tool.emitCall(this, "GetInfo", this.idForm, function(response) {
+        this.sEmit.emitCall("GetInfo", this.idForm, function(response) {
             cm.ctrls = response;
         });
     }

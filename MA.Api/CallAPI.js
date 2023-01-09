@@ -95,7 +95,7 @@ class CallAPI {
             // Dentro de next() podemos definir una función que se ejecute antes del evento
             // TODO: En este punto podemos verificar si el usuario tiene permisos para la acción que solicita
             try {
-                LogFile.writeLog(`${socket.accessDB.login}: ${event}`);
+                //LogFile.writeLog(`${socket.accessDB.login}: ${event}`);
                 if (CallAPI.authenticationByToken(CallAPI.getTokenInHead(socket), address)){
                     // Conexión acreditada
                     next();

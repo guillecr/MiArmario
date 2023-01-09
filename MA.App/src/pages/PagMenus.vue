@@ -14,7 +14,6 @@
 
     <div class="PagGenericForm" id="appDetail">
         <dynamic-form 
-            v-if="true"
             idForm="FORM_D_MENUS"
             :objForm="objSelected"
             @save-menu="saveMenu"
@@ -27,12 +26,13 @@
 <script>
 import DynamicForm from '../components/DynamicForm.vue'
 import DynamicList from '../components/DynamicList.vue'
-import tools from '../tools'
+import SocketEmit from '../SocketEmit'
 
 export default {
   components: { DynamicForm, DynamicList },
   data: function(){
     return {
+        sEmit: new SocketEmit(this.$socket, this.sockets, 'PagMenus'),
         objSelected:{},
         keySelected: null,
         serviceName: "PagMenus"
@@ -42,7 +42,7 @@ export default {
     keySelected(key){
         if (key) {
             var cm = this;
-            tools.emitCall(this, "GetInfo", key, function(request) {
+            this.sEmit.emitCall("GetInfo", key, function(request) {
                 if (request) {
                     cm.objSelected = request;
                 } else {
@@ -68,7 +68,7 @@ export default {
         }
     },
     saveMenu(){
-        tools.emitCall(this, "Save", this.objSelected, this.saveMenuResponse);
+        this.sEmit.emitCall("Save", this.objSelected, this.saveMenuResponse);
     },
     saveMenuResponse(response) {
         var msg = "Error en el guardado";

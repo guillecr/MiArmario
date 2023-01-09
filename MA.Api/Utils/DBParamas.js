@@ -14,6 +14,10 @@ class DBParams{
         if (!param){
             if (type == 'String'){
                 param = '';
+            // } else if (type == 'Date') {
+            //     param = param.getUTCMilliseconds();
+            } else if (type == 'Boolean'){
+                param = false; // TODO: Poner false lleva el campo de BD a NULL. Valorar forzar el valor 0
             } else {
                 param = null; // Los campos vacios serán cadenas vacias
             }

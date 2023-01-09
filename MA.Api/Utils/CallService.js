@@ -16,14 +16,20 @@ class CallService {
     }
 
     static createCall(socket, funName){
-        socket.on(this.name + "." + funName, async(request) => {
-            var response = false;
-            try {
-                response = await this[funName](socket.accessDB, request);
-            } catch(ex){
-                LogFile.writeLog(`ERROR - ${this.name + "." + funName}: ${ex.message}`);
+        socket.on(this.name + "." + funName, async(requestCall) => {
+            if (requestCall && requestCall.idResponseEvent) {           
+                var response = false;
+                var request = requestCall.request;
+                try {
+                    response = await this[funName](socket.accessDB, request);
+                } catch(ex){
+                    LogFile.writeLog(`ERROR - ${this.name + "." + funName}: ${ex.message}`);
+                }
+                socket.emit(this.name + "." + funName + "." + requestCall.idResponseEvent + ".Response", response);
+            } else {
+                // Llamada mal contruida
+                LogFile.writeLog(`ERROR - ${this.name + "." + funName}: "Llamada mal construida"`);
             }
-            socket.emit(this.name + "." + funName + ".Response", response);
         });
     }
 }

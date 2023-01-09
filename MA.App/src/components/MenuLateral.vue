@@ -1,24 +1,24 @@
 <template>
-<div @mouseout="HiddenMenu" ref="MenuLista">
-    <div class="MenuToggel">
-        <i alt="Menu" class="fi fi-rr-apps MenuBoton" @click="ShowMenu"/>
-        <!-- <span class="MenuBoton" @click="ShowMenu"></span> -->
-        {{pageName}}
-    </div>
-    <div id="Menu" class="MenuRaiz" :style="{left: (visible?'0':'-225px')}" >
-        <div class="MenuContenedor" >
-            <div class="MenuLista">
-                <div class="MenuLabel" v-for="accion in acciones" :key="accion.IdMenu" @click="NavegationTo(accion.TxPath)">
-                    {{accion.TxName}}
+    <div @mouseout="HiddenMenu" ref="MenuLista">
+        <div class="MenuToggel">
+            <i alt="Menu" class="fi fi-rr-apps MenuBoton" @click="ShowMenu"/>
+            <!-- <span class="MenuBoton" @click="ShowMenu"></span> -->
+            {{pageName}}
+        </div>
+        <div id="Menu" class="MenuRaiz" :style="{left: (visible?'0':'-225px')}" >
+            <div class="MenuContenedor" >
+                <div class="MenuLista">
+                    <div class="MenuLabel" v-for="accion in acciones" :key="accion.IdMenu" @click="NavegationTo(accion.TxPath)">
+                        {{accion.TxName}}
+                    </div>
                 </div>
-            </div>
-            <div class="MenuInfo">
-                <img class="MenuIcon" alt="Logo" src="../assets/logo.png">
-                <span style="text-align: right;">Versión: {{version}}</span>
+                <div class="MenuInfo">
+                    <img class="MenuIcon" alt="Logo" src="../assets/logo.png">
+                    <span style="text-align: right;">Versión: {{version}}</span>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </template>
 
 <script>
@@ -90,6 +90,7 @@ export default {
     left: 10px;
     font-size: 30px;
     color: white;
+    cursor: pointer;
 }
 .MenuHeader{
     color:black;

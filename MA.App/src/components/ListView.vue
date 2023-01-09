@@ -5,7 +5,16 @@
             :fields="listFields"
             :selectable="selectable"
             :select-mode="selectMode"
-            @row-selected="rowSelected"></b-table>
+            :busy="isBusy"
+            head-variant="dark"
+            @row-selected="rowSelected">
+            <template #table-busy>
+                <div class="text-center my-2">
+                <b-spinner class="align-middle" style="margin-right: 5px;"></b-spinner>
+                <strong>Loading...</strong>
+                </div>
+            </template>
+        </b-table>
   </div>
 </template>
 
@@ -22,6 +31,10 @@ export default {
         selectMode: {
             type: String,
             default: "single"
+        },
+        isBusy: {
+            type: Boolean,
+            default: false
         }
     },
 
@@ -68,7 +81,7 @@ export default {
         },
         rowSelected: function(row){
             // TODO: No pensado para múltiples filas
-            if (this.objList[row[0].RowId]){
+            if (this.objList && row[0] && this.objList[row[0].RowId]){
                 this.$emit('row-selected', this.objList[row[0].RowId]);
             }
         }

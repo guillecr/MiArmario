@@ -1,9 +1,21 @@
 <template>
     <div id="PagMisPrendas">
+        <dlg-dynamic-form :style="{display:(chShowDlgClothes)?'':'none'}"
+            idForm="FORM_CLOTHES_EDIT"
+            :nuPosXInit="100"
+            :nuPosYInit="100"
+            txTitle="Prenda"
+            :objFrom="objSelectClothes"
+            @close="chShowDlgClothes = false"
+            @finalize="saveClothes"
+        />
         <b-form-select v-model="idArmario" :options="listArmarios"></b-form-select>
         <b-jumbotron id="PagMisPrendasJumnotron" :header="objArmario.TxName" :lead="objArmario.TxDescription">
         </b-jumbotron>
-        <listcards :list="listPrendas" key="IdPrenda"></listcards>
+        <listcards
+         :list="listPrendas" 
+         key="IdPrenda"
+         @row-selected="showClothes"></listcards>
     </div>
 </template>
 <style scoped>
@@ -22,38 +34,26 @@
     }
 </style>
 <script>
-import tool from "../tools";
-import listcards from "../components/ListCards.vue";
 import tools from "../tools";
+import listcards from "../components/ListCards.vue";
+import SocketEmit from "../SocketEmit";
+import DlgDynamicForm from '../components/DlgDynamicForm.vue';
 
 export default {
     components: {
-        listcards
-    },
-    sockets: {
-        PagMisPrendasGetListArmariosResponse(listArmarios){
-            this.listArmarios = listArmarios;
-            if (!this.idArmario){
-                this.idArmario = this.listArmarios[0].value;
-            }
-        },
-        PagMisPrendasGetInfoArmario(response){
-            this.objArmario = response.objArmario;
-        },
-        PagMisPrendasGetInfoPrenda(response){
-            this.listPrendas.push(response.ObjPrenda);
-        },
-        PagMisPrendasGetInfoPrendaAllResponse(response){
-            console.log(response);
-        }
+        listcards,
+        DlgDynamicForm
     },
     data(){
         return {
+            sEmit: new SocketEmit(this.$socket, this.sockets, 'PagMisPrendas'),
             idArmario:null,
             txArmario:null,
             listPrendas:[],
             objArmario:{},
             listArmarios: [],
+            chShowDlgClothes: false,
+            objSelectClothes: {},
             serviceName:"PagMisPrendas"
         }
     },
@@ -62,24 +62,60 @@ export default {
             if (newValue){
                 this.listPrendas = [];
                 var cm = this;
-                tool.emitCall(this, 'GetInfo', this.idArmario, function(response){
+                this.sEmit.emitCall( 'GetInfo', this.idArmario, function(response){
                     cm.objArmario = response.objArmario;
                     cm.listPrendas = response.lstPrenda;
                 });
             }
         }
     },
+    methods:{
+        showClothes(row){
+            var cm = this;
+            this.sEmit.emitCall('GetInfoPrenda', row.IdPrenda, function(response){
+                if (response) {
+                    cm.objSelectClothes = response;
+                    cm.chShowDlgClothes = true;
+                }
+            });
+        },
+        saveClothes(frm){
+            var cm = this;
+            this.sEmit.emitCall('SavePrenda', frm, function(response){
+                var msg = "Error en el guardado";
+                if (response) {
+                    msg = "Guardado correctamente"
+                }
+                cm.$bvToast.toast(msg, {
+                    title: 'Guardado de ropa',
+                    autoHideDelay: 5000,
+                    appendToast: true
+                });
+
+                cm.objSelectClothes = {};
+                cm.chShowDlgClothes = false;
+                cm.refreshClothes();
+            });
+        },
+        refreshClothes(){
+            var cm = this;
+            this.sEmit.emitCall( 'GetInfo', this.idArmario, function(response){
+                cm.objArmario = response.objArmario;
+                cm.listPrendas = response.lstPrenda;
+            });
+        }
+    },
     created(){
         var cm = this;
-        tools.emitCall(this, 'GetListArmarios', null, function(request){
+        this.sEmit.emitCall('GetListArmarios', null, function(request){
             cm.listArmarios = request;
             if (!cm.idArmario){
                 cm.idArmario = cm.listArmarios[0].value;
             }
         });
     },
-    async mounted(){
-        var idArmario = tool.getParamsURL('idArmario');
+    mounted(){
+        var idArmario = tools.getParamsURL('idArmario');
         if (idArmario) {
             this.idArmario = idArmario;
         }

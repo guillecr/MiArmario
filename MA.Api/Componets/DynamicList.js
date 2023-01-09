@@ -12,12 +12,14 @@ class DynamicList extends CallService {
         if (dList) {
             result = {defColumns:[], defButtons:[],selectable: true};
             // Campos
+            // TODO: Aplicar orden
             var params = new DBParams;
-            var lstFields = await DListFields.Find(accessDB, `AND CD_LIST = ${params.addParams(IdList)} AND NU_ORDER IS NOT NULL AND CH_ACTIVE = 1`, params);
+            var lstFields = await DListFields.Find(accessDB, `AND CD_LIST = ${params.addParams(IdList)} AND NU_ORDER IS NOT NULL AND CH_ACTIVE = 1 ORDER BY NU_ORDER`, params);
             
             // Botones
+            // TODO: Aplicar orden
             params = new DBParams;
-            var lstButtons = await DListButtons.Find(accessDB, `AND CD_LIST = ${params.addParams(IdList)} AND CH_ACTIVE = 1`, params);
+            var lstButtons = await DListButtons.Find(accessDB, `AND CD_LIST = ${params.addParams(IdList)} AND CH_ACTIVE = 1 ORDER BY NU_ORDER`, params);
 
             for (var indx in lstFields){
                 result.defColumns.push(lstFields[indx]);

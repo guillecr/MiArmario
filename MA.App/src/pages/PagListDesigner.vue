@@ -22,14 +22,23 @@
 
 <template>
   <div id="PagListDesigner">
-    <dlg-dynamic-form :style="{display:(chShowDlg)?'':'none'}"
+    <dlg-dynamic-form :style="{display:(chShowDlgFld)?'':'none'}"
         idForm="FORM_DLG_LIST_FIELD"
         :nuPosXInit="100"
         :nuPosYInit="1100"
-        txTitle="Prueba"
+        txTitle="Campo"
         :objFrom="objFieldList"
-        @close="chShowDlg = false"
+        @close="chShowDlgFld = false"
         @finalize="saveField"
+    />
+    <dlg-dynamic-form :style="{display:(chShowDlgBtn)?'':'none'}"
+        idForm="FORM_DLG_LIST_BUTTON"
+        :nuPosXInit="100"
+        :nuPosYInit="1100"
+        txTitle="Botón"
+        :objFrom="objButtonList"
+        @close="chShowDlgBtn = false"
+        @finalize="saveButton"
     />
     <div class="PagListDesignerListLists">
         <DynamicList
@@ -40,24 +49,30 @@
 
     <div class="PagGenericToggle">
         <span class="fi-rr-angle-left" onclick="document.getElementById('app').scrollIntoView(true);"></span>
-        <p>{{(listSelect)?listSelect.TxName:'Nuevo'}}</p>
+        <p>{{(idListSelect)?'Editar':'Nuevo'}}</p>
     </div>
 
     <div class="PagListDesignerForm" id="appDetail">
         <b-tabs content-class="mt-3">
-            <b-tab title="Formulario" active>
+            <b-tab title="Lista" active>
                 <DynamicForm 
-                    v-if="true"
                     idForm="FORM_D_LIST"
                     :objForm="objFormPag"
                     @save-list="saveList($event)"
                 />
             </b-tab>
-            <b-tab title="Campos" v-if="listSelect">
+            <b-tab title="Campos" :disabled="(idListSelect)?false:true">
                 <DynamicList
                     idList="LIST_D_LIST_FIELDS"
-                    :initFilter="{fltCdList: listSelect.IdList}"
+                    :initFilter="{fltCdList: idListSelect}"
                     @row-selected="showField"
+                ></DynamicList>
+            </b-tab>
+            <b-tab title="Botones" :disabled="(idListSelect)?false:true">
+                <DynamicList
+                    idList="LIST_D_LIST_BUTTONS"
+                    :initFilter="{fltCdList: idListSelect}"
+                    @row-selected="showButton"
                 ></DynamicList>
             </b-tab>
         </b-tabs>
@@ -71,8 +86,7 @@
 import DlgDynamicForm from '../components/DlgDynamicForm.vue';
 import DynamicForm from '../components/DynamicForm.vue';
 import DynamicList from '../components/DynamicList.vue';
-
-import tools from '../tools';
+import SocketEmit from '../SocketEmit';
 
 export default {
     components:{
@@ -82,38 +96,92 @@ export default {
     },
     data() {
         return {
+            sEmit: new SocketEmit(this.$socket, this.sockets, 'PagListDesigner'),
             objFormPag: {},
             listLoad: false,
-            listSelect: null,
+            idListSelect: null,
             serviceName: 'PagListDesigner',
             callBackDlg: null,
             objFieldList: {},
-            chShowDlg: false
+            objButtonList: {},
+            chShowDlgFld: false,
+            chShowDlgBtn: false
+        }
+    },
+    watch: {
+        idListSelect() {
+            var cm = this;
+            if (this.idListSelect){
+                this.sEmit.emitCall("GetListInfo", this.idListSelect, function(response){
+                    cm.objFormPag = response;
+                });
+            } else {
+                cm.objFormPag = {};
+            }
         }
     },
     methods:{
+        saveButton(button){
+            button.CdList = this.idListSelect;
+            var cm = this;
+            this.sEmit.emitCall('SaveButton', button, function(response){
+                var msg = "Error en el guardado";
+                if (response) {
+                    msg = "Guardado correctamente"
+                }
+                cm.$bvToast.toast(msg, {
+                    title: 'Guardado del botón',
+                    autoHideDelay: 5000,
+                    appendToast: true
+                });
+            });
+            this.chShowDlgBtn = false;
+        },
         saveField(field){
-            this.chShowDlg = false;
+            field.CdList = this.idListSelect;
+            var cm = this;
+            this.sEmit.emitCall('SaveField', field, function(response){
+                var msg = "Error en el guardado";
+                if (response) {
+                    msg = "Guardado correctamente"
+                }
+                cm.$bvToast.toast(msg, {
+                    title: 'Guardado del campo',
+                    autoHideDelay: 5000,
+                    appendToast: true
+                });
+            });
+            this.chShowDlgFld = false;
         },
         showField(row){
-            this.objFieldList = row;
-            this.chShowDlg = true;
+            var cm = this;
+            cm.objFieldList = {};
+            if (row.IdListField) {
+                this.sEmit.emitCall('GetFieldInfo', row.IdListField, function(response){
+                    debugger;
+                    cm.objFieldList = response;
+                });
+            }
+            this.chShowDlgFld = true;
+        },
+        showButton(row){
+            var cm = this;
+            cm.objButtonList = {};
+            if (row.IdListButton) {
+                this.sEmit.emitCall('GetButtonInfo', row.IdListButton, function(response){
+                    cm.objButtonList = response;
+                });
+            }
+            this.chShowDlgBtn = true;
         },
         setSelectedList(row){
-            if (row && row.IdList) {      
-                this.listSelect = row;
-                var cm = this;
-                tools.emitCall(this, "GetListInfo", this.listSelect.IdList, function(response){
-                    cm.objFormPag = response;
-                });
-                if (row) {
-                    document.getElementById("appDetail").scrollIntoView();
-                }
+            if (row) {      
+                this.idListSelect = row.IdList;
+                document.getElementById("appDetail").scrollIntoView();
             }
         },
         saveList(lst){
-            var cm = this;
-            tools.emitCall(this, "Save", lst, this.saveListResponse);
+            this.sEmit.emitCall("Save", lst, this.saveListResponse);
         },
         saveListResponse(response) {
             var msg = "Error en el guardado";

@@ -6,6 +6,7 @@ class RegDB{
     constructor(){}
 
     static ListFields = {};
+
     /**
      * Método para obtener un diccionario de las ID con sus valores del objeto
      * @returns Colección de IDs con sus valores
@@ -54,6 +55,9 @@ class RegDB{
             var column = field.TxColumnName;
             if (field.CdType == 'Boolean'){
                 this[camp] = !!source[column];
+            } else if (field.CdType == 'Date'){
+                var dateC = new Date(source[column]);
+                this[camp] = dateC.toISOString().substring(0,19);
             } else {
                 this[camp] = source[column];
             }

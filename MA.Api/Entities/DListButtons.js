@@ -2,7 +2,7 @@ const RegDB = require('../Utils/RegDB');
 const Fields = require('../Utils/Fields');
 
 class DListButtons extends RegDB{
-    constructor(IdListButton, CdCreatedBy, CdModifiedBy, FhCreated, FhModified, CdList, TxLabel, TxAction, TxStyle, ChActive, CdVariant){
+    constructor(IdListButton, CdCreatedBy, CdModifiedBy, FhCreated, FhModified, CdList, TxLabel, TxAction, TxStyle, ChActive, CdVariant, NuOrder){
         super();
         this.IdListButton = IdListButton;
         this.CdCreatedBy = CdCreatedBy;
@@ -15,6 +15,7 @@ class DListButtons extends RegDB{
         this.TxStyle = TxStyle;
         this.ChActive = ChActive;
         this.CdVariant = CdVariant;
+        this.NuOrder = NuOrder;
     };
 
     static TxTable = 'D_LIST_BUTTONS';
@@ -31,6 +32,7 @@ class DListButtons extends RegDB{
         TxStyle: new Fields('TX_STYLE', 'String', null , null),
         ChActive: new Fields('CH_ACTIVE', 'Boolean', null, null),
         CdVariant: new Fields('CD_VARIANT', 'String', null , null),
+        NuOrder: new Fields('NU_ORDER', 'Number', null , null)
     };
 }
 

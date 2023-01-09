@@ -11,15 +11,17 @@
 
 <script>
 
-import tool from "../tools";
 import DynamicForm from '../components/DynamicForm.vue';
-import tools from "../tools";
+import SocketEmit from '../SocketEmit';
+import tools from '../tools';
+
 export default {
   components:{
     DynamicForm
   },
   data: function(){
     return {
+      sEmit: new SocketEmit(this.$socket, this.sockets, 'PagMisPrendas'),
       serviceName:"PagMisPrendas",
       objPrenda:{},
       objFormPag:{
@@ -30,12 +32,12 @@ export default {
     }
   },
   mounted: function(){
-    this.idPrenda = tool.getParamsURL('idPrenda');
+    this.idPrenda = tools.getParamsURL('idPrenda');
     if (this.idPrenda == null){
       this.idPrenda = 1;
     } 
     var cm = this;
-    tools.emitCall(this, "GetInfoPrenda", this.idPrenda, function(response) {
+    this.sEmit.emitCall("GetInfoPrenda", this.idPrenda, function(response) {
       cm.objPrenda = response;
     });
   }
