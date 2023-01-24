@@ -23,6 +23,7 @@ class DPrendas extends RegDB{
     static ListFields = {
         IdPrenda: new Fields('ID_PRENDA','Number' ,'PK' , null),
         TxName: new Fields('TX_NAME', 'String', null , null),
+        CdType: new Fields('CD_TYPE', 'Number', null , null),
         CdState: new Fields('CD_STATE', 'Number', null , null),
         CdSubstate: new Fields('CD_SUBSTATE', 'Number', null, null),
         NuOrder: new Fields('NU_ORDER', 'Number', null, null),

@@ -2,10 +2,10 @@ const DMenus = require("../Entities/DMenus");
 const CallService = require("../Utils/CallService");
 
 class PagMenus extends CallService {
-    static async GetInfo(accessDB, idMenu){
+    static async GetInfo(accessDB, CdComponent){
         var menu = null;
-        if (idMenu) {
-            menu = await DMenus.Id(accessDB, idMenu);
+        if (CdComponent) {
+            menu = await DMenus.Id(accessDB, CdComponent);
         }
         return menu;
     }

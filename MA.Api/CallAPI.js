@@ -16,6 +16,7 @@ const DynamicList = require('./Componets/DynamicList');
 const PagListDesigner = require('./pages/PagListDesigner');
 const TokenManager = require('./Utils/TokenManager');
 const PagMenus = require('./pages/PagMenus');
+const PagGestionLiterales = require('./pages/PagGestionLiterales');
 
 
 class CallAPI {
@@ -121,7 +122,7 @@ class CallAPI {
         socket.on('getMenus', async () => {
             try {
                 var params = new DBParams;
-                var menus = await DMenus.Find(socket.accessDB, `AND ID_MENU IN (
+                var menus = await DMenus.Find(socket.accessDB, `AND CD_COMPONENT IN (
                         SELECT PM.CD_MENU
                         FROM R_PROFILES_MENUS PM
                             ,R_PROFILES_USERS PU
@@ -162,6 +163,7 @@ class CallAPI {
         DynamicList.createCalls(socket);
         PagListDesigner.createCalls(socket);
         PagMenus.createCalls(socket);
+        PagGestionLiterales.createCalls(socket);
     }
 
 

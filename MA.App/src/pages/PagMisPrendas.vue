@@ -64,6 +64,7 @@ export default {
                 var cm = this;
                 this.sEmit.emitCall( 'GetInfo', this.idArmario, function(response){
                     cm.objArmario = response.objArmario;
+                    response.lstPrenda.push({TxName:'Nuevo'});
                     cm.listPrendas = response.lstPrenda;
                 });
             }
@@ -72,12 +73,18 @@ export default {
     methods:{
         showClothes(row){
             var cm = this;
-            this.sEmit.emitCall('GetInfoPrenda', row.IdPrenda, function(response){
-                if (response) {
-                    cm.objSelectClothes = response;
-                    cm.chShowDlgClothes = true;
-                }
-            });
+            if (row.IdPrenda) {
+                // Editar prenda
+                this.sEmit.emitCall('GetInfoPrenda', row.IdPrenda, function(response){
+                    if (response) {
+                        cm.objSelectClothes = response;
+                        cm.chShowDlgClothes = true;
+                    }
+                });
+            } else {
+                cm.objSelectClothes = {};
+                cm.chShowDlgClothes = true;
+            }
         },
         saveClothes(frm){
             var cm = this;

@@ -17,7 +17,7 @@
                 class="mb-2"
                 @click="selectCart(elm)"
             >
-                <b-card-text>
+                <b-card-text v-if="elm.TxState">
                     Estado <b-badge>{{elm.TxState}}</b-badge>
                 </b-card-text>
             </b-card>

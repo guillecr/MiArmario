@@ -63,7 +63,7 @@ export default {
   methods: {
     setSelected(key){
         if (key){
-            this.keySelected = key.IdMenu;
+            this.keySelected = key.CdComponent;
             document.getElementById("appDetail").scrollIntoView();
         }
     },

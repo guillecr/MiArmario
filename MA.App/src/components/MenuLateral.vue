@@ -14,7 +14,7 @@
                 </div>
                 <div class="MenuInfo">
                     <img class="MenuIcon" alt="Logo" src="../assets/logo.png">
-                    <span style="text-align: right;">Versión: {{version}}</span>
+                    <span class="MenuVersion">Versión: {{version}}</span>
                 </div>
             </div>
         </div>
@@ -136,16 +136,21 @@ export default {
     bottom: 0;
     padding: 10px;
     margin: 5px;
-    background-color: #8debe2;
+    /* background-color: #8debe2; */
     font-size: 10px;
-    border: 1px solid black;
-    border-radius: 4px;
+    /* border: 1px solid black;
+    border-radius: 4px; */
     right: 0;
     left: 0;
     color: black;
 }
+.MenuVersion{
+    display: block;
+    text-align: right;
+}
 .MenuIcon{
     width: 100%;
+    border-radius: 5px;
 }
 a {
     color:white;
