@@ -267,7 +267,7 @@
             <label class="DynamicFormLabel"
                 v-if="elm.CdType != 'BTN'"
                 :style="{width: elm.NuWidthLabel + 'px'
-                    ,display: (elm.CdType == 'MULTILINE')?'block':''}">
+                    ,display: (elm.CdType == 'MULTILINE' || elm.CdType == 'IMPORTFILE')?'block':''}">
                 {{elm.TxLabel}}
             </label>
             <div class="DynamicFormResizeLabel"
@@ -332,6 +332,17 @@
                 :style="{height:(elm.NuHeight - 2 * gridSizeY) + 'px'}"
                 :disabled="calcDisabled(elm)"
                 v-model="objForm[elm.CdField]" />
+            <b-form-file 
+                v-if="elm.CdType=='IMPORTFILE'"
+                :state="Boolean(objForm[elm.CdField])"
+                size="sm"
+                :style="{width:elm.NuWidth + 'px', 'text-align':'left'}"
+                :disabled="calcDisabled(elm)"
+                placeholder="Añadir fichero"
+                drop-placeholder="Eliminar?"
+                v-model="objForm[elm.CdField]"
+                @change="readFile($event, elm)"
+            />
 
             <div class="DynamicFormMove"
                 v-if="adminMode && formEdit"
@@ -342,7 +353,8 @@
                     elm.CdType == 'TEXT' ||
                     elm.CdType == 'LST' ||
                     elm.CdType == 'BTN' ||
-                    elm.CdType == 'MULTILINE'
+                    elm.CdType == 'MULTILINE' ||
+                    elm.CdType == 'IMPORTFILE'
                 )"
                 @mousedown="mouseDownSizeX(elm, $event, $event.target.parentElement)"
             ></div>
@@ -396,7 +408,8 @@ export default {
                 {value:'LST', text:'Lista'},
                 {value:'CHECK', text:'Check'},
                 {value:'BTN', text:'Botón'},
-                {value:'MULTILINE', text:'Multilinea'}
+                {value:'MULTILINE', text:'Multilinea'},
+                {value:'IMPORTFILE', text:'ImportFile'}
             ]
         }
     },
@@ -435,6 +448,17 @@ export default {
         }
     },
     methods: {
+        readFile(ev, ctr){
+            var elm = ev.target;
+            var cm = this;
+            var myFile = elm.files[0];
+            var fileName = myFile.name;
+            var reader = new FileReader();
+            reader.addEventListener('load', function(e){
+                cm.objForm[ctr.CdField] = {Name:fileName, value:e.target.result};
+            });
+            reader.readAsDataURL(myFile);
+        },
         getCtrl: function(IdFormField){
             for (var i in this.ctrls){
                 if (this.ctrls[i].IdFormField == IdFormField) {

@@ -111,6 +111,7 @@ class RegDB{
      * @returns Promesa con el resultado de la busqueda
      */
     static Id(accessDB, idValue){
+        // TODO: Trabaja por la posición del parámetro del constructor en vez de buscar la PK
         var reg = new this(idValue);
         return reg.Read(accessDB);
     }
@@ -191,7 +192,7 @@ class RegDB{
     Upset(accessDB){
         var cm = this;
         return new Promise( async(resolve, reject) => {
-            if (await this.Update(accessDB) == 0) {
+            if (this.getId() || await this.Update(accessDB) == 0) {
                 await this.Insert(accessDB);
             }
             resolve(this.getId());

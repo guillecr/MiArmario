@@ -4,6 +4,7 @@ const ExtImgs = require('../Entities/ExtImgs');
 
 const DBParams = require('../Utils/DBParamas');
 const CallService = require('../Utils/CallService');
+const RPrendasImgs = require('../Entities/RPrendasImgs');
 
 class PagMisPrendas extends CallService {
     static async GetInfo(accessDB, idArmario){
@@ -16,9 +17,11 @@ class PagMisPrendas extends CallService {
             var prenda = listPrendas[index];
             var params = new DBParams;
             var listImg = await ExtImgs.Find(accessDB,`AND ID_IMG IN (SELECT R.CD_IMG FROM R_PRENDAS_IMGS R WHERE R.CD_PRENDA = ${prenda.IdPrenda})
+                AND CH_PRINCIPAL = 1
                 AND CH_ACTIVE = 1`, params);
             if (listImg && listImg.length > 0){
-                listPrendas[index].BiImg = 'data:image/jpeg;base64, ' + listImg[0].BiStream;
+                listPrendas[index].BiImg = 'data:application/octet-stream;base64, ' + listImg[0].BiStream;
+                listPrendas[index].CdImg = listImg[0].IdImg;
             }
         }
         return {"objArmario": armario, "lstPrenda": listPrendas};
@@ -37,16 +40,42 @@ class PagMisPrendas extends CallService {
     static async GetInfoPrenda(accessDB, idPrenda) {
         return await DPrendas.Id(accessDB, idPrenda);
     }
-    
+
     static async SavePrenda(accessDB, prenda){
         var prendaDb = new DPrendas;
         prendaDb.setObject(prenda);
         var response;
         if (prendaDb.IdPrenda) {
-            response = prendaDb.Update(accessDB);
+            response = await prendaDb.Update(accessDB);
         } else {
-            response = prendaDb.Insert(accessDB);
+            response = await prendaDb.Insert(accessDB);
         }
+
+        if (prenda.ObjImg){
+            prenda.ObjImg.value = prenda.ObjImg.value.split(',')[1];
+            var params = new DBParams;
+            var listImg = await ExtImgs.Find(accessDB,`AND ID_IMG IN (SELECT R.CD_IMG FROM R_PRENDAS_IMGS R WHERE R.CD_PRENDA = ${prenda.IdPrenda})
+                AND CH_PRINCIPAL = 1
+                AND CH_ACTIVE = 1`, params);
+            
+            if (listImg && listImg.length > 0) {
+                var img = listImg[0];
+                img.BiStream = prenda.ObjImg.value;
+                img.Update(accessDB);
+            } else {
+                var img = new ExtImgs();
+                img.ChActive = true;
+                img.ChPrincipal = true;
+                img.BiStream = prenda.ObjImg.value;
+                img.IdImg = await img.Insert(accessDB);
+                var rImgPrenda = new RPrendasImgs();
+                rImgPrenda.CdImg = img.IdImg;
+                rImgPrenda.CdPrenda = prendaDb.IdPrenda;
+                rImgPrenda.ChActive = true;
+                await rImgPrenda.Insert(accessDB);
+            }
+        }
+        
         return response;
     }
 }
