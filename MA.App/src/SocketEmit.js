@@ -34,6 +34,7 @@ class SocketEmit {
         var timpeUnsubscribe = setTimeout(function() {
             console.log(`Llamada '${serviceNameFull}.${idResponseEvent}' perdida`);
             cm.lstSocket.unsubscribe(`${serviceNameFull}.${idResponseEvent}.Response`);
+            callBack(false);
         }, 5000);
     }
 }

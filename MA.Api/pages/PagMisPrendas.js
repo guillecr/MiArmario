@@ -41,6 +41,13 @@ class PagMisPrendas extends CallService {
         return await DPrendas.Id(accessDB, idPrenda);
     }
 
+    static async DeletePrenda(accessDB, idPrenda){
+        var prendaDb = await DPrendas.Id(accessDB, idPrenda);
+        prendaDb.ChActive = false;
+        var result = await prendaDb.Update(accessDB);
+        return result == 1;
+    }
+
     static async SavePrenda(accessDB, prenda){
         var prendaDb = new DPrendas;
         prendaDb.setObject(prenda);
@@ -48,13 +55,14 @@ class PagMisPrendas extends CallService {
         if (prendaDb.IdPrenda) {
             response = await prendaDb.Update(accessDB);
         } else {
+            prendaDb.ChActive = true;
             response = await prendaDb.Insert(accessDB);
         }
 
         if (prenda.ObjImg){
             prenda.ObjImg.value = prenda.ObjImg.value.split(',')[1];
             var params = new DBParams;
-            var listImg = await ExtImgs.Find(accessDB,`AND ID_IMG IN (SELECT R.CD_IMG FROM R_PRENDAS_IMGS R WHERE R.CD_PRENDA = ${prenda.IdPrenda})
+            var listImg = await ExtImgs.Find(accessDB,`AND ID_IMG IN (SELECT R.CD_IMG FROM R_PRENDAS_IMGS R WHERE R.CD_PRENDA = ${prendaDb.IdPrenda})
                 AND CH_PRINCIPAL = 1
                 AND CH_ACTIVE = 1`, params);
             

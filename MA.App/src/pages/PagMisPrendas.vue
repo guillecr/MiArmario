@@ -2,19 +2,21 @@
     <div id="PagMisPrendas">
         <dlg-dynamic-form :style="{display:(chShowDlgClothes)?'':'none'}"
             idForm="FORM_CLOTHES_EDIT"
-            :nuPosXInit="100"
-            :nuPosYInit="100"
+            :nuPosXInit="nuDlgPosX"
+            :nuPosYInit="nuDlgPosY"
             txTitle="Prenda"
             :objFrom="objSelectClothes"
             @close="chShowDlgClothes = false"
+            @delete="deleteClothes"
             @finalize="saveClothes"
         />
         <b-form-select v-model="idArmario" :options="listArmarios"></b-form-select>
         <b-jumbotron id="PagMisPrendasJumnotron" :header="objArmario.TxName" :lead="objArmario.TxDescription">
         </b-jumbotron>
         <listcards
-         :list="listPrendas" 
-         key="IdPrenda"
+         :list="listPrendas"
+         nameNew="Añadir"
+         Cdkey="IdPrenda"
          @row-selected="showClothes"></listcards>
     </div>
 </template>
@@ -54,7 +56,9 @@ export default {
             listArmarios: [],
             chShowDlgClothes: false,
             objSelectClothes: {},
-            serviceName:"PagMisPrendas"
+            serviceName:"PagMisPrendas",
+            nuDlgPosX: 100,
+            nuDlgPosY: 100
         }
     },
     watch: {
@@ -64,14 +68,35 @@ export default {
                 var cm = this;
                 this.sEmit.emitCall( 'GetInfo', this.idArmario, function(response){
                     cm.objArmario = response.objArmario;
-                    response.lstPrenda.push({TxName:'Nuevo'});
+                    //response.lstPrenda.push({TxName:'Nuevo'});
                     cm.listPrendas = response.lstPrenda;
                 });
             }
         }
     },
     methods:{
-        showClothes(row){
+        deleteClothes(IdPrenda){
+            var cm = this;
+            this.sEmit.emitCall('DeletePrenda', IdPrenda, function(response){
+                var msg = "Error en el eliminado";
+                if (response) {
+                    msg = "Eliminado correctamente"
+                }
+                cm.$bvToast.toast(msg, {
+                    title: 'Eliminar ropa',
+                    autoHideDelay: 5000,
+                    appendToast: true
+                });
+
+                cm.objSelectClothes = {};
+                cm.chShowDlgClothes = false;
+                cm.refreshClothes();
+            });
+        },
+        showClothes(event){
+            var row = event.row;
+            this.nuDlgPosX = event.event.pageX;
+            this.nuDlgPosY = event.event.pageY;
             var cm = this;
             if (row.IdPrenda) {
                 // Editar prenda

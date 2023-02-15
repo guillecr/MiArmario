@@ -53,6 +53,8 @@
             :objForm="objFrom"
             @close="$emit('close')"
             @finalize="$emit('finalize',$event)"
+            @delete="$emit('delete', $event)"
+            @eventFrm="eventFrm"
         />
     </div>
 </template>
@@ -99,6 +101,11 @@
             }
         },
         methods: {
+            eventFrm(ev){
+                if (ev.name){
+                    this.$emit(ev.name, ev.value);
+                }
+            },
             mouseDownMove: function (ev){
                 this.posXRef = this.nuPosX - ev.clientX;
                 this.posYRef = this.nuPosY - ev.clientY;

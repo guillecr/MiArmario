@@ -11,12 +11,17 @@ class DBParams{
      */
     addParams(param, type, name){
         var nameParam = name || "$PARAM" + Object.keys(this.listParams).length;
+        if (!type) {
+            type = typeof param;
+        }
+        type = type.toUpperCase();
+        
         if (!param){
-            if (type == 'String'){
+            if (type == 'STRING'){
                 param = '';
             // } else if (type == 'Date') {
             //     param = param.getUTCMilliseconds();
-            } else if (type == 'Boolean'){
+            } else if (type == 'BOOLEAN'){
                 param = false; // TODO: Poner false lleva el campo de BD a NULL. Valorar forzar el valor 0
             } else {
                 param = null; // Los campos vacios serán cadenas vacias
