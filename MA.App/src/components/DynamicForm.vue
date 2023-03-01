@@ -97,6 +97,9 @@
         background-color: white;
         z-index: 100;
     }
+    .custom-select:disabled {
+        color: black; /* Texto negro en las listas cuando están desativadas */
+    }
 
 </style>
 
@@ -322,6 +325,7 @@
                 v-if="elm.CdType=='LST'"
                 type="text"
                 :options="getListFill(elm)"
+                :disabled="calcDisabled(elm)"
                 size="sm"
                 :style="{width:elm.NuWidth + 'px'}"
                 v-model="objForm[elm.CdField]" />
@@ -418,8 +422,11 @@ export default {
             var nuHeight = 0;
             for (const elm in this.ctrls) {
                 var ctrl = this.ctrls[elm];
+                if (ctrl.CdType == 'IMPORTFILE'){
+                    ctrl.height = 78;
+                }
 
-                if (ctrl.NuPosY + (ctrl.NuHeight || 26) > nuHeight) { // El tamaño mínimo de los controles es 26
+                if (this.calcVisibility(ctrl) && ctrl.NuPosY + (ctrl.NuHeight || 26) > nuHeight) { // El tamaño mínimo de los controles es 26
                     nuHeight = ctrl.NuPosY + (ctrl.NuHeight || 26);
                 }
             }
@@ -496,6 +503,7 @@ export default {
                 return true;
             }
             if (ctrl && ctrl.TxVisible){
+                var frm = this.objForm;
                 return !!this.calcEval(ctrl.TxVisible);
             }
             return false;
@@ -505,6 +513,7 @@ export default {
                 return true;
             }
             if (ctrl && typeof ctrl.TxDisabled != 'undefined') {
+                var frm = this.objForm;
                 return !!this.calcEval(ctrl.TxDisabled);
             }
             return true;

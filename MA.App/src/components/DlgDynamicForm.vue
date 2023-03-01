@@ -84,6 +84,14 @@
             txTitle: String,
             callBack: Function,
         },
+        watch:{
+            nuPosXInit: function(newValue){
+                this.nuPosX_ = newValue;
+            },
+            nuPosYInit: function(newValue){
+                this.nuPosY_ = newValue;
+            }
+        },
         computed:{
             nuPosX() {
                 return this.nuPosX_ || this.nuPosXInit;

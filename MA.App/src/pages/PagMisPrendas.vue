@@ -10,29 +10,52 @@
             @delete="deleteClothes"
             @finalize="saveClothes"
         />
-        <b-form-select v-model="idArmario" :options="listArmarios"></b-form-select>
-        <b-jumbotron id="PagMisPrendasJumnotron" :header="objArmario.TxName" :lead="objArmario.TxDescription">
+        <div class="PagMisPrendasListArmarios">
+            Mis armarios
+            <b-list-group>
+                <b-list-group-item v-for="elm in listArmarios" :key="elm.value"
+                    @click="idArmario=elm.value" 
+                    :active="elm.value == idArmario">{{elm.text}}
+                </b-list-group-item>
+            </b-list-group>
+        </div>
+        <b-jumbotron id="PagMisPrendasJumnotron" 
+            :header="objArmario.TxName" 
+            :lead="objArmario.TxDescription">
         </b-jumbotron>
-        <listcards
-         :list="listPrendas"
-         nameNew="Añadir"
-         Cdkey="IdPrenda"
-         @row-selected="showClothes"></listcards>
+        <listcards class="PagMisPrendasListPrendas"
+            :list="listPrendas"
+            nameNew="Añadir"
+            Cdkey="IdPrenda"
+            @row-selected="showClothes">
+        </listcards>
     </div>
 </template>
 <style scoped>
-    #PagMisPrendas{
+    /* #PagMisPrendas{
         width: 90vw;
         margin-left: 5vw;
+    } */
+    .PagMisPrendasListPrendas{
+        margin-left: 220px;
     }
     #PagMisPrendasJumnotron{
         background-color: transparent;
         padding-top: 20px;
         padding-bottom: 20px;
     }
-    #PagMisPrendasCardsPrendas{
+    /* #PagMisPrendasCardsPrendas{
         float: left;
         margin-right: 5px;
+    } */
+    .PagMisPrendasListArmarios{
+        position: relative;
+        top:5px;
+        left: 0;
+        width: 200px;
+        padding: 10px;
+        float: left;
+
     }
 </style>
 <script>
