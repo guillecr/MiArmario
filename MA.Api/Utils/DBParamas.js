@@ -23,6 +23,8 @@ class DBParams{
             //     param = param.getUTCMilliseconds();
             } else if (type == 'BOOLEAN'){
                 param = false; // TODO: Poner false lleva el campo de BD a NULL. Valorar forzar el valor 0
+            } else if (type == 'NUMBER'){
+                // No modificamos el valor, si es 0 o si es nulo
             } else {
                 param = null; // Los campos vacios serán cadenas vacias
             }

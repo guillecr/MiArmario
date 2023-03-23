@@ -18,7 +18,7 @@ const connDB = function(UrlDB){
     console.log('Conexión a la base de datos...');
     db = new sqlite3.Database(UrlDB, (err) => {
         if (err) {
-        return console.error(err.message);
+            return console.error(err.message);
         }
         console.log('Conectado a la base de datos');
     });
@@ -32,7 +32,7 @@ const upServer = function(HttpPort, KeyUrl, CertUrl){
     server = http.createServer(app);
     io = new Server(server);
     server.listen(HttpPort, () => {
-        console.log("Server running on port %PORT%".replace("%PORT%", PARAMS.HTTP_PORT))
+        console.log("Server arrancado en el puerto %PORT%".replace("%PORT%", PARAMS.HTTP_PORT))
     });
 
     // SERVIDOR HTTPS

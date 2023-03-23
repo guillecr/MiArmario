@@ -158,7 +158,6 @@ export default {
             cm.objFieldList = {};
             if (row.IdListField) {
                 this.sEmit.emitCall('GetFieldInfo', row.IdListField, function(response){
-                    debugger;
                     cm.objFieldList = response;
                 });
             }

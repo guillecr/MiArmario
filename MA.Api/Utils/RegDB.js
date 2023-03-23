@@ -14,7 +14,7 @@ class RegDB{
     getId(){
         var dicIDs = {};
         for(var i in this.constructor.ListFields){
-            if (this.constructor.ListFields[i].CdUsing == 'PK'){
+            if (this.constructor.ListFields[i].CdUsing == 'PK' && this[i]){
                 dicIDs[i] = this[i];
             }
         }
@@ -192,7 +192,7 @@ class RegDB{
     Upset(accessDB){
         var cm = this;
         return new Promise( async(resolve, reject) => {
-            if (this.getId() || await this.Update(accessDB) == 0) {
+            if (Object.keys(this.getId()).length == 0 || await this.Update(accessDB) == 0) {
                 await this.Insert(accessDB);
             }
             resolve(this.getId());

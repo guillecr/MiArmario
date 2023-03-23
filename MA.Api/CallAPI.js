@@ -9,15 +9,19 @@ const PagMisPrendas = require("./pages/PagMisPrendas");
 const PagLogin = require("./pages/PagLogin");
 const PagTest = require("./pages/PagTest");
 const PagFormDesigner = require('./pages/PagFormDesigner');
+const PagMenus = require('./pages/PagMenus');
+const PagGestionLiterales = require('./pages/PagGestionLiterales');
+const PagUsers = require('./pages/PagUsers');
+const PagPermissions = require('./pages/PagPermissions');
+const PagListDesigner = require('./pages/PagListDesigner');
+const PagArmarios = require('./pages/PagArmarios');
+
 
 // Componentes
 const DynamicForm = require('./Componets/DynamicForm');
 const DynamicList = require('./Componets/DynamicList');
-const PagListDesigner = require('./pages/PagListDesigner');
 const TokenManager = require('./Utils/TokenManager');
-const PagMenus = require('./pages/PagMenus');
-const PagGestionLiterales = require('./pages/PagGestionLiterales');
-
+const PagChangePw = require('./pages/PagChangePw');
 
 class CallAPI {
 
@@ -137,15 +141,6 @@ class CallAPI {
             }
         });
 
-        socket.on('createUser', async (user) => {
-            try {
-                var user = new DUsers(null, user.TxName, user.TxLogin);
-                await user.Insert(socket.accessDB);
-            } catch (ex) {
-                console.log('Error en createUser: ' + ex.message);
-            }
-        });
-
         socket.on('disconnect', () => {
             console.log((new Date()) + ' => Usuario desconectado');
         });
@@ -164,8 +159,11 @@ class CallAPI {
         PagListDesigner.createCalls(socket);
         PagMenus.createCalls(socket);
         PagGestionLiterales.createCalls(socket);
+        PagUsers.createCalls(socket);
+        PagPermissions.createCalls(socket);
+        PagArmarios.createCalls(socket);
+        PagChangePw.createCalls(socket);
     }
-
 
 }
 

@@ -21,12 +21,12 @@
                 img-alt="Card Image"
                 img-top
                 tag="article"
-                style="width: 25rem;"
+                style="width: 24rem;"
                 class="mb-2"
                 @click="selectCart($event, elm)"
             >
                 <b-card-text v-if="elm.TxState">
-                    Estado <b-badge>{{elm.TxState}}</b-badge>
+                    Estado <b-badge>{{elm.TxState}}</b-badge>/<b-badge>{{ elm.TxSubstate }}</b-badge>
                 </b-card-text>
             </b-card>
         </div>

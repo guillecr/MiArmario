@@ -1,16 +1,4 @@
 <style>
-.PagFormDesignerToggle {
-    margin: 2px;
-    height: 50px;
-    background-color: rgb(74, 144, 177);
-}
-.PagFormDesignerToggle p {
-    text-align: left;
-    padding-top: 8px;
-    padding-left: 8px;
-    font-size: 25px;
-    color:white;
-}
 .PagFormDesignerTableForms {
     height: 96%;
     padding: 8px;

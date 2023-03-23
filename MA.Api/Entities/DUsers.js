@@ -23,7 +23,7 @@ class DUsers extends RegDB{
         TxName: new Fields('TX_NAME', 'String', null , null),
         TxPassword: new Fields('TX_PASSWORD', 'Number', null , null),
         TxLogin: new Fields('TX_LOGIN', 'String', null , null),
-        CdActive: new Fields('CH_ACTIVE', 'Boolean', null, null),
+        ChActive: new Fields('CH_ACTIVE', 'Boolean', null, null),
         FhCreated: new Fields('FH_CREATED', 'Date', 'IO', null),
         FhModified: new Fields('FH_MODIFIED', 'Date', null, null),
         CdModifiedBy: new Fields('CD_MODIFIED_BY', 'Number', null, null),

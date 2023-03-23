@@ -71,6 +71,11 @@
         width: 150px;
         left: 180px;
     }
+    @media (max-width: 485px) {
+        #LoginInForm {
+            left: 5px;
+        }
+    }
 </style>
 
 <script>

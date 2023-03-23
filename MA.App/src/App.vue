@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" style="font-size: 14px;">
     <menu-lateral
       :version="version"
       :appName="appName"
@@ -76,18 +76,19 @@ export default {
       if(!access){
         this.user = null;
         if (this.$route.name == 'Login'){
-          this.$bvToast.toast(`Usuario rechazado`, {
-            title: 'Error',
-            autoHideDelay: 5000,
-            appendToast: true
-          });
-        } else {
-          this.$bvToast.toast(`Sesión caducada`, {
-            title: 'Error',
+          this.$bvToast.toast(`Sin acceso`, {
+            title: 'Login',
             autoHideDelay: 5000,
             appendToast: true
           });
         }
+        //  else {
+        //   this.$bvToast.toast(`Sesión caducada`, {
+        //     title: 'Error',
+        //     autoHideDelay: 5000,
+        //     appendToast: true
+        //   });
+        // }
 
         if (this.$route.name != 'Login') {
           this.$router.push('/login');
@@ -95,7 +96,7 @@ export default {
       } else {
         this.user = access;
         if (this.$route.name == 'Login'){
-          this.$router.push('/');
+          this.$router.push('/init');
         }
       }
       this.$socket.emit('getMenus');
@@ -116,21 +117,22 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   padding-top: 54px;
   height: 100vh;
+  padding-bottom: 30px;
 }
 #banConnect {
   position: fixed;
   bottom: 0;
-  right: 0;
-  background-color: #2c3e50;
-  left: 0;
-  text-align: right;
-  color: white;
+  width: 100vw;
+  /* right: 0;
+  left: 0; */
   padding: 3px;
   padding-right: 7px;
+  text-align: right;
+  background-color: #2c3e50;
+  color: white;
   z-index: 100;
 }
 .view {

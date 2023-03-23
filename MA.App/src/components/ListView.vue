@@ -1,17 +1,22 @@
 <template>
     <div class="ListView">
-        <b-table hover 
+        <b-table 
+            class="mt-3"
             :items="listItems" 
             :fields="listFields"
             :selectable="selectable"
             :select-mode="selectMode"
             :busy="isBusy"
-            head-variant="dark"
+            striped
+            responsive
+            hover
+            sticky-header
+            style="max-height: 100%;"
             @row-selected="rowSelected">
             <template #table-busy>
                 <div class="text-center my-2">
-                <b-spinner class="align-middle" style="margin-right: 5px;"></b-spinner>
-                <strong>Loading...</strong>
+                    <b-spinner class="align-middle" style="margin-right: 5px;"></b-spinner>
+                    <strong>Loading...</strong>
                 </div>
             </template>
         </b-table>
@@ -40,18 +45,7 @@ export default {
 
     computed: {
         listFields() {
-            var result = [];
-            if (this.defColumns && this.defColumns.length){
-                for(var i = 0; i < this.defColumns.length; i++){
-                    var def = this.defColumns[i];
-                    result.push({
-                        key: def.CdFieldName,
-                        label: def.TxLabel,
-                        thStyle: def.TxStyle
-                    });
-                }
-            }
-            return result;
+            return this.defColumns || []
         },
         listItems() {
             var result = [];
@@ -60,8 +54,8 @@ export default {
                 var row = {};
                 row.RowId = i;
                 for(var indx in this.defColumns){
-                    var CdFieldName = this.defColumns[indx].CdFieldName;
-                    row[CdFieldName] = this.calValue(CdFieldName, elm);
+                    var key = this.defColumns[indx].key;
+                    row[key] = this.calValue(key, elm);
                 }
                 result.push(row);
             }

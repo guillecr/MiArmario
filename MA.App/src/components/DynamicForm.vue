@@ -1,9 +1,13 @@
 <style scoped>
     .DynamicFormDiv {
         position: relative;
+    }
+    .DynamicFormDivCtrl {
+        position: relative;
         /* left: 13px;
         top: 13px; */
-        width: 100vw;
+        width: 500px;
+        height: 26px;
     }
     .DynamicFormElement {
         position: absolute;
@@ -104,23 +108,18 @@
 </style>
 
 <template>
-    <div class="DynamicFormDiv"
-        :style="{
-            height:this.heightForm + 'px',
-            width:this.widthForm + 'px'
-        }"
-    >
+    <div Class="DynamicFormDiv">
         <b-form-checkbox v-if="adminMode"
             id="checkbox-edit"
-            style="position: absolute; top: 0; left: 400px; width: 50px;"
+            style="position: absolute; top: -50px; left: 400px; width: 50px;"
             v-model="formEdit"
             name="checkbox-edit"
             :value="true"
             :unchecked-value="false"
         >Editar</b-form-checkbox>
-        <b-btn v-if="formEdit" variant="success" class="FormButtom" style="position: absolute; top: 0; left: 500px; width: 70px;" @click="saveForm">Guardar</b-btn>
-        <b-btn v-if="formEdit" class="FormButtom" style="position: absolute; top: 0; left: 575px; width: 120px;" @click="addCtrl">Añadir control</b-btn>
-        <b-btn v-if="formEdit" variant="danger" class="FormButtom" style="position: absolute; top: 0; left: 700px; width: 120px;" @click="deleteCtrl">Eliminar control</b-btn>
+        <b-btn v-if="formEdit" variant="success" class="FormButtom" style="position: absolute; top: -50px; left: 500px; width: 70px;" @click="saveForm">Guardar</b-btn>
+        <b-btn v-if="formEdit" class="FormButtom" style="position: absolute; top: -50px; left: 575px; width: 120px;" @click="addCtrl">Añadir control</b-btn>
+        <b-btn v-if="formEdit" variant="danger" class="FormButtom" style="position: absolute; top: -50px; left: 700px; width: 120px;" @click="deleteCtrl">Eliminar control</b-btn>
 
         <!-- Caja de propiedades -->
         <div v-if="formEdit && ctrlActive && ctrlActive.length && ctrlActive[0]"
@@ -255,121 +254,129 @@
             </label>
         </div>
         <!-- Fin de caja de propiedades -->
+        
+        <div class="DynamicFormDivCtrl"
+            :style="{
+                height:this.heightForm + 'px',
+                width:this.widthForm + 'px',
+                boxShadow:(formEdit)?'5px 5px 5px 5px #9f9f9f':'',
+                marginLeft:(adminMode)? '10px':''
+            }">
+            <label class="DynamicFormElement" v-for="elm in ctrls" :key="elm.IdFormFields"
+                :style="{left:elm.NuPosX + 'px'
+                    ,top:elm.NuPosY + 'px'
+                    ,height:elm.NuHeight + 'px'
+                    ,width:(elm.CdType == 'MULTILINE')?elm.NuWidth + 'px':''
+                    ,display:(calcVisibility(elm)? '':'none')
+                    ,cursor: ((adminMode && formEdit)? 'all-scroll':'auto')}"
 
-        <label class="DynamicFormElement" v-for="elm in ctrls" :key="elm.IdFormFields"
-            :style="{left:elm.NuPosX + 'px'
-                ,top:elm.NuPosY + 'px'
-                ,height:elm.NuHeight + 'px'
-                ,width:(elm.CdType == 'MULTILINE')?elm.NuWidth + 'px':''
-                ,display:(calcVisibility(elm)? '':'none')
-                ,cursor: ((adminMode && formEdit)? 'all-scroll':'auto')}"
+                @click="selectCtrl(elm)"
+            >
 
-            @click="selectCtrl(elm)"
-        >
+                <label class="DynamicFormLabel"
+                    v-if="elm.CdType != 'BTN'"
+                    :style="{width: elm.NuWidthLabel + 'px'
+                        ,display: (elm.CdType == 'MULTILINE' || elm.CdType == 'IMPORTFILE')?'block':''}">
+                    {{elm.TxLabel}}
+                </label>
+                <div class="DynamicFormResizeLabel"
+                    v-if="adminMode && formEdit && (
+                        elm.CdType == 'TEXT' ||
+                        elm.CdType == 'DATE' ||
+                        elm.CdType == 'DATETIME' ||
+                        elm.CdType == 'LABEL' ||
+                        elm.CdType == 'LST' ||
+                        elm.CdType == 'CHECK'
+                    )"
+                    :style="{left:(elm.NuWidthLabel - 4) + 'px'}"
+                    @mousedown="mouseDownLabel(elm, $event, $event.target.parentElement)"
+                ></div>
 
-            <label class="DynamicFormLabel"
-                v-if="elm.CdType != 'BTN'"
-                :style="{width: elm.NuWidthLabel + 'px'
-                    ,display: (elm.CdType == 'MULTILINE' || elm.CdType == 'IMPORTFILE')?'block':''}">
-                {{elm.TxLabel}}
+                <b-btn class="FormButtom"
+                    v-if="elm.CdType=='BTN'"
+                    :disabled="calcDisabled(elm)"
+                    :style="{width:elm.NuWidth + 'px'}"
+                    @click="calcAction(elm.TxAction)"
+                >{{elm.TxLabel}}</b-btn>
+
+                <b-form-input class="DynamicFormElementText"
+                    v-if="elm.CdType=='TEXT'"
+                    type="text"
+                    :style="{width:elm.NuWidth + 'px'}"
+                    :disabled="calcDisabled(elm)"
+                    v-model="objForm[elm.CdField]"
+                />
+                <b-form-input class="DynamicFormElementDate"
+                    v-if="elm.CdType=='DATE'"
+                    type="date"
+                    :style="{width:NuWidthDate + 'px'}"
+                    :disabled="calcDisabled(elm)"
+                    v-model="objForm[elm.CdField]"
+                />
+                <b-form-input class="DynamicFormElementDatetime"
+                    v-if="elm.CdType=='DATETIME'"
+                    type="datetime-local"
+                    :style="{width:NuWidthDateTime + 'px'}"
+                    :disabled="calcDisabled(elm)"
+                    v-model="objForm[elm.CdField]"
+                />
+
+                <b-form-checkbox class="DynamicFormElementCheck"
+                    v-if="elm.CdType=='CHECK'"
+                    :disabled="calcDisabled(elm)"
+                    v-model="objForm[elm.CdField]"
+                ></b-form-checkbox>
+
+                <b-form-select class="DynamicFormElementList"
+                    v-if="elm.CdType=='LST'"
+                    type="text"
+                    :options="getListFill(elm)"
+                    :disabled="calcDisabled(elm)"
+                    size="sm"
+                    :style="{width:elm.NuWidth + 'px'}"
+                    v-model="objForm[elm.CdField]" />
+
+                <b-form-textarea class="DynamicFormElementMultiline"
+                    v-if="elm.CdType=='MULTILINE'"
+                    no-resize
+                    :style="{height:(elm.NuHeight - 2 * gridSizeY) + 'px'}"
+                    :disabled="calcDisabled(elm)"
+                    v-model="objForm[elm.CdField]" />
+                <b-form-file 
+                    v-if="elm.CdType=='IMPORTFILE'"
+                    :state="Boolean(objForm[elm.CdField])"
+                    size="sm"
+                    :style="{width:elm.NuWidth + 'px', 'text-align':'left'}"
+                    :disabled="calcDisabled(elm)"
+                    placeholder="Añadir fichero"
+                    drop-placeholder="Eliminar?"
+                    v-model="objForm[elm.CdField]"
+                    @change="readFile($event, elm)"
+                />
+
+                <div class="DynamicFormMove"
+                    v-if="adminMode && formEdit"
+                    @mousedown.stop="mouseDownMove(elm, $event, $event.target.parentElement)">
+                </div>
+                <div class="DynamicFormResizeX"
+                    v-if="adminMode && formEdit && (
+                        elm.CdType == 'TEXT' ||
+                        elm.CdType == 'LST' ||
+                        elm.CdType == 'BTN' ||
+                        elm.CdType == 'MULTILINE' ||
+                        elm.CdType == 'IMPORTFILE'
+                    )"
+                    @mousedown="mouseDownSizeX(elm, $event, $event.target.parentElement)"
+                ></div>
+                <div
+                    v-if="adminMode && formEdit && (
+                        elm.CdType == 'LABEL' ||
+                        elm.CdType == 'MULTILINE'
+                    )" class="DynamicFormResizeY"
+                    @mousedown="mouseDownSizeY(elm, $event, $event.target.parentElement)"
+                ></div>
             </label>
-            <div class="DynamicFormResizeLabel"
-                v-if="adminMode && formEdit && (
-                    elm.CdType == 'TEXT' ||
-                    elm.CdType == 'DATE' ||
-                    elm.CdType == 'DATETIME' ||
-                    elm.CdType == 'LABEL' ||
-                    elm.CdType == 'LST' ||
-                    elm.CdType == 'CHECK'
-                )"
-                :style="{left:(elm.NuWidthLabel - 4) + 'px'}"
-                @mousedown="mouseDownLabel(elm, $event, $event.target.parentElement)"
-            ></div>
-
-            <b-btn class="FormButtom"
-                v-if="elm.CdType=='BTN'"
-                :disabled="calcDisabled(elm)"
-                :style="{width:elm.NuWidth + 'px'}"
-                @click="calcAction(elm.TxAction)"
-            >{{elm.TxLabel}}</b-btn>
-
-            <b-form-input class="DynamicFormElementText"
-                v-if="elm.CdType=='TEXT'"
-                type="text"
-                :style="{width:elm.NuWidth + 'px'}"
-                :disabled="calcDisabled(elm)"
-                v-model="objForm[elm.CdField]"
-            />
-            <b-form-input class="DynamicFormElementDate"
-                v-if="elm.CdType=='DATE'"
-                type="date"
-                :style="{width:NuWidthDate + 'px'}"
-                :disabled="calcDisabled(elm)"
-                v-model="objForm[elm.CdField]"
-            />
-            <b-form-input class="DynamicFormElementDatetime"
-                v-if="elm.CdType=='DATETIME'"
-                type="datetime-local"
-                :style="{width:NuWidthDateTime + 'px'}"
-                :disabled="calcDisabled(elm)"
-                v-model="objForm[elm.CdField]"
-            />
-
-            <b-form-checkbox class="DynamicFormElementCheck"
-                v-if="elm.CdType=='CHECK'"
-                :disabled="calcDisabled(elm)"
-                v-model="objForm[elm.CdField]"
-            ></b-form-checkbox>
-
-            <b-form-select class="DynamicFormElementList"
-                v-if="elm.CdType=='LST'"
-                type="text"
-                :options="getListFill(elm)"
-                :disabled="calcDisabled(elm)"
-                size="sm"
-                :style="{width:elm.NuWidth + 'px'}"
-                v-model="objForm[elm.CdField]" />
-
-            <b-form-textarea class="DynamicFormElementMultiline"
-                v-if="elm.CdType=='MULTILINE'"
-                no-resize
-                :style="{height:(elm.NuHeight - 2 * gridSizeY) + 'px'}"
-                :disabled="calcDisabled(elm)"
-                v-model="objForm[elm.CdField]" />
-            <b-form-file 
-                v-if="elm.CdType=='IMPORTFILE'"
-                :state="Boolean(objForm[elm.CdField])"
-                size="sm"
-                :style="{width:elm.NuWidth + 'px', 'text-align':'left'}"
-                :disabled="calcDisabled(elm)"
-                placeholder="Añadir fichero"
-                drop-placeholder="Eliminar?"
-                v-model="objForm[elm.CdField]"
-                @change="readFile($event, elm)"
-            />
-
-            <div class="DynamicFormMove"
-                v-if="adminMode && formEdit"
-                @mousedown.stop="mouseDownMove(elm, $event, $event.target.parentElement)">
-            </div>
-            <div class="DynamicFormResizeX"
-                v-if="adminMode && formEdit && (
-                    elm.CdType == 'TEXT' ||
-                    elm.CdType == 'LST' ||
-                    elm.CdType == 'BTN' ||
-                    elm.CdType == 'MULTILINE' ||
-                    elm.CdType == 'IMPORTFILE'
-                )"
-                @mousedown="mouseDownSizeX(elm, $event, $event.target.parentElement)"
-            ></div>
-            <div
-                v-if="adminMode && formEdit && (
-                    elm.CdType == 'LABEL' ||
-                    elm.CdType == 'MULTILINE'
-                )" class="DynamicFormResizeY"
-                @mousedown="mouseDownSizeY(elm, $event, $event.target.parentElement)"
-            ></div>
-        </label>
+        </div>
     </div>
 </template>
 <script>
@@ -433,7 +440,7 @@ export default {
             return nuHeight;
         },
         widthForm() {
-            var nuWidth = 1000;
+            var nuWidth = 500;
             if (!this.adminMode){
                 nuWidth = 0;
                 for (const elm in this.ctrls) {
@@ -477,6 +484,15 @@ export default {
         getListFill: function(ctrl){
             if (ctrl.ListFill){
                 return ctrl.ListFill;
+            }
+        },
+        setListFill: function(CdField, lstFill){
+            for (var i = 0; i < this.ctrls; i++){
+                var ctrl = this.ctrls[i];
+                if (ctrl.CdField == CdField){
+                    ctrl.ListFill = lstFill;
+                    break;
+                }
             }
         },
         refreshListFill: function(ctrl){

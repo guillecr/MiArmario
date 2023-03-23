@@ -33,7 +33,8 @@ class DPrendas extends RegDB{
         CdCloset: new Fields('CD_CLOSET', 'Number', null, null),
         CdModifiedBy: new Fields('CD_MODIFIED_BY', 'Number', null, null),
         CdCreatedBy: new Fields('CD_CREATED_BY', 'Number', 'IO', null),
-        TxState: new Fields('(SELECT P.TX_DESCRIPTION FROM P_LITERAL_VALUES P WHERE P.ID_LITERAL_VALUE = D_PRENDAS.CD_STATE)', 'String', 'RO',null)
+        TxState: new Fields('(SELECT P.TX_DESCRIPTION FROM P_LITERAL_VALUES P WHERE P.ID_LITERAL_VALUE = D_PRENDAS.CD_STATE)', 'String', 'RO',null),
+        TxSubstate: new Fields('(SELECT P.TX_DESCRIPTION FROM P_LITERAL_VALUES P WHERE P.ID_LITERAL_VALUE = D_PRENDAS.CD_SUBSTATE)', 'String', 'RO',null)
     };
 }
 

@@ -22,7 +22,13 @@
     }
     .DlgDynamicFormFrm {
         position: relative;
-        margin: 15px;
+        margin: 5px 15px 15px 15px;
+    }
+    @media (max-width: 485px) {
+        .DlgDynamicForm{
+            /* top: 10px !important; */
+            left:0 !important;
+        }
     }
 </style>
 
@@ -86,9 +92,19 @@
         },
         watch:{
             nuPosXInit: function(newValue){
+                // Si el cambio de la posición Y está muy proximo al borde de la pantalla, se pintará el diálogo a la izquierda de la posición indicada
+                // TODO: La primera vez, al no está formado, no tiene anchura
+                var elm = document.getElementsByClassName("DlgDynamicForm")[0];
+                if (newValue + elm.clientWidth >= screen.width){
+                    newValue = newValue - elm.clientWidth;
+                }
                 this.nuPosX_ = newValue;
             },
             nuPosYInit: function(newValue){
+                var elm = document.getElementsByClassName("DlgDynamicForm")[0];
+                if (newValue + elm.clientHeight >= screen.height){
+                    newValue = newValue - elm.clientHeight;
+                }
                 this.nuPosY_ = newValue;
             }
         },

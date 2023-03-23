@@ -13,6 +13,10 @@ class DynamicForm extends CallService {
             if (elm.CdType == 'LST'){
                 var params = new DBParams
                 var cmd = new Commands(accessDB.linkDB, elm.TxSqlList, params);
+                if (cmd.sentencia.indexOf(" $userId")>0){
+                    // Añadimos el código de usuario
+                    cmd.sentencia = cmd.sentencia.replace("$userId", accessDB.user);
+                }
                 var result = await cmd.ejecutarSentencia();
                 elm.ListFill = [];
                 for (var indx in result){
@@ -59,11 +63,12 @@ class DynamicForm extends CallService {
     }
 
     static async GetListFill(accessDB, IdFormField){
+        // TODO: Sin servicio
         if (IdFormField) {
             var elm = await DFormFields.Id(accessDB, IdFormField);
             if (elm && elm.TxSqlList && elm.TxSqlList.startsWith("SELECT ")) {
                 // TODO: Permitir incluir un parámetro a sustituir para hacer listas dependientes
-                var params = new DBParams
+                var params = new DBParams                
                 var cmd = new Commands(accessDB.linkDB, elm.TxSqlList, params);
                 var result = await cmd.ejecutarSentencia();
                 var listFill = [];

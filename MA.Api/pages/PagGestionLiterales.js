@@ -9,7 +9,11 @@ class PagGestionLiterales extends CallService{
     static async Save(accessDB, literal){
         var literalDB = new PLiteralValues;
         literalDB.setObject(literal);
-        return await literalDB.Upset(accessDB);
+        if (literalDB.IdLiteralValue){
+            return await literalDB.Update(accessDB);
+        } else {
+            return await literalDB.Insert(accessDB);
+        }
     }
 }
 

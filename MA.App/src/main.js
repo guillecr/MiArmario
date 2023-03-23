@@ -9,7 +9,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import tool from "./tools";
 
-const urlServer = 'http://localhost:3000/miarmario/';
+const urlServer = 'http://192.168.1.46:3000/miarmario/';
 
 // var connection = new VueSocketIO({
 //   debug: true,

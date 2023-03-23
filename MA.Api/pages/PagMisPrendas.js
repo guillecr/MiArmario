@@ -2,17 +2,43 @@ const DPrendas = require('../Entities/DPrendas');
 const DClosets = require('../Entities/DClosets');
 const ExtImgs = require('../Entities/ExtImgs');
 
+const PLiteralValues = require('../Entities/PLiteralValues')
+
 const DBParams = require('../Utils/DBParamas');
 const CallService = require('../Utils/CallService');
 const RPrendasImgs = require('../Entities/RPrendasImgs');
 
 class PagMisPrendas extends CallService {
-    static async GetInfo(accessDB, idArmario){
+    static async GetInfo(accessDB, request){
+        var idArmario = request.idArmario;
+        var lstFltState;
+        var lstFltSubstate;
+        if (request.flt){
+            var lstFltState = request.flt.lstStates;
+            var lstFltSubstate = request.flt.lstSubstates; 
+        }
         var params = new DBParams;
         var armario = await DClosets.Id(accessDB, idArmario);
         params = new DBParams;
-        var listPrendas = await DPrendas.Find(accessDB,`AND CD_CLOSET = ${params.addParams(idArmario)}
-            AND CH_ACTIVE = 1`, params);
+        var where = `AND CD_CLOSET = ${params.addParams(idArmario)}
+AND CH_ACTIVE = 1`
+        var sep = "\nAND CD_STATE IN ("
+        if (lstFltState && lstFltState.length > 0) {
+            for (var i = 0; i < lstFltState.length; i++) {
+                where += sep + params.addParams(lstFltState[i]);
+                sep = ',';
+            }
+            where += ')';
+        }
+        var sep = "\nAND CD_SUBSTATE IN ("
+        if (lstFltSubstate && lstFltSubstate.length > 0) {
+            for (var i = 0; i < lstFltSubstate.length; i++) {
+                where += sep + params.addParams(lstFltSubstate[i]);
+                sep = ',';
+            }
+            where += ')';
+        }
+        var listPrendas = await DPrendas.Find(accessDB, where, params);
         for (var index in listPrendas){
             var prenda = listPrendas[index];
             var params = new DBParams;
@@ -27,12 +53,30 @@ class PagMisPrendas extends CallService {
         return {"objArmario": armario, "lstPrenda": listPrendas};
     }
 
+    static async GetFilters(accessDB){
+        var result = {
+            lstStates: [],
+            lstSubstates: []
+        };
+        var params = new DBParams;
+        var literalsState = await PLiteralValues.Find(accessDB, `AND CD_TYPE IN ('ESTADO_PRENDA', 'SUB_ESTADO_PRENDA')`, params)
+        for (var i = 0; i < literalsState.length; i++){
+            var literal = literalsState[i];
+            if (literal.CdType == 'ESTADO_PRENDA'){
+                result.lstStates.push(literal);
+            } else {
+                result.lstSubstates.push(literal);
+            }
+        }
+        return result;
+    }
+
     static async GetListArmarios(accessDB){
         var params = new DBParams;
         var listArmarios = await DClosets.Find(accessDB, `AND CD_USER = ${params.addParams(accessDB.user)}`, params);
         var response = [];
         for (var elm in listArmarios){
-            response.push({"value":listArmarios[elm].IdClosets, "text":listArmarios[elm].TxName});
+            response.push({"value":listArmarios[elm].IdCloset, "text":listArmarios[elm].TxName});
         }
         return response;
     }

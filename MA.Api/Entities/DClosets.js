@@ -2,9 +2,9 @@ const RegDB = require('../Utils/RegDB');
 const Fields = require('../Utils/Fields');
 
 class DClosets extends RegDB{
-    constructor(IdClosets, TxName, CdUser, TxDescription, ChActive, FhCreated, FhModified, CdCreatedBy, CdModifiedBy){
+    constructor(IdCloset, TxName, CdUser, TxDescription, ChActive, FhCreated, FhModified, CdCreatedBy, CdModifiedBy){
         super();
-        this.IdClosets = IdClosets;
+        this.IdCloset = IdCloset;
         this.TxName = TxName;
         this.CdUser = CdUser;
         this.TxDescription = TxDescription;
@@ -18,7 +18,7 @@ class DClosets extends RegDB{
     static TxTable = 'D_CLOSETS';
 
     static ListFields = {
-        IdClosets: new Fields('ID_CLOSET','Number' ,'PK' , null),
+        IdCloset: new Fields('ID_CLOSET','Number' ,'PK' , null),
         TxName: new Fields('TX_NAME', 'String', null , null),
         CdUser: new Fields('CD_USER', 'Number', null , null),
         TxDescription: new Fields('TX_DESCRIPTION', 'String', null , null),
