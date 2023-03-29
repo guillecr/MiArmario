@@ -9,11 +9,13 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import tool from "./tools";
 
-const urlServer = 'http://192.168.1.46:3000/miarmario/';
+debugger;
+const host = location.host.split(':')[0];
+const urlServer = `http://${host}:3030/miarmario/`;
 
 // var connection = new VueSocketIO({
 //   debug: true,
-//   connection: io('http://192.168.0.16:3000',{ transports : ['websocket'] }), // transports es importante para CORS
+//   connection: io('http://192.168.0.16:3030',{ transports : ['websocket'] }), // transports es importante para CORS
 // });
 // var connection = new VueSocketIO({
 //   debug: true,

@@ -3,7 +3,8 @@
     "KEY_URL": "./my_cert.key",
     "CERT_URL": "./my_cert.crt",
     "LOG_PATH": "./log.txt",
-    "HTTP_PORT": 3000,
+    "HTTP_PORT": 3030,
+    "APP_PORT": 8080,
     "TOKEN_KEY": "s26g18KP28",
     "TIME_TOKEN_SESIONS": 3600
 }

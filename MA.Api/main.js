@@ -8,10 +8,9 @@ const sqlite3 = require('sqlite3').verbose(); // Cliente SQLite3
 const CallAPI = require('./CallAPI'); // Llamadas API
 const LogFile = require('./Utils/LogFile'); // Registros Log
 const URL_PARAMS = 'params.json'; // Archivo de parámetros
+const path = require('path');
 
 const app = express();
-// const server = http.createServer(app);
-// const io = new Server(server);
 
 const connDB = function(UrlDB){
     // Conexión a la base de datos
@@ -24,30 +23,43 @@ const connDB = function(UrlDB){
     });
 }
 
+const upApp = function(HttpPort){
+    app.use(express.static(path.join('../MA.App/', 'dist')));
+    app.get('*',function(req, res) {
+        res.sendFile(path.join(__dirname  + '/../MA.App/', 'dist', 'index.html'));
+    });
+    app.listen(HttpPort, function() {
+        console.log('La aplicación está corriendo en el puerto ' + HttpPort);
+    });
+}
+
 const upServer = function(HttpPort, KeyUrl, CertUrl){
     // Levantar servicio
     console.log('Levantando instancia del servicio');
     
     // SERVIDOR HTTP
-    server = http.createServer(app);
-    io = new Server(server);
+    var server = http.createServer(app);
+    var io = new Server(server);
     server.listen(HttpPort, () => {
-        console.log("Server arrancado en el puerto %PORT%".replace("%PORT%", PARAMS.HTTP_PORT))
+        console.log("Server arrancado en el puerto %PORT%".replace("%PORT%", PARAMS.HTTP_PORT));
     });
 
+    var MaIo = io.of("/miarmario/");
+    MaIo.on('connection', CallAPI.calls);
+
     // SERVIDOR HTTPS
-    // serverS = https.createServer({
+    // var serverS = https.createServer({
     //     key: fs.readFileSync(KeyUrl),
     //     cert: fs.readFileSync(CertUrl)
     // }, app);
-    // io = new Server(serverS);
-    // serverS.listen(HttpPort, () => {
-    //     console.log("Server running on port %PORT%".replace("%PORT%", PARAMS.HTTP_PORT))
+    // ioS = new Server(serverS);
+    // serverS.listen(HttpPort + 1, () => {
+    //     console.log("Server running on port %PORT%".replace("%PORT%", PARAMS.HTTP_PORT + 1))
     // });
+    // MaIoS = ioS.of("/miarmario/");
+    // MaIoS.on('connection', CallAPI.calls);
 
-    MaIo = io.of("/miarmario/")
     //io.on('connection', CallAPI.calls);
-    MaIo.on('connection', CallAPI.calls);
 }
 
 // Función de entrada
@@ -63,6 +75,7 @@ const start = function(UrlParams){
             LogFile.writeLog('Servicio iniciando');
             connDB(PARAMS.DB_PATH);
             upServer(PARAMS.HTTP_PORT, PARAMS.KEY_URL, PARAMS.CERT_URL);
+            upApp(PARAMS.APP_PORT);
         }
     });
 }

@@ -51,7 +51,6 @@
         position: absolute;
         top:5px;
         left: 210px;
-        width: 100%;
     }
     #PagMisPrendasJumnotron{
         background-color: transparent;

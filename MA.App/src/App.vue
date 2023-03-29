@@ -129,7 +129,7 @@ export default {
   /* right: 0;
   left: 0; */
   padding: 3px;
-  padding-right: 7px;
+  padding-right: 25px;
   text-align: right;
   background-color: #2c3e50;
   color: white;
