@@ -2,7 +2,7 @@ const RegDB = require('../Utils/RegDB');
 const Fields = require('../Utils/Fields');
 
 class DMenus extends RegDB{
-    constructor(CdComponent, TxName, CdPath, ChActive, FhCreated, FhModified, CdCreatedBy, CdModifiedBy){
+    constructor(CdComponent, TxName, CdPath, ChActive, FhCreated, FhModified, CdCreatedBy, CdModifiedBy, NuOrder){
         super();
         this.TxName = TxName;
         this.CdPath = CdPath;
@@ -12,6 +12,7 @@ class DMenus extends RegDB{
         this.CdModifiedBy = CdModifiedBy;
         this.CdCreatedBy = CdCreatedBy;
         this.CdComponent = CdComponent;
+        this.NuOrder = NuOrder;
     };
 
     static TxTable = "D_MENUS";
@@ -24,7 +25,8 @@ class DMenus extends RegDB{
         TxName: new Fields('TX_NAME', 'String', null , null),
         TxPath: new Fields('TX_PATH', 'Number', null , null),
         ChActive: new Fields('CH_ACTIVE', 'Boolean', null, null),
-        CdComponent: new Fields('CD_COMPONENT', 'String', 'PK', null)
+        CdComponent: new Fields('CD_COMPONENT', 'String', 'PK', null),
+        NuOrder: new Fields('NU_ORDER', 'Number', null, null)
     };
 
 }

@@ -1,5 +1,5 @@
 <template>
-    <div id="PagMisPrendas" style="position: relative;">
+    <div>
         <dlg-dynamic-form :style="{display:(chShowDlgClothes)?'':'none'}"
             idForm="FORM_CLOTHES_EDIT"
             :nuPosXInit="nuDlgPosX"
@@ -10,43 +10,53 @@
             @delete="deleteClothes"
             @finalize="saveClothes"
         />
-        <div class="PagMisPrendasListArmarios">
-            Mis armarios
-            <b-list-group>
-                <b-list-group-item style="cursor: pointer;" v-for="elm in listArmarios" :key="elm.value"
-                    @click="idArmario=elm.value" 
-                    :active="elm.value == idArmario">{{elm.text}}
-                </b-list-group-item>
-            </b-list-group>
-            <br>
-            Estados
-            <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterStates" :key="flt.IdLiteralValue"
-                style="position: relative; width: 200px; text-align: left;"
-                v-model="fltPrendas.lstStates[flt.IdLiteralValue]"
-            >{{flt.TxDescription}}</b-form-checkbox>
-            <br>
-            Sub-Estado
-            <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterSubstates" :key="flt.IdLiteralValue"
-                style="position: relative; width: 200px; text-align: left;"
-                v-model="fltPrendas.lstSubstates[flt.IdLiteralValue]"
-            >{{flt.TxDescription}}</b-form-checkbox>
+        <div id="PagMisPrendas">
+            <div class="PagMisPrendasListArmarios">
+                Mis armarios
+                <b-list-group>
+                    <b-list-group-item style="cursor: pointer;" v-for="elm in listArmarios" :key="elm.value"
+                        @click="idArmario=elm.value" 
+                        :active="elm.value == idArmario">{{elm.text}}
+                    </b-list-group-item>
+                </b-list-group>
+                <br>
+                Estados
+                <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterStates" :key="flt.IdLiteralValue"
+                    style="position: relative; width: 200px; text-align: left;"
+                    v-model="fltPrendas.lstStates[flt.IdLiteralValue]"
+                >{{flt.TxDescription}}</b-form-checkbox>
+                <br>
+                Sub-Estado
+                <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterSubstates" :key="flt.IdLiteralValue"
+                    style="position: relative; width: 200px; text-align: left;"
+                    v-model="fltPrendas.lstSubstates[flt.IdLiteralValue]"
+                >{{flt.TxDescription}}</b-form-checkbox>
 
-        </div>
-        <div class="PagMisPrendasPrendas">
-            <b-jumbotron id="PagMisPrendasJumnotron" 
-                :header="objArmario.TxName" 
-                :lead="objArmario.TxDescription">
-            </b-jumbotron>
-            <listcards class="PagMisPrendasListPrendas"
-                :list="listPrendas"
-                nameNew="Añadir"
-                Cdkey="IdPrenda"
-                @row-selected="showClothes">
-            </listcards>
+            </div>
+            <div class="PagMisPrendasPrendas">
+                <b-jumbotron id="PagMisPrendasJumnotron" 
+                    :header="objArmario.TxName" 
+                    :lead="objArmario.TxDescription">
+                </b-jumbotron>
+                <div class="PagMisPrendasDivBtnAdd">            
+                    <b-btn class="PagMisPrendasBtnAdd"
+                        variant="outline-primary"
+                        @click="showClothes({event:$event,row:{}})"
+                    ><span style="padding-top: 4px;" class="fi-rr-plus"></span><span style="margin-left: 5px;">Añadir</span></b-btn>
+                </div>
+                <listcards class="PagMisPrendasListPrendas"
+                    :list="listPrendas"
+                    Cdkey="IdPrenda"
+                    @row-selected="showClothes">
+                </listcards>
+            </div>
         </div>
     </div>
 </template>
 <style scoped>
+    #PagMisPrendas {
+        position: relative;
+    }
     .PagMisPrendasPrendas{
         position: absolute;
         top:5px;
@@ -55,8 +65,8 @@
     #PagMisPrendasJumnotron{
         background-color: transparent;
         padding-top: 20px;
-        padding-bottom: 20px;
-        margin-bottom: 1rem;
+        padding-bottom: 0;
+        margin-bottom: 0rem; /* El margen lo da PagMisPrendasDivBtnAdd */
     }
     .PagMisPrendasListArmarios{
         position: absolute;
@@ -64,6 +74,19 @@
         left: 0;
         width: 200px;
         padding: 10px;
+    }
+    .PagMisPrendasDivBtnAdd{
+        width: 100%;
+        height: 32px;
+        padding-right: 10%;
+        margin-bottom: 1rem;
+    }
+    .PagMisPrendasBtnAdd{
+        display: flex;
+        align-items: center;
+        height: 32px;
+        padding-left: 6px;
+        float: right;
     }
     @media (max-width: 485px) {
         .PagMisPrendasPrendas{
@@ -171,7 +194,7 @@ export default {
                     }
                 });
             } else {
-                cm.objSelectClothes = {ChEdit: true};
+                cm.objSelectClothes = {ChEdit: true, CdCloset:this.idArmario};
                 cm.chShowDlgClothes = true;
             }
         },

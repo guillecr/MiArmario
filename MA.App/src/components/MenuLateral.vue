@@ -1,5 +1,5 @@
 <template>
-    <div @mouseout="HiddenMenu" ref="MenuLista">
+    <div id="DivMenu" @mouseout="HiddenMenu" ref="MenuLista">
         <div class="MenuToggel">
             <i alt="Menu" class="fi fi-rr-apps MenuBoton" @click="ShowMenu"/>
             <!-- <span class="MenuBoton" @click="ShowMenu"></span> -->
@@ -67,6 +67,9 @@ export default {
 }
 </script>
 <style scoped>
+#DivMenu {
+    height: 54px;
+}
 #Menu{
     z-index: 500;
 }

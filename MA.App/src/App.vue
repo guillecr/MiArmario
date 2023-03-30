@@ -118,7 +118,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  padding-top: 54px;
+  /* padding-top: 54px; */
   height: 100vh;
   padding-bottom: 30px;
 }

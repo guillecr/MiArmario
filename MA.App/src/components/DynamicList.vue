@@ -37,7 +37,7 @@
         <div class="DynamicListLstButtons">
             <b-btn class="FormButtom DynamicListButton"
                 variant="outline-primary"
-                style="padding-top: 4px !important;width: 26px;" 
+                style="padding-top: 4px !important;width: 32px;" 
                 @click="refreshData"
             ><span class="fi-rr-refresh"></span></b-btn>
             <b-btn class="FormButtom DynamicListButton" v-for="btn in defButtons" 

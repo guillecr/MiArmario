@@ -9,7 +9,6 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import tool from "./tools";
 
-debugger;
 const host = location.host.split(':')[0];
 const urlServer = `http://${host}:3030/miarmario/`;
 

@@ -134,7 +134,8 @@ class CallAPI {
                             AND PU.CD_USER = ${params.addParams(socket.accessDB.user)}
                             AND PU.CH_ACTIVE = 1
                             AND PM.CH_ACTIVE = 1)
-                    AND CH_ACTIVE = 1`, params);
+                    AND CH_ACTIVE = 1
+                    ORDER BY NU_ORDER`, params);
                 socket.emit("Menus", menus); 
             } catch (ex) {
                 LogFile.writeLog('ERROR - getMenus: ' + ex.message);
