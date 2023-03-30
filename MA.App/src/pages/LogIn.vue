@@ -73,7 +73,9 @@
     }
     @media (max-width: 485px) {
         #LoginInForm {
-            left: 5px;
+            left: 0;
+            right: 0;
+            margin: auto;
         }
     }
 </style>

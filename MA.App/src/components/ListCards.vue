@@ -5,10 +5,18 @@
         height: 28rem;
     }
     #ListCartsElm{
-        float: left !important;
+        float: left;
         margin-right: 0.5rem;
         margin-left: 0.5rem;
         z-index: 50;
+    }
+    @media (max-width: 485px) {
+        #ListCartsElm {
+            float: unset;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
     }
 </style>
 <template>

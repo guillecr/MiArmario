@@ -56,6 +56,7 @@
         background-color: transparent;
         padding-top: 20px;
         padding-bottom: 20px;
+        margin-bottom: 1rem;
     }
     .PagMisPrendasListArmarios{
         position: absolute;
