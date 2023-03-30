@@ -24,9 +24,9 @@ const connDB = function(UrlDB){
 }
 
 const upApp = function(HttpPort){
-    app.use(express.static(path.join('../MA.App/', 'dist')));
+    app.use(express.static(path.join(__dirname, '/MA.App/', 'dist')));
     app.get('*',function(req, res) {
-        res.sendFile(path.join(__dirname  + '/../MA.App/', 'dist', 'index.html'));
+        res.sendFile(path.join(__dirname  + '/MA.App/', 'dist', 'index.html'));
     });
     app.listen(HttpPort, function() {
         console.log('La aplicación está corriendo en el puerto ' + HttpPort);
