@@ -486,7 +486,7 @@ export default {
                     nuWidth = maxWidthCtrl;
                 }
             }
-            if (nuWidth < 500) {
+            if (this.formEdit && nuWidth < 500) {
                 nuWidth = 500; 
             }
             return nuWidth;
