@@ -19,7 +19,9 @@
         display: initial;
         padding-left: 10px;
         font-size: 14px;
-        
+    }
+    .DynamicFormElementMultiline{
+        font-size: 14px;
     }
     .DynamicFormElementList{
         height: 26px;
@@ -38,7 +40,28 @@
         height: 26px;
         display: initial;
         font-size: 14px;
+        line-height:unset;
+        font-weight:unset;
+        background-clip:unset;
+        transition:unset;
+        -webkit-appearance:unset !important;
+        appearance:unset !important;
     }
+    .DynamicFormElementDatetime2{
+        height: 26px;
+        display: initial;
+        font-size: 14px;
+        padding: 0.375rem 0.75rem;
+        background-color: white;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+        .DynamicFormElementDatetime2:disabled, .DynamicFormElementDatetime2[readonly] {
+            background-color: #e9ecef;
+            color: black;
+            opacity: 1;
+        }
+
     .DynamicFormElementCheck {
         display: initial;
     }
@@ -313,7 +336,15 @@
                     :disabled="calcDisabled(elm)"
                     v-model="objForm[elm.CdField]"
                 />
-                <b-form-input class="DynamicFormElementDatetime"
+                <!-- <b-form-input class="DynamicFormElementDatetime"
+                    v-if="elm.CdType=='DATETIME'"
+                    type="datetime-local"
+                    :style="{width:NuWidthDateTime + 'px'}"
+                    :disabled="calcDisabled(elm)"
+                    v-model="objForm[elm.CdField]"
+                /> -->
+                <!-- Control alternativo hasta encontrar la solución al problema de visibilidad en los dispositivos -->
+                <input class="DynamicFormElementDatetime2"
                     v-if="elm.CdType=='DATETIME'"
                     type="datetime-local"
                     :style="{width:NuWidthDateTime + 'px'}"
@@ -410,7 +441,7 @@ export default {
             chVisiblePropeties: true,
             ChMiminicePropeties: false,
             NuWidthDate: 140,
-            NuWidthDateTime: 190,
+            NuWidthDateTime: 200,
             ListTypesCtrls:[
                 {value:'TEXT', text:'Texto'},
                 {value:'DATE', text:'Fecha'},
@@ -440,23 +471,23 @@ export default {
             return nuHeight;
         },
         widthForm() {
-            var nuWidth = 500;
-            if (!this.adminMode){
-                nuWidth = 0;
-                for (const elm in this.ctrls) {
-                    var ctrl = this.ctrls[elm];
-                    
-                    if (ctrl.Cdtype == 'DATE'){
-                        ctrl.NuWidth = this.NuWidthDate;
-                    } else if (ctrl.CdType == 'DATETIME'){
-                        ctrl.NuWidth = this.NuWidthDateTime;
-                    }
-
-                    var maxWidthCtrl = ctrl.NuPosX + (ctrl.NuWidth || 0) + (ctrl.NuWidthLabel || 0);
-                    if (maxWidthCtrl > nuWidth) {
-                        nuWidth = maxWidthCtrl;
-                    }
+            var nuWidth = 0;
+            for (const elm in this.ctrls) {
+                var ctrl = this.ctrls[elm];
+                
+                if (ctrl.Cdtype == 'DATE'){
+                    ctrl.NuWidth = this.NuWidthDate;
+                } else if (ctrl.CdType == 'DATETIME'){
+                    ctrl.NuWidth = this.NuWidthDateTime;
                 }
+
+                var maxWidthCtrl = ctrl.NuPosX + (ctrl.NuWidth || 0) + (ctrl.NuWidthLabel || 0);
+                if (maxWidthCtrl > nuWidth) {
+                    nuWidth = maxWidthCtrl;
+                }
+            }
+            if (nuWidth < 500) {
+                nuWidth = 500; 
             }
             return nuWidth;
         }

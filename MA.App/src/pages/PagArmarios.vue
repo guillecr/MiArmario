@@ -7,12 +7,12 @@
           />
       </div>
   
-      <div id="PagArmariosList" class="PagGenericToggle">
+      <div id="appDetail" class="PagGenericToggle">
           <span class="fi-rr-angle-left" onclick="document.getElementById('app').scrollIntoView(true);"></span>
           <p>{{(keySelected)?'Editar':'Nuevo'}}</p>
       </div>
   
-      <div class="PagGenericForm" id="appDetail">
+      <div class="PagGenericForm">
         <b-tabs content-class="mt-3">
             <b-tab title="Usuario" active>
                 <dynamic-form 

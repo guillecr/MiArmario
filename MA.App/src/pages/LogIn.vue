@@ -44,7 +44,10 @@
         background-color: white;
         border: 1px black solid;
         border-radius: 8px;
-        padding: 25px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        padding-left: 45px;
+        padding-right: 45px;
         box-shadow: 5px 5px 15px rgb(58, 58, 58);
     }
     .LoginHeader{
@@ -61,21 +64,20 @@
         border-radius: 8px;
     }
     .LoginFrm{
-        padding-left: 20px;
-        padding-right: 20px;
         font-size: large;
         font-family: 'Quicksand'
     }
     .LoginBtn{
         position: relative;
-        width: 150px;
-        left: 180px;
+        width: 100px;
+        float: right;
     }
     @media (max-width: 485px) {
         #LoginInForm {
             left: 0;
             right: 0;
             margin: auto;
+            width: 80%;
         }
     }
 </style>

@@ -17,12 +17,12 @@
         ></DynamicList>
     </div>
 
-    <div class="PagGenericToggle">
+    <div id="appDetail" class="PagGenericToggle">
         <span class="fi-rr-angle-left" onclick="document.getElementById('app').scrollIntoView(true);"></span>
         <p>Formulario</p>
     </div>
 
-    <div class="PagGenericForm" id="PagFormDesignerForm">
+    <div class="PagGenericForm">
         <b-tabs content-class="mt-3">
             <b-tab title="Formulario" active>
                 <DynamicForm
@@ -90,7 +90,7 @@ export default {
             } else {
                 cm.objFormFoms = row;
             }
-            document.getElementById("PagFormDesignerForm").scrollIntoView();
+            document.getElementById("appDetail").scrollIntoView();
         }
     }
 

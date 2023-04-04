@@ -47,12 +47,12 @@
         ></DynamicList>
     </div>
 
-    <div class="PagGenericToggle">
+    <div id="appDetail" class="PagGenericToggle">
         <span class="fi-rr-angle-left" onclick="document.getElementById('app').scrollIntoView(true);"></span>
         <p>{{(idListSelect)?'Editar':'Nuevo'}}</p>
     </div>
 
-    <div class="PagListDesignerForm" id="appDetail">
+    <div class="PagListDesignerForm">
         <b-tabs content-class="mt-3">
             <b-tab title="Lista" active>
                 <DynamicForm 

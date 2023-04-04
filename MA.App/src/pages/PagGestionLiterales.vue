@@ -7,12 +7,12 @@
           />
       </div>
   
-      <div id="PagGestionLiteralesList" class="PagGenericToggle">
+      <div id="appDetail" class="PagGenericToggle">
           <span class="fi-rr-angle-left" onclick="document.getElementById('app').scrollIntoView(true);"></span>
           <p>{{(keySelected)?'Editar':'Nuevo'}}</p>
       </div>
   
-      <div class="PagGenericForm" id="appDetail">
+      <div class="PagGenericForm">
           <dynamic-form 
               idForm="FORM_P_LITERAL_VALUES"
               :objForm="objSelected"
