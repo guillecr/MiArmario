@@ -39,7 +39,9 @@ const upServer = function(HttpPort, KeyUrl, CertUrl){
     
     // SERVIDOR HTTP
     var server = http.createServer(app);
-    var io = new Server(server);
+    var io = new Server(server, {
+        maxHttpBufferSize: 6e8
+    });
     server.listen(HttpPort, () => {
         console.log("Server arrancado en el puerto %PORT%".replace("%PORT%", PARAMS.HTTP_PORT));
     });

@@ -96,7 +96,7 @@ AND CH_ACTIVE = 1`
         var prendaDb = new DPrendas;
         prendaDb.setObject(prenda);
         var response;
-        if (prendaDb.IdPrenda) {
+        if (prendaDb.IdPrenda && prendaDb.IdPrenda > 0) {
             response = await prendaDb.Update(accessDB);
         } else {
             prendaDb.ChActive = true;
@@ -128,7 +128,7 @@ AND CH_ACTIVE = 1`
             }
         }
         
-        return response;
+         return response;
     }
 }
 
