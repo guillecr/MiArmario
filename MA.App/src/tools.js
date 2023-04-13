@@ -23,6 +23,38 @@ const tools = {
         e.cancelBbble = true;
         e.returnValue = false;
         return false;
+    },
+    downscaleImage(dataUrl, newWidth, imageType, imageArguments) {
+        let image, oldWidth, oldHeight, newHeight, canvas, ctx, newDataUrl;
+
+        return new Promise((resolve, reject)=>{
+            debugger;
+            image = document.createElement("img");
+            image.src = dataUrl;
+            image.onload = function () {
+
+                imageType = imageType || "image/jpeg";
+                imageArguments = imageArguments || 0.6;
+            
+                // Creamos una imagen temporal en base a la original.
+                oldWidth = image.width;
+                oldHeight = image.height;
+                newHeight = Math.floor(oldHeight / oldWidth * newWidth);
+            
+                // Creamos un canva para dibujar la nueva imagen.
+                canvas = document.createElement("canvas");
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+            
+                // Dibuamos la nueva imagen comprimida en el canva
+                ctx = canvas.getContext("2d");
+                ctx.drawImage(image, 0, 0, newWidth, newHeight);
+            
+                // Obtenemos el dataURL de la nueva imagen comprimida
+                //y hacemos un return.
+                resolve(canvas.toDataURL(imageType, imageArguments));              
+            }
+        });
     }
 }
 

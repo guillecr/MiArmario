@@ -200,21 +200,26 @@ export default {
         },
         saveClothes(frm){
             var cm = this;
-            this.sEmit.emitCall('SavePrenda', frm, function(response){
-                var msg = "Error en el guardado";
-                if (response) {
-                    msg = "Guardado correctamente"
-                }
-                cm.$bvToast.toast(msg, {
-                    title: 'Guardado de ropa',
-                    autoHideDelay: 5000,
-                    appendToast: true
+            tools.downscaleImage(frm.ObjImg.value, 600)
+                .then(function(data){
+                    frm.ObjImg.value = data;
+                    cm.sEmit.emitCall('SavePrenda', frm, cm.saveClothesResponse);
                 });
-
-                cm.objSelectClothes = {};
-                cm.chShowDlgClothes = false;
-                cm.refreshClothes();
+        },
+        saveClothesResponse(response){
+            var msg = "Error en el guardado";
+            if (response) {
+                msg = "Guardado correctamente"
+            }
+            this.$bvToast.toast(msg, {
+                title: 'Guardado de ropa',
+                autoHideDelay: 5000,
+                appendToast: true
             });
+
+            this.objSelectClothes = {};
+            this.chShowDlgClothes = false;
+            this.refreshClothes();
         },
         refreshClothes(){
             var cm = this;
