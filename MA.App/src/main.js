@@ -10,7 +10,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css';
 import tool from "./tools";
 
 const host = location.host.split(':')[0];
-const urlServer = `http://${host}:3030/miarmario/`;
+const urlServer = `https://${host}/miarmario/`;
 
 // var connection = new VueSocketIO({
 //   debug: true,

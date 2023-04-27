@@ -1,6 +1,6 @@
 {
   "name": "ma.api",
-  "version": "05.04.2023",
+  "version": "27.04.2023",
   "description": "Api para el cliente MA.App",
   "main": "main.js",
   "scripts": {

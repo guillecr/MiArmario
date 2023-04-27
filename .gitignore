@@ -5,3 +5,7 @@ MA.App/public/PosibleLogoSm.png
 MA.App/src/assets/logo2.png
 MA.App/src/assets/PosibleLogo.png
 MA.Api/MiArmarioBD.db
+MA.Api/private.key
+MA.Api/certificate.crt
+MA.Api/ca_bundle.crt
+MA.Api/params.json

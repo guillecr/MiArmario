@@ -1,7 +1,7 @@
 // DEPENDENCIAS
 const fs = require('fs'); // Lectura de archivos
-const http = require('http'); // Servidor HTTP
-//const https = require('https'); // Servidor HTTPS
+//const http = require('http'); // Servidor HTTP
+const https = require('https'); // Servidor HTTPS
 const express = require('express'); // Aplicación express
 const { Server } = require("socket.io"); // Socket
 const sqlite3 = require('sqlite3').verbose(); // Cliente SQLite3
@@ -23,45 +23,41 @@ const connDB = function(UrlDB){
     });
 }
 
-const upApp = function(HttpPort){
-    app.use(express.static(path.join(__dirname, '/MA.App/', 'dist')));
-    app.get('*',function(req, res) {
-        res.sendFile(path.join(__dirname  + '/MA.App/', 'dist', 'index.html'));
-    });
-    app.listen(HttpPort, function() {
-        console.log('La aplicación está corriendo en el puerto ' + HttpPort);
-    });
-}
-
-const upServer = function(HttpPort, KeyUrl, CertUrl){
+const upServer = function(HostName, HttpPort, KeyUrl, CertUrl, CaUrl){
     // Levantar servicio
     console.log('Levantando instancia del servicio');
     
     // SERVIDOR HTTP
-    var server = http.createServer(app);
-    var io = new Server(server, {
-        maxHttpBufferSize: 6e8
-    });
-    server.listen(HttpPort, () => {
-        console.log("Server arrancado en el puerto %PORT%".replace("%PORT%", PARAMS.HTTP_PORT));
-    });
+    // var server = http.createServer(app);
+    // var io = new Server(server, {
+    //     maxHttpBufferSize: 6e8
+    // });
+    // server.listen(HttpPort, () => {
+    //     console.log("Server arrancado en el puerto %PORT%".replace("%PORT%", PARAMS.HTTP_PORT));
+    // });
 
-    var MaIo = io.of("/miarmario/");
-    MaIo.on('connection', CallAPI.calls);
+    // var MaIo = io.of("/miarmario/");
+    // MaIo.on('connection', CallAPI.calls);
 
     // SERVIDOR HTTPS
-    // var serverS = https.createServer({
-    //     key: fs.readFileSync(KeyUrl),
-    //     cert: fs.readFileSync(CertUrl)
-    // }, app);
-    // ioS = new Server(serverS);
-    // serverS.listen(HttpPort + 1, () => {
-    //     console.log("Server running on port %PORT%".replace("%PORT%", PARAMS.HTTP_PORT + 1))
-    // });
-    // MaIoS = ioS.of("/miarmario/");
-    // MaIoS.on('connection', CallAPI.calls);
+    app.use(express.static(path.join(__dirname, '/MA.App/', 'dist')));
+    app.get('*',function(req, res) {
+        res.sendFile(path.join(__dirname  + '/MA.App/', 'dist', 'index.html'));
+    });
 
-    //io.on('connection', CallAPI.calls);
+    var serverS = https.createServer({
+        key: fs.readFileSync(KeyUrl),
+        cert: fs.readFileSync(CertUrl),
+        ca: fs.readFileSync(CaUrl)
+    }, app);
+
+    // var ioS = new Server(serverS);
+    var ioS = new Server(serverS);
+    serverS.listen(HttpPort, HostName, () => {
+        console.log(`Servidor arrancado en el puerto ${PARAMS.HTTP_PORT}`);
+    });
+    var MaIo = ioS.of("/miarmario/");
+    MaIo.on('connection', CallAPI.calls);
 }
 
 // Función de entrada
@@ -76,8 +72,7 @@ const start = function(UrlParams){
             LogFile.UrlLog = PARAMS.LOG_PATH;
             LogFile.writeLog('Servicio iniciando');
             connDB(PARAMS.DB_PATH);
-            upServer(PARAMS.HTTP_PORT, PARAMS.KEY_URL, PARAMS.CERT_URL);
-            upApp(PARAMS.APP_PORT);
+            upServer(PARAMS.HOST_NAME, PARAMS.HTTP_PORT, PARAMS.KEY_URL, PARAMS.CERT_URL, PARAMS.CA_URL);
         }
     });
 }
