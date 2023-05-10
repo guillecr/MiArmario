@@ -22,6 +22,7 @@ const DynamicForm = require('./Componets/DynamicForm');
 const DynamicList = require('./Componets/DynamicList');
 const TokenManager = require('./Utils/TokenManager');
 const PagChangePw = require('./pages/PagChangePw');
+const Commands = require('./Utils/Commands');
 
 class CallAPI {
 
@@ -93,7 +94,7 @@ class CallAPI {
         // Comprobar acreditación inicial
         CallAPI.getSession(socket);
 
-        socket.use(([event, ...args], next) => {
+        socket.use(async ([event, ...args], next) => {
             // events: Nombre de la llamada
             // args: Parámetros a la llamada
             // Utilizamos este mecanismo para la autentificación
@@ -101,21 +102,40 @@ class CallAPI {
             // TODO: En este punto podemos verificar si el usuario tiene permisos para la acción que solicita
             try {
                 //LogFile.writeLog(`${socket.accessDB.login}: ${event}`);
-                if (CallAPI.authenticationByToken(CallAPI.getTokenInHead(socket), address)){
-                    // Conexión acreditada
+                var allower = false;
+                var idUserCall = CallAPI.authenticationByToken(CallAPI.getTokenInHead(socket), address);
+                if (event == 'getMenus' || event == 'LoginIn') {
+                    if (!idUserCall){
+                        socket.accessDB.user = 4; // Sin login
+                    }
+                    allower = true;
+                } else if (idUserCall) {
+                    var menuCall = event.split(".")[0];
+                    var cmd = new Commands(socket.accessDB.linkDB);
+                    cmd.sentencia = `
+                    SELECT 1 FROM R_PROFILES_MENUS PM
+                    JOIN R_PROFILES_USERS PU ON PM.CD_PROFILE = PU.CD_PROFILE
+                    WHERE PM.CD_MENU = ${cmd.addParams(menuCall)}
+                        AND PU.CD_USER = ${cmd.addParams(idUserCall)}
+                    `
+                    var resultSql = await cmd.ejecutarSentencia();
+                    if (resultSql.length > 0){
+                        // Tiene permiso
+                        allower = true;
+                    } else {
+                        LogFile.writeLog("Acceso no autorizado: " + socket.accessDB.login + " -> " +  menuCall);
+                    }
+                } 
+
+                if (allower){
+                    // Acceso permitido
                     next();
-                } else if(event == 'getMenus') {
-                    // Conexión no acreditada
-                    socket.accessDB.user = 4;
-                    next();
-                } else if (event == 'LoginIn') {
-                    socket.accessDB.user = 2; // User 2 => API_LOGIN_IN
-                    next(); 
                 } else {
                     // Acceso denegado
                     socket.accessDB.user = null;
                     socket.emit('withAccess', false);
-                }
+                }              
+                
             } catch (ex){
                 LogFile.writeLog('ERROR - manejador de eventos: ' + ex.message);
                 socket.accessDB.user = null;
@@ -134,6 +154,7 @@ class CallAPI {
                             AND PU.CD_USER = ${params.addParams(socket.accessDB.user)}
                             AND PU.CH_ACTIVE = 1
                             AND PM.CH_ACTIVE = 1)
+                    AND TX_PATH IS NOT NULL
                     AND CH_ACTIVE = 1
                     ORDER BY NU_ORDER`, params);
                 socket.emit("Menus", menus); 
