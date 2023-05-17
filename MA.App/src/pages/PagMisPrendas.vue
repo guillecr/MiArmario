@@ -15,7 +15,7 @@
                 Mis armarios
                 <b-list-group>
                     <b-list-group-item style="cursor: pointer;" v-for="elm in listArmarios" :key="elm.value"
-                        @click="idArmario=elm.value" 
+                        @click="idArmario=elm.value; nuPrendTotal=elm.total" 
                         :active="elm.value == idArmario">{{elm.text}}
                     </b-list-group-item>
                 </b-list-group>
@@ -43,6 +43,15 @@
                         variant="outline-primary"
                         @click="showClothes({event:$event,row:{}})"
                     ><span style="padding-top: 4px;" class="fi-rr-plus"></span><span style="margin-left: 5px;">Añadir</span></b-btn>
+                </div>
+                <div class="overflow-auto">
+                    <b-pagination 
+                        pills 
+                        align="fill" 
+                        style="padding-left: 2px; padding-right: 2px; padding-top: 4px;" 
+                        v-model=nuPage
+                        :per-page="nuPrendPerPage"
+                        :total-rows="nuPrendTotal"></b-pagination>
                 </div>
                 <listcards class="PagMisPrendasListPrendas"
                     :list="listPrendas"
@@ -123,20 +132,26 @@ export default {
             objSelectClothes: {},
             serviceName:"PagMisPrendas",
             nuDlgPosX: 100,
-            nuDlgPosY: 100
+            nuDlgPosY: 100,
+            nuPage: 1,
+            nuPrendTotal: 0,
+            nuPrendPerPage: 5
         }
     },
     watch: {
         fltPrendas:{
-            handler(){
+            handler() {
                 if (this.idArmario){
                     this.refreshClothes();
                 }
             },
             deep: true
         },
-        idArmario(newValue){
-            if (newValue){
+        nuPage(){
+            this.refreshClothes();
+        },
+        idArmario(newValue) {
+            if (newValue) {
                 this.refreshClothes();
             }
         }
@@ -224,7 +239,8 @@ export default {
         refreshClothes(){
             var cm = this;
             var lstFilter = this.getLstFilter();
-            this.sEmit.emitCall( 'GetInfo', {idArmario: this.idArmario, flt: lstFilter}, function(response){
+            this.sEmit.emitCall( 'GetInfo', {idArmario: this.idArmario, flt: lstFilter, nuPage: this.nuPage}, function(response){
+                // TODO: La obtenión de la lista de armarios podría ya dar toda la definición del armario, en vez de pedir de nuevo la información
                 cm.objArmario = response.objArmario;
                 cm.listPrendas = response.lstPrenda;
             });
@@ -236,6 +252,7 @@ export default {
             cm.listArmarios = request;
             if (!cm.idArmario){
                 cm.idArmario = cm.listArmarios[0].value;
+                cm.nuPrendTotal = cm.listArmarios[0].total;
             }
         });
     },
@@ -249,6 +266,7 @@ export default {
             if (response){
                 cm.lstFltPrendas.lstFilterStates = response.lstStates;
                 cm.lstFltPrendas.lstFilterSubstates = response.lstSubstates;
+                cm.nuPrendPerPage = response.nuPrendPerPage;
             }
             
         });

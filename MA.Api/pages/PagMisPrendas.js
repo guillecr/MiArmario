@@ -7,12 +7,15 @@ const PLiteralValues = require('../Entities/PLiteralValues')
 const DBParams = require('../Utils/DBParamas');
 const CallService = require('../Utils/CallService');
 const RPrendasImgs = require('../Entities/RPrendasImgs');
+const Commands = require('../Utils/Commands');
+const NU_PREDAS_PAGE = 5;
 
 class PagMisPrendas extends CallService {
     static async GetInfo(accessDB, request){
         var idArmario = request.idArmario;
         var lstFltState;
         var lstFltSubstate;
+        var nuPage = request.nuPage || 1;
         if (request.flt){
             var lstFltState = request.flt.lstStates;
             var lstFltSubstate = request.flt.lstSubstates; 
@@ -39,6 +42,7 @@ AND CH_ACTIVE = 1`
             where += ')';
         }
         var listPrendas = await DPrendas.Find(accessDB, where, params);
+        listPrendas = listPrendas.slice((nuPage * NU_PREDAS_PAGE) - NU_PREDAS_PAGE, nuPage * NU_PREDAS_PAGE);
         for (var index in listPrendas){
             var prenda = listPrendas[index];
             var params = new DBParams;
@@ -56,7 +60,8 @@ AND CH_ACTIVE = 1`
     static async GetFilters(accessDB){
         var result = {
             lstStates: [],
-            lstSubstates: []
+            lstSubstates: [],
+            nuPrendPerPage: NU_PREDAS_PAGE
         };
         var params = new DBParams;
         var literalsState = await PLiteralValues.Find(accessDB, `AND CD_TYPE IN ('ESTADO_PRENDA', 'SUB_ESTADO_PRENDA')`, params)
@@ -72,11 +77,23 @@ AND CH_ACTIVE = 1`
     }
 
     static async GetListArmarios(accessDB){
-        var params = new DBParams;
-        var listArmarios = await DClosets.Find(accessDB, `AND CD_USER = ${params.addParams(accessDB.user)}`, params);
+        var listArmarios = [];
+        var cmd = new Commands;
+        cmd.db = accessDB.linkDB;
+        cmd.sentencia = `
+        SELECT C.ID_CLOSET "IdCloset"
+            , C.TX_NAME "TxName"
+            , IFNULL((SELECT SUM(1)
+                FROM D_PRENDAS P 
+                WHERE P.CD_CLOSET = C.ID_CLOSET 
+                    AND P.CH_ACTIVE = 1), 0) "total"
+        FROM D_CLOSETS C
+        WHERE C.CD_USER = ${accessDB.user}
+        AND C.CH_ACTIVE = 1`;
+        listArmarios = await cmd.ejecutarSentencia();
         var response = [];
         for (var elm in listArmarios){
-            response.push({"value":listArmarios[elm].IdCloset, "text":listArmarios[elm].TxName});
+            response.push({"value":listArmarios[elm].IdCloset, "text":listArmarios[elm].TxName, "total":listArmarios[elm].total});
         }
         return response;
     }
