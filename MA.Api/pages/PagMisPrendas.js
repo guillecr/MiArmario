@@ -8,17 +8,19 @@ const DBParams = require('../Utils/DBParamas');
 const CallService = require('../Utils/CallService');
 const RPrendasImgs = require('../Entities/RPrendasImgs');
 const Commands = require('../Utils/Commands');
-const NU_PREDAS_PAGE = 5;
+const NU_PREDAS_PAGE = 6;
 
 class PagMisPrendas extends CallService {
     static async GetInfo(accessDB, request){
         var idArmario = request.idArmario;
         var lstFltState;
         var lstFltSubstate;
+        var lstFltType;
         var nuPage = request.nuPage || 1;
         if (request.flt){
-            var lstFltState = request.flt.lstStates;
-            var lstFltSubstate = request.flt.lstSubstates; 
+            lstFltState = request.flt.lstStates;
+            lstFltSubstate = request.flt.lstSubstates;
+            lstFltType = request.flt.lstTypes;
         }
         var params = new DBParams;
         var armario = await DClosets.Id(accessDB, idArmario);
@@ -37,6 +39,14 @@ AND CH_ACTIVE = 1`
         if (lstFltSubstate && lstFltSubstate.length > 0) {
             for (var i = 0; i < lstFltSubstate.length; i++) {
                 where += sep + params.addParams(lstFltSubstate[i]);
+                sep = ',';
+            }
+            where += ')';
+        }
+        var sep = "\nAND CD_TYPE IN ("
+        if (lstFltType && lstFltType.length > 0) {
+            for (var i = 0; i < lstFltType.length; i++) {
+                where += sep + params.addParams(lstFltType[i]);
                 sep = ',';
             }
             where += ')';
@@ -61,16 +71,19 @@ AND CH_ACTIVE = 1`
         var result = {
             lstStates: [],
             lstSubstates: [],
+            lstTypes: [],
             nuPrendPerPage: NU_PREDAS_PAGE
         };
         var params = new DBParams;
-        var literalsState = await PLiteralValues.Find(accessDB, `AND CD_TYPE IN ('ESTADO_PRENDA', 'SUB_ESTADO_PRENDA')`, params)
+        var literalsState = await PLiteralValues.Find(accessDB, `AND CD_TYPE IN ('ESTADO_PRENDA', 'SUB_ESTADO_PRENDA', 'TIPO_PRENDA')`, params)
         for (var i = 0; i < literalsState.length; i++){
             var literal = literalsState[i];
             if (literal.CdType == 'ESTADO_PRENDA'){
                 result.lstStates.push(literal);
-            } else {
+            } else if (literal.CdType == 'SUB_ESTADO_PRENDA') {
                 result.lstSubstates.push(literal);
+            } else {
+                result.lstTypes.push(literal);
             }
         }
         return result;
@@ -83,17 +96,13 @@ AND CH_ACTIVE = 1`
         cmd.sentencia = `
         SELECT C.ID_CLOSET "IdCloset"
             , C.TX_NAME "TxName"
-            , IFNULL((SELECT SUM(1)
-                FROM D_PRENDAS P 
-                WHERE P.CD_CLOSET = C.ID_CLOSET 
-                    AND P.CH_ACTIVE = 1), 0) "total"
         FROM D_CLOSETS C
         WHERE C.CD_USER = ${accessDB.user}
         AND C.CH_ACTIVE = 1`;
         listArmarios = await cmd.ejecutarSentencia();
         var response = [];
         for (var elm in listArmarios){
-            response.push({"value":listArmarios[elm].IdCloset, "text":listArmarios[elm].TxName, "total":listArmarios[elm].total});
+            response.push({"value":listArmarios[elm].IdCloset, "text":listArmarios[elm].TxName});
         }
         return response;
     }

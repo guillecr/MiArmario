@@ -15,23 +15,31 @@
                 Mis armarios
                 <b-list-group>
                     <b-list-group-item style="cursor: pointer;" v-for="elm in listArmarios" :key="elm.value"
-                        @click="idArmario=elm.value; nuPrendTotal=elm.total" 
+                        @click="idArmario=elm.value" 
                         :active="elm.value == idArmario">{{elm.text}}
                     </b-list-group-item>
                 </b-list-group>
                 <br>
-                Estados
-                <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterStates" :key="flt.IdLiteralValue"
-                    style="position: relative; width: 200px; text-align: left;"
-                    v-model="fltPrendas.lstStates[flt.IdLiteralValue]"
-                >{{flt.TxDescription}}</b-form-checkbox>
-                <br>
-                Sub-Estado
-                <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterSubstates" :key="flt.IdLiteralValue"
-                    style="position: relative; width: 200px; text-align: left;"
-                    v-model="fltPrendas.lstSubstates[flt.IdLiteralValue]"
-                >{{flt.TxDescription}}</b-form-checkbox>
-
+                <b-button v-b-toggle.filters variant="outline-info">Filtros</b-button>
+                <b-collapse id="filters" class="mt-2">
+                    Tipo
+                    <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterTypes" :key="flt.IdLiteralValue"
+                        style="position: relative; width: 200px; text-align: left;"
+                        v-model="fltPrendas.lstTypes[flt.IdLiteralValue]"
+                    >{{flt.TxDescription}}</b-form-checkbox>
+                    <br>
+                    Estado
+                    <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterStates" :key="flt.IdLiteralValue"
+                        style="position: relative; width: 200px; text-align: left;"
+                        v-model="fltPrendas.lstStates[flt.IdLiteralValue]"
+                    >{{flt.TxDescription}}</b-form-checkbox>
+                    <br>
+                    Condición
+                    <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterSubstates" :key="flt.IdLiteralValue"
+                        style="position: relative; width: 200px; text-align: left;"
+                        v-model="fltPrendas.lstSubstates[flt.IdLiteralValue]"
+                    >{{flt.TxDescription}}</b-form-checkbox>
+                </b-collapse>
             </div>
             <div class="PagMisPrendasPrendas">
                 <b-jumbotron id="PagMisPrendasJumnotron" 
@@ -48,10 +56,10 @@
                     <b-pagination 
                         pills 
                         align="fill" 
-                        style="padding-left: 2px; padding-right: 2px; padding-top: 4px;" 
+                        style="padding-right: 8px; padding-top: 4px;" 
                         v-model=nuPage
                         :per-page="nuPrendPerPage"
-                        :total-rows="nuPrendTotal"></b-pagination>
+                        :total-rows="objArmario.NuPrendas"></b-pagination>
                 </div>
                 <listcards class="PagMisPrendasListPrendas"
                     :list="listPrendas"
@@ -126,7 +134,7 @@ export default {
             listPrendas:[],
             objArmario:{},
             listArmarios: [],
-            fltPrendas:{lstStates:{}, lstSubstates:{}},
+            fltPrendas:{lstStates:{}, lstSubstates:{}, lstTypes:{}},
             lstFltPrendas:{},
             chShowDlgClothes: false,
             objSelectClothes: {},
@@ -134,7 +142,6 @@ export default {
             nuDlgPosX: 100,
             nuDlgPosY: 100,
             nuPage: 1,
-            nuPrendTotal: 0,
             nuPrendPerPage: 5
         }
     },
@@ -158,20 +165,28 @@ export default {
     },
     methods:{
         getLstFilter(){
-            var lst = {lstStates: [], lstSubstates: []};
+            var lst = {lstStates: [], lstSubstates: [], lstTypes:[]};
             if (this.fltPrendas.lstStates) {
                 for (var i = 0; i < Object.keys(this.fltPrendas.lstStates).length; i++){
-                    var keyState = Object.keys(this.fltPrendas.lstStates)[i];
-                    if (this.fltPrendas.lstStates[keyState]){
-                        lst.lstStates.push(keyState);
+                    var keyLit = Object.keys(this.fltPrendas.lstStates)[i];
+                    if (this.fltPrendas.lstStates[keyLit]){
+                        lst.lstStates.push(keyLit);
                     }
                 }
             }
             if (this.fltPrendas.lstSubstates) {
                 for (var j = 0; j < Object.keys(this.fltPrendas.lstSubstates).length; j++){
-                    var keySubstate = Object.keys(this.fltPrendas.lstSubstates)[j];
-                    if (this.fltPrendas.lstSubstates[keySubstate]){
-                        lst.lstSubstates.push(keySubstate);
+                    var keyLit = Object.keys(this.fltPrendas.lstSubstates)[j];
+                    if (this.fltPrendas.lstSubstates[keyLit]){
+                        lst.lstSubstates.push(keyLit);
+                    }
+                }
+            }
+            if (this.fltPrendas.lstTypes) {
+                for (var j = 0; j < Object.keys(this.fltPrendas.lstTypes).length; j++){
+                    var keyLit = Object.keys(this.fltPrendas.lstTypes)[j];
+                    if (this.fltPrendas.lstTypes[keyLit]){
+                        lst.lstTypes.push(keyLit);
                     }
                 }
             }
@@ -239,6 +254,7 @@ export default {
         refreshClothes(){
             var cm = this;
             var lstFilter = this.getLstFilter();
+            debugger;
             this.sEmit.emitCall( 'GetInfo', {idArmario: this.idArmario, flt: lstFilter, nuPage: this.nuPage}, function(response){
                 // TODO: La obtenión de la lista de armarios podría ya dar toda la definición del armario, en vez de pedir de nuevo la información
                 cm.objArmario = response.objArmario;
@@ -252,7 +268,6 @@ export default {
             cm.listArmarios = request;
             if (!cm.idArmario){
                 cm.idArmario = cm.listArmarios[0].value;
-                cm.nuPrendTotal = cm.listArmarios[0].total;
             }
         });
     },
@@ -266,6 +281,7 @@ export default {
             if (response){
                 cm.lstFltPrendas.lstFilterStates = response.lstStates;
                 cm.lstFltPrendas.lstFilterSubstates = response.lstSubstates;
+                cm.lstFltPrendas.lstFilterTypes = response.lstTypes;
                 cm.nuPrendPerPage = response.nuPrendPerPage;
             }
             

@@ -2,20 +2,27 @@
     #ListCartsElm img {
         width: unset;
         max-width: 100%;
-        height: 28rem;
+        height: 25vw;
+    }
+    .card-title {
+        font-size: 2.5vw;
     }
     #ListCartsElm{
+        width: 22%;
+        min-width: 18vw;
+        margin-left: 2%;
         float: left;
-        margin-right: 0.5rem;
-        margin-left: 0.5rem;
         z-index: 50;
     }
     @media (max-width: 485px) {
         #ListCartsElm {
-            float: unset;
-            left: 0;
-            right: 0;
-            margin: auto;
+            width: 45%;
+        }
+        #ListCartsElm img {
+            height: 40vw;
+        }
+        .card-title {
+            font-size: 6vw;
         }
     }
 </style>
@@ -29,7 +36,6 @@
                 img-alt="Card Image"
                 img-top
                 tag="article"
-                style="width: 24rem;"
                 class="mb-2"
                 @click="selectCart($event, elm)"
             >

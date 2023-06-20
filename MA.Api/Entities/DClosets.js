@@ -26,7 +26,11 @@ class DClosets extends RegDB{
         FhCreated: new Fields('FH_CREATED', 'Date', 'IO', null),
         FhModified: new Fields('FH_MODIFIED', 'Date', null, null),
         CdModifiedBy: new Fields('CD_MODIFIED_BY', 'Number', null, null),
-        CdCreatedBy: new Fields('CD_CREATED_BY', 'Number', 'IO', null)
+        CdCreatedBy: new Fields('CD_CREATED_BY', 'Number', 'IO', null),
+        NuPrendas: new Fields(`IFNULL((SELECT SUM(1)
+        FROM D_PRENDAS P 
+        WHERE P.CD_CLOSET = ID_CLOSET 
+            AND P.CH_ACTIVE = 1), 0)`, 'Number', 'RO', null)
     };
 }
 
