@@ -149,6 +149,7 @@ export default {
         fltPrendas:{
             handler() {
                 if (this.idArmario){
+                    this.nuPage = 1;
                     this.refreshClothes();
                 }
             },
@@ -167,24 +168,24 @@ export default {
         getLstFilter(){
             var lst = {lstStates: [], lstSubstates: [], lstTypes:[]};
             if (this.fltPrendas.lstStates) {
-                for (var i = 0; i < Object.keys(this.fltPrendas.lstStates).length; i++){
-                    var keyLit = Object.keys(this.fltPrendas.lstStates)[i];
+                for (let i = 0; i < Object.keys(this.fltPrendas.lstStates).length; i++){
+                    let keyLit = Object.keys(this.fltPrendas.lstStates)[i];
                     if (this.fltPrendas.lstStates[keyLit]){
                         lst.lstStates.push(keyLit);
                     }
                 }
             }
             if (this.fltPrendas.lstSubstates) {
-                for (var j = 0; j < Object.keys(this.fltPrendas.lstSubstates).length; j++){
-                    var keyLit = Object.keys(this.fltPrendas.lstSubstates)[j];
+                for (let j = 0; j < Object.keys(this.fltPrendas.lstSubstates).length; j++){
+                    let keyLit = Object.keys(this.fltPrendas.lstSubstates)[j];
                     if (this.fltPrendas.lstSubstates[keyLit]){
                         lst.lstSubstates.push(keyLit);
                     }
                 }
             }
             if (this.fltPrendas.lstTypes) {
-                for (var j = 0; j < Object.keys(this.fltPrendas.lstTypes).length; j++){
-                    var keyLit = Object.keys(this.fltPrendas.lstTypes)[j];
+                for (let j = 0; j < Object.keys(this.fltPrendas.lstTypes).length; j++){
+                    let keyLit = Object.keys(this.fltPrendas.lstTypes)[j];
                     if (this.fltPrendas.lstTypes[keyLit]){
                         lst.lstTypes.push(keyLit);
                     }
@@ -228,13 +229,13 @@ export default {
                 cm.chShowDlgClothes = true;
             }
         },
-        saveClothes(frm){
+        async saveClothes(frm){
             var cm = this;
-            tools.downscaleImage(frm.ObjImg.value, 600)
-                .then(function(data){
-                    frm.ObjImg.value = data;
-                    cm.sEmit.emitCall('SavePrenda', frm, cm.saveClothesResponse);
-                });
+            if (frm.ObjImg && frm.ObjImg.value){
+                frm.ObjImg.value = await tools.downscaleImage(frm.ObjImg.value, 600)
+            }
+            cm.sEmit.emitCall('SavePrenda', frm, cm.saveClothesResponse);
+            
         },
         saveClothesResponse(response){
             var msg = "Error en el guardado";
@@ -254,7 +255,6 @@ export default {
         refreshClothes(){
             var cm = this;
             var lstFilter = this.getLstFilter();
-            debugger;
             this.sEmit.emitCall( 'GetInfo', {idArmario: this.idArmario, flt: lstFilter, nuPage: this.nuPage}, function(response){
                 // TODO: La obtenión de la lista de armarios podría ya dar toda la definición del armario, en vez de pedir de nuevo la información
                 cm.objArmario = response.objArmario;

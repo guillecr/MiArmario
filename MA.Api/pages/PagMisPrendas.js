@@ -52,6 +52,7 @@ AND CH_ACTIVE = 1`
             where += ')';
         }
         var listPrendas = await DPrendas.Find(accessDB, where, params);
+        armario.NuPrendas = listPrendas.length;
         listPrendas = listPrendas.slice((nuPage * NU_PREDAS_PAGE) - NU_PREDAS_PAGE, nuPage * NU_PREDAS_PAGE);
         for (var index in listPrendas){
             var prenda = listPrendas[index];

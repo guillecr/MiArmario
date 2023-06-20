@@ -25,10 +25,9 @@ const tools = {
         return false;
     },
     downscaleImage(dataUrl, newWidth, imageType, imageArguments) {
-        let image, oldWidth, oldHeight, newHeight, canvas, ctx, newDataUrl;
+        let image, oldWidth, oldHeight, newHeight, canvas, ctx;
 
         return new Promise((resolve, reject)=>{
-            debugger;
             image = document.createElement("img");
             image.src = dataUrl;
             image.onload = function () {
