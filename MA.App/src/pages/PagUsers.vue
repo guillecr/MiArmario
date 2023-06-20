@@ -93,7 +93,7 @@
             }
         },
         saveEntity(){
-            this.sEmit.emitCall("Save", this.objSelected, this.saveEntityResponse);
+            this.sEmit.emitCall("Save", this.objSelected, this.saveEntityResponse, 10000);
         },
         saveEntityResponse(response) {
             var msg = "Error en el guardado";

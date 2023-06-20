@@ -8,7 +8,7 @@ class SocketEmit {
         this.serviceName = serviceName;
     }
 
-    emitCall(eventName, request, callBack){
+    emitCall(eventName, request, callBack, timeWait){
         // Creamos la subscripción a la respuesta del servicio llamado. Cuando obtengamos la respuesta, nos desubscribimos.
         // Para evitar solicitudes cruzadas en el mismo tiempo, cada llamada irá con un ID de respuesta.
         // De esa manera, cada solicitud tendrá un evento de respuesta único
@@ -22,7 +22,7 @@ class SocketEmit {
             cm.lstSocket.unsubscribe(`${serviceNameFull}.${idResponseEvent}.Response`);
             callBack(response);
         });
-        this.socket.emit(serviceNameFull, requestCall, timeWait);
+        this.socket.emit(serviceNameFull, requestCall);
         if (!timeWait) {
             timeWait = 5000;
         }

@@ -67,7 +67,7 @@ class CallAPI {
     static getSession(socket){
         var result = false;
         try {
-            var idUser = this.getAuthentication(socket);
+            var idUser = CallAPI.getAuthentication(socket);
             if (idUser){
                 DUsers.Id({linkDB: db, user: 2}, idUser)
                     .then(function(user){
