@@ -64,31 +64,28 @@ class CallAPI {
         return idUser;
     }
 
-    static getSession(socket){
+    static async getSession(socket){
         var result = false;
         try {
             var idUser = CallAPI.getAuthentication(socket);
             if (idUser){
-                DUsers.Id({linkDB: db, user: 2}, idUser)
-                    .then(function(user){
-                        if (!user){
-                            // Error muy raro
-                            LogFile.writeLog('ERROR - autentificación: Token valido con usuario no localizado. ID User: ' + idUser);
-                            socket.accessDB.user = null;
-                        } else {
-                            socket.accessDB.user = user.IdUser; // Damos permisos
-                            socket.accessDB.login = user.TxLogin;
-                            result = true;  
-                        }
-                    });                
+                var user = await DUsers.Id({linkDB: db, user: 2}, idUser)
+                if (!user){
+                    // Error muy raro
+                    LogFile.writeLog('ERROR - autentificación: Token valido con usuario no localizado. ID User: ' + idUser);
+                    socket.accessDB.user = null;
+                } else {
+                    socket.accessDB.user = user.IdUser; // Damos permisos
+                    socket.accessDB.login = user.TxLogin;
+                    result = user.TxLogin;  
+                }              
             } else {
                 LogFile.writeLog(`Conexión sin acreditación`);
-                socket.emit('withAccess', false);
             }
         } catch (ex){
             LogFile.writeLog('ERROR - getSession: ' + ex.message);
         }
-        return result;
+        socket.emit('withAccess', result);
     }
 
     static calls(socket){
@@ -97,9 +94,7 @@ class CallAPI {
         console.log((new Date()) + ` => Nueva conexión aceptada (${CallAPI.getIp(socket)})`)
         LogFile.writeLog(`Nueva conexión aceptada (${CallAPI.getIp(socket)})`);
         // Comprobar acreditación inicial
-        if (CallAPI.getSession(socket)){
-            socket.emit('withAccess', socket.accessDB.login);
-        }
+        CallAPI.getSession(socket);
 
         socket.use(async ([event, ...args], next) => {
             // events: Nombre de la llamada
