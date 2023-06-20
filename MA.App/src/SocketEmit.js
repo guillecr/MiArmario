@@ -2,13 +2,6 @@ class SocketEmit {
     serviceName;
     socket;
     lstSocket;
-    component;
-    Socket() {
-        return this.component.$socket;
-    }
-    Sockets() {
-        return this.component.sockets;
-    }
     constructor(socket, lstSocket, serviceName){
         this.socket = socket;
         this.lstSocket = lstSocket;
@@ -20,7 +13,7 @@ class SocketEmit {
         // Para evitar solicitudes cruzadas en el mismo tiempo, cada llamada irá con un ID de respuesta.
         // De esa manera, cada solicitud tendrá un evento de respuesta único
         var cm = this;
-        var idResponseEvent = Math.floor(Math.random() * 100) + 1; // Sumamos 1 para evitar un ID = 0
+        var idResponseEvent = Math.floor(Math.random() * 1000) + 1; // Sumamos 1 para evitar un ID = 0
         var requestCall = {idResponseEvent: idResponseEvent, request: request};
         var serviceNameFull = `${this.serviceName}.${eventName}`;
 
@@ -29,13 +22,15 @@ class SocketEmit {
             cm.lstSocket.unsubscribe(`${serviceNameFull}.${idResponseEvent}.Response`);
             callBack(response);
         });
-        this.socket.emit(serviceNameFull, requestCall);
-        // Establecemos un tiempo de espera de la respuesta de 5 segundos
+        this.socket.emit(serviceNameFull, requestCall, timeWait);
+        if (!timeWait) {
+            timeWait = 5000;
+        }
         var timpeUnsubscribe = setTimeout(function() {
             console.log(`Llamada '${serviceNameFull}.${idResponseEvent}' perdida`);
             cm.lstSocket.unsubscribe(`${serviceNameFull}.${idResponseEvent}.Response`);
             callBack(false);
-        }, 5000);
+        }, timeWait);
     }
 }
 

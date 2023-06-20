@@ -1,47 +1,29 @@
 const jwt = require("jwt-simple");
 
 class TokenManager {
-    static authentication(token){
-        if (token) {
-            try {
-                var user = this.checkToken(token);
-                return {result: "OK", idUser: user};
-            }
-            catch(e) {
-                if (e.code == "TOKEN_EXPIRE"){
-                    return {result: "TOKEN_EXPIRE", idUser: null};
-                } else if (e.code == "ERROR"){
-                    return {result: "ERROR", message: e.message};
-                }
-            }
-        }
-        return {result: "NO_TOKEN", idUser: null};
-    }
-
     static checkToken(token){
-        if (!token){
-            // No tenemos token
-            return null;
-        } else { 
+        var response = null
+        if (token) { 
             var payload = null;
             try {    
                 payload = jwt.decode(token, PARAMS.TOKEN_KEY);
-                // TODO: No necesario la comprovación?
+                // TODO: Se puede quitar ya que la decodificación del token mirá la valided por fecha
                 if (payload.exp > (Date.now() / 1000)) {
-                    return payload.sub;
+                    response = {result: "OK", idUser: payload.sub};
                 } else {
-                    // Token exirado
-                    throw {code: "TOKEN_EXPIRE", menssage: null};
+                    // Token expirado
+                    response = {result: "TOKEN_EXPIRE", menssage: null};
                 }    
             } catch (ex){
                 if (ex.message == "Token expired"){
-                    // Token exirado
-                    throw {code: "TOKEN_EXPIRE", menssage: null};
+                    // Token expirado
+                    response = {result: "TOKEN_EXPIRE", menssage: null};
                 } else {
-                    throw {code: "ERROR", menssage: ex.message};
+                    response = {result: "ERROR", menssage: ex.message};
                 }
             }
         }
+        return response;
     }
 
     static getToken(idUser){

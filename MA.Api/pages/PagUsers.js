@@ -10,7 +10,7 @@ class PagUsers extends CallService {
     static async Save(accessDB, user){
         if (user.TxPasswordUncode){
             user.TxPassword = await bcrypt.hash(user.TxPasswordUncode, 12);
-        } else if (!userDB.IdUser){
+        } else if (!user.IdUser){
             // No podemos generar un nuevo usuario sin contraseña
             return false
         }

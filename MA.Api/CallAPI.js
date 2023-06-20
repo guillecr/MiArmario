@@ -7,7 +7,6 @@ const LogFile = require('./Utils/LogFile');
 // Páginas
 const PagMisPrendas = require("./pages/PagMisPrendas");
 const PagLogin = require("./pages/PagLogin");
-const PagTest = require("./pages/PagTest");
 const PagFormDesigner = require('./pages/PagFormDesigner');
 const PagMenus = require('./pages/PagMenus');
 const PagGestionLiterales = require('./pages/PagGestionLiterales');
@@ -15,13 +14,12 @@ const PagUsers = require('./pages/PagUsers');
 const PagPermissions = require('./pages/PagPermissions');
 const PagListDesigner = require('./pages/PagListDesigner');
 const PagArmarios = require('./pages/PagArmarios');
-
+const PagChangePw = require('./pages/PagChangePw');
 
 // Componentes
 const DynamicForm = require('./Componets/DynamicForm');
 const DynamicList = require('./Componets/DynamicList');
 const TokenManager = require('./Utils/TokenManager');
-const PagChangePw = require('./pages/PagChangePw');
 const Commands = require('./Utils/Commands');
 
 class CallAPI {
@@ -37,32 +35,38 @@ class CallAPI {
     static getTokenInHead(socket){
         return socket.handshake.auth.token;
     }
+    static getIp(socket){
+        return socket.request.connection.remoteAddress;
+    }
 
-    static authenticationByToken(token, address){
+    static getAuthentication(socket){
         // TODO: verificación del token con la IP
         var idUser = null;
+        var token = CallAPI.getTokenInHead(socket);
+        var address = CallAPI.getIp(socket);
         try {
-            var aut = TokenManager.authentication(token);
+            var aut = TokenManager.checkToken(token);
             if (aut.result == "TOKEN_EXPIRE") {
                 // Token caducado
                 LogFile.writeLog(`Token de la conexión ${address} a expirado`);
 
             } else if (aut.result == "ERROR") {
-                LogFile.writeLog('ERROR - authenticationByToken: ' + aut.message);
+                LogFile.writeLog('ERROR - getIdUserInToken: ' + aut.message);
 
             } else if (aut.result == "OK") {
                 idUser = aut.idUser;
             }
             
         } catch (ex){
-            LogFile.writeLog('ERROR - authenticationByToken: ' + ex.message);
+            LogFile.writeLog('ERROR - getIdUserInToken: ' + ex.message);
         }
         return idUser;
     }
 
     static getSession(socket){
+        var result = false;
         try {
-            var idUser = this.authenticationByToken(this.getTokenInHead(socket), socket.request.connection.remoteAddress);
+            var idUser = this.getAuthentication(socket);
             if (idUser){
                 DUsers.Id({linkDB: db, user: 2}, idUser)
                     .then(function(user){
@@ -73,7 +77,7 @@ class CallAPI {
                         } else {
                             socket.accessDB.user = user.IdUser; // Damos permisos
                             socket.accessDB.login = user.TxLogin;
-                            socket.emit('withAccess', user.TxLogin);
+                            result = true;  
                         }
                     });                
             } else {
@@ -83,16 +87,18 @@ class CallAPI {
         } catch (ex){
             LogFile.writeLog('ERROR - getSession: ' + ex.message);
         }
+        return result;
     }
 
     static calls(socket){
         // Llamadas IO
-        var address = socket.request.connection.remoteAddress;
         socket.accessDB = { linkDB: db, user: null };
-        console.log((new Date()) + ` => Nueva conexión aceptada (${address})`)
-        LogFile.writeLog(`Nueva conexión aceptada (${address})`);
+        console.log((new Date()) + ` => Nueva conexión aceptada (${CallAPI.getIp(socket)})`)
+        LogFile.writeLog(`Nueva conexión aceptada (${CallAPI.getIp(socket)})`);
         // Comprobar acreditación inicial
-        CallAPI.getSession(socket);
+        if (CallAPI.getSession(socket)){
+            socket.emit('withAccess', socket.accessDB.login);
+        }
 
         socket.use(async ([event, ...args], next) => {
             // events: Nombre de la llamada
@@ -103,7 +109,7 @@ class CallAPI {
             try {
                 //LogFile.writeLog(`${socket.accessDB.login}: ${event}`);
                 var allower = false;
-                var idUserCall = CallAPI.authenticationByToken(CallAPI.getTokenInHead(socket), address);
+                var idUserCall = CallAPI.getAuthentication(socket);
                 if (event == 'getMenus' || event == 'LoginIn') {
                     if (!idUserCall){
                         socket.accessDB.user = 4; // Sin login
@@ -125,21 +131,22 @@ class CallAPI {
                     } else {
                         LogFile.writeLog("Acceso no autorizado: " + socket.accessDB.login + " -> " +  menuCall);
                     }
-                } 
+                } else {
+                    // Token no valido
+                    socket.accessDB.user = null;
+                    socket.emit('withAccess', false);
+                }
 
                 if (allower){
                     // Acceso permitido
                     next();
                 } else {
                     // Acceso denegado
-                    socket.accessDB.user = null;
-                    socket.emit('withAccess', false);
+                    // TODO: Devolver una respuesta
                 }              
                 
             } catch (ex){
                 LogFile.writeLog('ERROR - manejador de eventos: ' + ex.message);
-                socket.accessDB.user = null;
-                socket.emit('withAccess', false); // Ante un fallo no damos permisos
             }
         });
 
@@ -167,14 +174,8 @@ class CallAPI {
             console.log((new Date()) + ' => Usuario desconectado');
         });
 
-        socket.on('test',(msg) => {
-            console.log('Petición tipo test: ' + msg);
-            io.emit("mensaje",'Hola desde la API');
-        });
-
         PagMisPrendas.createCalls(socket);
         PagLogin.calls(socket); // Clase especial
-        //PagTest.calls(socket);
         PagFormDesigner.createCalls(socket);
         DynamicForm.createCalls(socket);
         DynamicList.createCalls(socket);
