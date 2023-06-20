@@ -42,23 +42,24 @@ class CallAPI {
     static getAuthentication(socket){
         // TODO: verificación del token con la IP
         var idUser = null;
-        var token = CallAPI.getTokenInHead(socket);
-        var address = CallAPI.getIp(socket);
         try {
-            var aut = TokenManager.checkToken(token);
-            if (aut.result == "TOKEN_EXPIRE") {
-                // Token caducado
-                LogFile.writeLog(`Token de la conexión ${address} a expirado`);
-
-            } else if (aut.result == "ERROR") {
-                LogFile.writeLog('ERROR - getIdUserInToken: ' + aut.message);
-
-            } else if (aut.result == "OK") {
-                idUser = aut.idUser;
-            }
-            
+            var token = CallAPI.getTokenInHead(socket);
+            var address = CallAPI.getIp(socket);
+            if (token) {
+                var aut = TokenManager.checkToken(token);
+                if (aut.result == "TOKEN_EXPIRE") {
+                    // Token caducado
+                    LogFile.writeLog(`Token de la conexión ${address} a expirado`);
+    
+                } else if (aut.result == "ERROR") {
+                    LogFile.writeLog('ERROR - getAuthentication: ' + aut.message);
+    
+                } else if (aut.result == "OK") {
+                    idUser = aut.idUser;
+                }
+            }           
         } catch (ex){
-            LogFile.writeLog('ERROR - getIdUserInToken: ' + ex.message);
+            LogFile.writeLog('ERROR - getAuthentication: ' + ex.message);
         }
         return idUser;
     }
