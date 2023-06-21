@@ -25,19 +25,19 @@
                     Tipo
                     <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterTypes" :key="flt.IdLiteralValue"
                         style="position: relative; width: 200px; text-align: left;"
-                        v-model="fltPrendas.lstTypes[flt.IdLiteralValue]"
+                        @change="setFilter('TYPE', flt.IdLiteralValue, $event)"
                     >{{flt.TxDescription}}</b-form-checkbox>
                     <br>
                     Estado
                     <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterStates" :key="flt.IdLiteralValue"
                         style="position: relative; width: 200px; text-align: left;"
-                        v-model="fltPrendas.lstStates[flt.IdLiteralValue]"
+                        @change="setFilter('STATE', flt.IdLiteralValue, $event)"
                     >{{flt.TxDescription}}</b-form-checkbox>
                     <br>
                     Condición
                     <b-form-checkbox v-for="flt in lstFltPrendas.lstFilterSubstates" :key="flt.IdLiteralValue"
                         style="position: relative; width: 200px; text-align: left;"
-                        v-model="fltPrendas.lstSubstates[flt.IdLiteralValue]"
+                        @change="setFilter('SUBSTATE', flt.IdLiteralValue, $event)"
                     >{{flt.TxDescription}}</b-form-checkbox>
                 </b-collapse>
             </div>
@@ -129,16 +129,16 @@ export default {
     data(){
         return {
             sEmit: new SocketEmit(this.$socket, this.sockets, 'PagMisPrendas'),
-            idArmario:null,
-            txArmario:null,
-            listPrendas:[],
-            objArmario:{},
+            idArmario: null,
+            txArmario: null,
+            listPrendas: [],
+            objArmario: {},
             listArmarios: [],
-            fltPrendas:{lstStates:{}, lstSubstates:{}, lstTypes:{}},
-            lstFltPrendas:{},
+            fltPrendas: { lstStates:[], lstSubstates:[], lstTypes:[] },
+            lstFltPrendas: {},
             chShowDlgClothes: false,
             objSelectClothes: {},
-            serviceName:"PagMisPrendas",
+            serviceName: "PagMisPrendas",
             nuDlgPosX: 100,
             nuDlgPosY: 100,
             nuPage: 1,
@@ -146,15 +146,6 @@ export default {
         }
     },
     watch: {
-        fltPrendas:{
-            handler() {
-                if (this.idArmario){
-                    this.nuPage = 1;
-                    this.refreshClothes();
-                }
-            },
-            deep: true
-        },
         nuPage(){
             this.refreshClothes();
         },
@@ -165,33 +156,26 @@ export default {
         }
     },
     methods:{
-        getLstFilter(){
-            var lst = {lstStates: [], lstSubstates: [], lstTypes:[]};
-            if (this.fltPrendas.lstStates) {
-                for (let i = 0; i < Object.keys(this.fltPrendas.lstStates).length; i++){
-                    let keyLit = Object.keys(this.fltPrendas.lstStates)[i];
-                    if (this.fltPrendas.lstStates[keyLit]){
-                        lst.lstStates.push(keyLit);
-                    }
-                }
+        setFilter(type, filter, value){
+            let lst;
+            switch (type) {
+                case 'TYPE':
+                    lst = this.fltPrendas.lstTypes;
+                    break;
+                case 'STATE':
+                    lst = this.fltPrendas.lstStates;
+                    break;
+                case 'SUBSTATE':
+                    lst = this.fltPrendas.lstSubstates;
+                    break;
             }
-            if (this.fltPrendas.lstSubstates) {
-                for (let j = 0; j < Object.keys(this.fltPrendas.lstSubstates).length; j++){
-                    let keyLit = Object.keys(this.fltPrendas.lstSubstates)[j];
-                    if (this.fltPrendas.lstSubstates[keyLit]){
-                        lst.lstSubstates.push(keyLit);
-                    }
-                }
+            if (value) {
+                lst.push(filter);
+            } else {
+                lst.splice(lst.indexOf(filter), 1);
             }
-            if (this.fltPrendas.lstTypes) {
-                for (let j = 0; j < Object.keys(this.fltPrendas.lstTypes).length; j++){
-                    let keyLit = Object.keys(this.fltPrendas.lstTypes)[j];
-                    if (this.fltPrendas.lstTypes[keyLit]){
-                        lst.lstTypes.push(keyLit);
-                    }
-                }
-            }
-            return lst;
+            this.refreshClothes();
+            this.nuPage = 1;
         },
         deleteClothes(IdPrenda){
             var cm = this;
@@ -232,7 +216,7 @@ export default {
         async saveClothes(frm){
             var cm = this;
             if (frm.ObjImg && frm.ObjImg.value){
-                frm.ObjImg.value = await tools.downscaleImage(frm.ObjImg.value, 600)
+                frm.ObjImg.value = await tools.downscaleImage(frm.ObjImg.value, 600);
             }
             cm.sEmit.emitCall('SavePrenda', frm, cm.saveClothesResponse);
             
@@ -254,8 +238,7 @@ export default {
         },
         refreshClothes(){
             var cm = this;
-            var lstFilter = this.getLstFilter();
-            this.sEmit.emitCall( 'GetInfo', {idArmario: this.idArmario, flt: lstFilter, nuPage: this.nuPage}, function(response){
+            this.sEmit.emitCall( 'GetInfo', {idArmario: this.idArmario, flt: cm.fltPrendas, nuPage: this.nuPage}, function(response){
                 // TODO: La obtenión de la lista de armarios podría ya dar toda la definición del armario, en vez de pedir de nuevo la información
                 cm.objArmario = response.objArmario;
                 cm.listPrendas = response.lstPrenda;

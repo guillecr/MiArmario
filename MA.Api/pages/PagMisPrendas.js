@@ -8,14 +8,14 @@ const DBParams = require('../Utils/DBParamas');
 const CallService = require('../Utils/CallService');
 const RPrendasImgs = require('../Entities/RPrendasImgs');
 const Commands = require('../Utils/Commands');
-const NU_PREDAS_PAGE = 6;
+const NU_PREDAS_PAGE = 8;
 
 class PagMisPrendas extends CallService {
     static async GetInfo(accessDB, request){
         var idArmario = request.idArmario;
-        var lstFltState;
-        var lstFltSubstate;
-        var lstFltType;
+        var lstFltState = [];
+        var lstFltSubstate = [];
+        var lstFltType = [];
         var nuPage = request.nuPage || 1;
         if (request.flt){
             lstFltState = request.flt.lstStates;
@@ -25,32 +25,38 @@ class PagMisPrendas extends CallService {
         var params = new DBParams;
         var armario = await DClosets.Id(accessDB, idArmario);
         params = new DBParams;
-        var where = `AND CD_CLOSET = ${params.addParams(idArmario)}
-AND CH_ACTIVE = 1`
-        var sep = "\nAND CD_STATE IN ("
-        if (lstFltState && lstFltState.length > 0) {
-            for (var i = 0; i < lstFltState.length; i++) {
+        var where = `AND CD_CLOSET = ${params.addParams(idArmario)} AND CH_ACTIVE = 1`
+        
+        // Filtro del estado
+        if (lstFltState.length > 0) {
+            let sep = "\nAND CD_STATE IN (";
+            for (let i = 0; i < lstFltState.length; i++) {
                 where += sep + params.addParams(lstFltState[i]);
                 sep = ',';
             }
             where += ')';
         }
-        var sep = "\nAND CD_SUBSTATE IN ("
-        if (lstFltSubstate && lstFltSubstate.length > 0) {
-            for (var i = 0; i < lstFltSubstate.length; i++) {
+
+        // Filtro del subestado
+        if (lstFltSubstate.length > 0) {
+            let sep = "\nAND CD_SUBSTATE IN (";
+            for (let i = 0; i < lstFltSubstate.length; i++) {
                 where += sep + params.addParams(lstFltSubstate[i]);
                 sep = ',';
             }
             where += ')';
         }
-        var sep = "\nAND CD_TYPE IN ("
-        if (lstFltType && lstFltType.length > 0) {
-            for (var i = 0; i < lstFltType.length; i++) {
+
+        // Filtro del tipo
+        if (lstFltType.length > 0) {
+            let sep = "\nAND CD_TYPE IN (";
+            for (let i = 0; i < lstFltType.length; i++) {
                 where += sep + params.addParams(lstFltType[i]);
                 sep = ',';
             }
             where += ')';
         }
+
         var listPrendas = await DPrendas.Find(accessDB, where, params);
         armario.NuPrendas = listPrendas.length;
         listPrendas = listPrendas.slice((nuPage * NU_PREDAS_PAGE) - NU_PREDAS_PAGE, nuPage * NU_PREDAS_PAGE);
