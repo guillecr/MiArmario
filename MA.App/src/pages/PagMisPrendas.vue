@@ -53,10 +53,9 @@
                     ><span style="padding-top: 4px;" class="fi-rr-plus"></span><span style="margin-left: 5px;">Añadir</span></b-btn>
                 </div>
                 <div class="overflow-auto">
-                    <b-pagination 
+                    <b-pagination id="PagMisPrendasPaginacion"
                         pills 
                         align="fill" 
-                        style="padding-right: 8px; padding-top: 4px;" 
                         v-model=nuPage
                         :per-page="nuPrendPerPage"
                         :total-rows="objArmario.NuPrendas"></b-pagination>
@@ -78,6 +77,12 @@
         position: absolute;
         top:5px;
         left: 210px;
+        right: 0;
+    }
+    #PagMisPrendasPaginacion {
+        width: 400px;
+        padding-right: 8px; 
+        padding-top: 4px;
     }
     #PagMisPrendasJumnotron{
         background-color: transparent;
@@ -112,6 +117,9 @@
         }
         .PagMisPrendasListArmarios{
             position: relative;
+        }
+        #PagMisPrendasPaginacion {
+            width: unset;
         }
     }
 </style>

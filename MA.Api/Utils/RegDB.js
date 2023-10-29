@@ -200,6 +200,29 @@ class RegDB{
     }
 
     /**
+     * Eliminación del registro en base de datos
+     * @param {accessDB} accessDB Acceso a la abse de datos.
+     * @returns {Promise} Promesa con un Booleano el resultado
+     */
+    Delete(accessDB){
+        var cm = this;
+        return new Promise(async(resolve, reject) => {
+            // Solo si tenemos PK
+            if (Object.keys(this.getId()).length == 0){
+                let params = new DBParamas;
+                var cmd = new Commands(accessDB.linkDB, cm.TxDelete(params), params);
+                cmd.ejecutarOperacion()
+                    .then(async function(row){
+                        resolve(row.rows > 0);
+                    }).catch(function(err){
+                        LogFile.writeLog("ERROR - RegDB.Delete: " + err);
+                        resolve(false);
+                    });
+            }
+        })
+    }
+
+    /**
      * Calcula la consulta SQL que debe de ejecutarse para realizar una consulta de tipo Select.
      * @param {Object} DicKey IDs del registro a buscar. Si no se indica, se generará la consulta para obtener todos.
      * @param {String} whereExtra String con condiciones para el where
@@ -294,6 +317,24 @@ class RegDB{
         }
         return sql + TxColumn + ")\nVALUES\n(" + TxValues + ")";
     };
+
+    /**
+     * Calcula la consulta SQL que debe de ejecutarse para realizar una consulta de tipo DELETE.
+     * @param {DBParamas} params Manejador de parámetros
+     * @returns {String} Consulta construida.
+     */
+    TxDelete(params) {
+        var sql = "DELETE FROM " + this.constructor.TxTable + "\nWHERE ";
+        sep = "";
+        var listColumns = this.constructor.ListFields;
+        for (var column in listColumns) {
+            if (listColumns[column].CdUsing == 'PK'){
+                TxWhere += `${sepWhere} ${listColumns[column].TxColumnName} = ${params.addParams(this[column])}`;
+                sep = "\n AND ";
+            }
+        }
+        return sql;
+    }
 
 };
 

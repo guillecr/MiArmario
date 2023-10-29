@@ -6,17 +6,17 @@
     }
     .card-title {
         font-size: 2.5vw;
+        min-height: 6vw; /* Evitamos que las cartas aumente de tamaño al pasar el texto a 2 lineas */
     }
     #ListCartsElm{
-        width: 22%;
+        width: 25%;
         min-width: 18vw;
-        margin-left: 2%;
         float: left;
         z-index: 50;
     }
     @media (max-width: 485px) {
         #ListCartsElm {
-            width: 45%;
+            width: 49%;
         }
         #ListCartsElm img {
             height: 40vw;
@@ -40,7 +40,7 @@
                 @click="selectCart($event, elm)"
             >
                 <b-card-text v-if="elm.TxState">
-                    Estado <b-badge>{{elm.TxState}}</b-badge>/<b-badge>{{ elm.TxSubstate }}</b-badge>
+                    <b-badge>{{elm.TxState}}</b-badge><br><b-badge>{{ elm.TxSubstate }}</b-badge>
                 </b-card-text>
             </b-card>
         </div>

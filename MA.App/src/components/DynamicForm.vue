@@ -299,7 +299,7 @@
                 <label class="DynamicFormLabel"
                     v-if="elm.CdType != 'BTN'"
                     :style="{width: elm.NuWidthLabel + 'px'
-                        ,display: (elm.CdType == 'MULTILINE' || elm.CdType == 'IMPORTFILE')?'block':''}">
+                        ,display: (elm.CdType == 'MULTILINE' || elm.CdType == 'IMPORTFILE' || elm.CdType == 'IMG')?'block':''}">
                     {{elm.TxLabel}}
                 </label>
                 <div class="DynamicFormResizeLabel"
@@ -385,6 +385,14 @@
                     @change="readFile($event, elm)"
                 />
 
+                <b-img v-if="elm.CdType == 'IMG'" 
+                    :src=objForm[elm.CdField]
+                    :style="{
+                        width: elm.NuWidth + 'px', 
+                        height: (elm.NuHeight - 2 * gridSizeY) + 'px'
+                    }"
+                ></b-img>
+
                 <div class="DynamicFormMove"
                     v-if="adminMode && formEdit"
                     @mousedown.stop="mouseDownMove(elm, $event, $event.target.parentElement)">
@@ -395,15 +403,17 @@
                         elm.CdType == 'LST' ||
                         elm.CdType == 'BTN' ||
                         elm.CdType == 'MULTILINE' ||
-                        elm.CdType == 'IMPORTFILE'
+                        elm.CdType == 'IMPORTFILE' || 
+                        elm.CdType == 'IMG'
                     )"
                     @mousedown="mouseDownSizeX(elm, $event, $event.target.parentElement)"
                 ></div>
-                <div
+                <div class="DynamicFormResizeY"
                     v-if="adminMode && formEdit && (
                         elm.CdType == 'LABEL' ||
-                        elm.CdType == 'MULTILINE'
-                    )" class="DynamicFormResizeY"
+                        elm.CdType == 'MULTILINE' || 
+                        elm.CdType == 'IMG'
+                    )"
                     @mousedown="mouseDownSizeY(elm, $event, $event.target.parentElement)"
                 ></div>
             </label>
@@ -451,6 +461,7 @@ export default {
                 {value:'CHECK', text:'Check'},
                 {value:'BTN', text:'Botón'},
                 {value:'MULTILINE', text:'Multilinea'},
+                {value:'IMG', text:'Imagen'},
                 {value:'IMPORTFILE', text:'ImportFile'}
             ]
         }
