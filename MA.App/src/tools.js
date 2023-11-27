@@ -24,8 +24,8 @@ const tools = {
         e.returnValue = false;
         return false;
     },
-    downscaleImage(dataUrl, newWidth, imageType, imageArguments) {
-        let image, oldWidth, oldHeight, newHeight, canvas, ctx;
+    downscaleImage(dataUrl, newWidth, newHeight, imageType, imageArguments) {
+        let image, oldWidth, oldHeight, newHeightReal, canvas, ctx;
 
         return new Promise((resolve, reject)=>{
             image = document.createElement("img");
@@ -38,7 +38,11 @@ const tools = {
                 // Creamos una imagen temporal en base a la original.
                 oldWidth = image.width;
                 oldHeight = image.height;
-                newHeight = Math.floor(oldHeight / oldWidth * newWidth);
+                if (!newHeight) {
+                    newHeight = newWidth; // Por defecto, cuadradas
+                }
+                newHeightReal = Math.floor(oldHeight / oldWidth * newWidth);
+                
             
                 // Creamos un canva para dibujar la nueva imagen.
                 canvas = document.createElement("canvas");
@@ -47,7 +51,7 @@ const tools = {
             
                 // Dibuamos la nueva imagen comprimida en el canva
                 ctx = canvas.getContext("2d");
-                ctx.drawImage(image, 0, 0, newWidth, newHeight);
+                ctx.drawImage(image, 0, (newHeight - newHeightReal) / 2, newWidth, newHeightReal);
             
                 // Obtenemos el dataURL de la nueva imagen comprimida
                 //y hacemos un return.

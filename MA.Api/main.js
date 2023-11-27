@@ -26,37 +26,27 @@ const connDB = function(UrlDB){
 const upServer = function(HostName, HttpPort, KeyUrl, CertUrl, CaUrl){
     // Levantar servicio
     console.log('Levantando instancia del servicio');
-    
-    // SERVIDOR HTTP
-    // var server = http.createServer(app);
-    // var io = new Server(server, {
-    //     maxHttpBufferSize: 6e8
-    // });
-    // server.listen(HttpPort, () => {
-    //     console.log("Server arrancado en el puerto %PORT%".replace("%PORT%", PARAMS.HTTP_PORT));
-    // });
-
-    // var MaIo = io.of("/miarmario/");
-    // MaIo.on('connection', CallAPI.calls);
-
-    // SERVIDOR HTTPS
+        
     app.use(express.static(path.join(__dirname, '/MA.App/', 'dist')));
     app.get('*',function(req, res) {
         res.sendFile(path.join(__dirname  + '/MA.App/', 'dist', 'index.html'));
     });
 
-    var serverS = https.createServer({
+    // SERVIDOR HTTP
+    //var server = http.createServer(app);
+
+    // SERVIDOR HTTPS
+    var server = https.createServer({
         key: fs.readFileSync(KeyUrl),
         cert: fs.readFileSync(CertUrl),
         ca: fs.readFileSync(CaUrl)
     }, app);
 
-    // var ioS = new Server(serverS);
-    var ioS = new Server(serverS);
-    serverS.listen(HttpPort, HostName, () => {
+    var io = new Server(server);
+    server.listen(HttpPort, HostName, () => {
         console.log(`Servidor arrancado en el puerto ${PARAMS.HTTP_PORT}`);
     });
-    var MaIo = ioS.of("/miarmario/");
+    var MaIo = io.of("/miarmario/");
     MaIo.on('connection', CallAPI.calls);
 }
 

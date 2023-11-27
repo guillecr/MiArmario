@@ -11,7 +11,7 @@ const Commands = require('../Utils/Commands');
 const NU_PREDAS_PAGE = 8;
 
 class PagMisPrendas extends CallService {
-    static async GetInfo(accessDB, request){
+    static async GetInfo(accessDB, request) {
         var idArmario = request.idArmario;
         var lstFltState = [];
         var lstFltSubstate = [];
@@ -62,8 +62,12 @@ class PagMisPrendas extends CallService {
         listPrendas = listPrendas.slice((nuPage * NU_PREDAS_PAGE) - NU_PREDAS_PAGE, nuPage * NU_PREDAS_PAGE);
         for (var index in listPrendas){
             var prenda = listPrendas[index];
-            var params = new DBParams;
-            var listImg = await ExtImgs.Find(accessDB,`AND ID_IMG IN (SELECT R.CD_IMG FROM R_PRENDAS_IMGS R WHERE R.CD_PRENDA = ${prenda.IdPrenda})
+            var params = new DBParams();
+            var listImg = await ExtImgs.Find(accessDB,`
+                AND ID_IMG IN (
+                    SELECT R.CD_IMG 
+                    FROM R_PRENDAS_IMGS R 
+                    WHERE R.CD_PRENDA = ${params.addParams(prenda.IdPrenda)})
                 AND CH_PRINCIPAL = 1
                 AND CH_ACTIVE = 1`, params);
             if (listImg && listImg.length > 0){
@@ -73,8 +77,7 @@ class PagMisPrendas extends CallService {
         }
         return {"objArmario": armario, "lstPrenda": listPrendas};
     }
-
-    static async GetFilters(accessDB){
+    static async GetFilters(accessDB) {
         var result = {
             lstStates: [],
             lstSubstates: [],
@@ -95,8 +98,7 @@ class PagMisPrendas extends CallService {
         }
         return result;
     }
-
-    static async GetListArmarios(accessDB){
+    static async GetListArmarios(accessDB) {
         var listArmarios = [];
         var cmd = new Commands;
         cmd.db = accessDB.linkDB;
@@ -113,19 +115,30 @@ class PagMisPrendas extends CallService {
         }
         return response;
     }
-
     static async GetInfoPrenda(accessDB, idPrenda) {
-        return await DPrendas.Id(accessDB, idPrenda);
+        let prenda = await DPrendas.Id(accessDB, idPrenda);
+        let params = new DBParams();
+        let lstImgPrenda = await ExtImgs.Find(accessDB,`
+            AND ID_IMG IN (
+                SELECT R.CD_IMG 
+                FROM R_PRENDAS_IMGS R 
+                WHERE R.CD_PRENDA = ${params.addParams(prenda.IdPrenda)})
+            AND CH_PRINCIPAL = 1
+            AND CH_ACTIVE = 1`, params);
+        if (lstImgPrenda && lstImgPrenda.length > 0) {
+            prenda.BiImg = 'data:application/octet-stream;base64, ' + lstImgPrenda[0].BiStream;
+            prenda.CdImg = lstImgPrenda[0].IdImg;
+        }
+        return prenda;
+        
     }
-
-    static async DeletePrenda(accessDB, idPrenda){
+    static async DeletePrenda(accessDB, idPrenda) {
         var prendaDb = await DPrendas.Id(accessDB, idPrenda);
         prendaDb.ChActive = false;
         var result = await prendaDb.Update(accessDB);
         return result == 1;
     }
-
-    static async SavePrenda(accessDB, prenda){
+    static async SavePrenda(accessDB, prenda) {
         var prendaDb = new DPrendas;
         prendaDb.setObject(prenda);
         var response;
@@ -139,7 +152,11 @@ class PagMisPrendas extends CallService {
         if (prenda.ObjImg){
             prenda.ObjImg.value = prenda.ObjImg.value.split(',')[1];
             var params = new DBParams;
-            var listImg = await ExtImgs.Find(accessDB,`AND ID_IMG IN (SELECT R.CD_IMG FROM R_PRENDAS_IMGS R WHERE R.CD_PRENDA = ${prendaDb.IdPrenda})
+            var listImg = await ExtImgs.Find(accessDB,`
+                AND ID_IMG IN (
+                    SELECT R.CD_IMG 
+                    FROM R_PRENDAS_IMGS R 
+                    WHERE R.CD_PRENDA = ${params.addParams(prendaDb.IdPrenda)})
                 AND CH_PRINCIPAL = 1
                 AND CH_ACTIVE = 1`, params);
             

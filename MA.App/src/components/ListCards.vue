@@ -2,9 +2,11 @@
     #ListCartsElm img {
         width: unset;
         max-width: 100%;
-        height: 25vw;
+        /* height: 25vw; */
     }
     .card-title {
+        display: grid;
+        align-content: center;
         font-size: 2.5vw;
         min-height: 6vw; /* Evitamos que las cartas aumente de tamaño al pasar el texto a 2 lineas */
     }
@@ -19,9 +21,12 @@
             width: 49%;
         }
         #ListCartsElm img {
-            height: 40vw;
+            height: 49vw;
+            width: 49vw;
         }
         .card-title {
+
+            min-height: 14vw;
             font-size: 6vw;
         }
     }

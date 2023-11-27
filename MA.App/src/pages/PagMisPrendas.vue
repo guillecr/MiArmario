@@ -223,9 +223,6 @@ export default {
         },
         async saveClothes(frm){
             var cm = this;
-            if (frm.ObjImg && frm.ObjImg.value){
-                frm.ObjImg.value = await tools.downscaleImage(frm.ObjImg.value, 600);
-            }
             cm.sEmit.emitCall('SavePrenda', frm, cm.saveClothesResponse);
             
         },

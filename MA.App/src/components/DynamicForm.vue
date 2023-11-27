@@ -385,13 +385,16 @@
                     @change="readFile($event, elm)"
                 />
 
-                <b-img v-if="elm.CdType == 'IMG'" 
+                <img v-if="elm.CdType == 'IMG'" 
                     :src=objForm[elm.CdField]
-                    :style="{
+                    :style="formEdit? {
                         width: elm.NuWidth + 'px', 
                         height: (elm.NuHeight - 2 * gridSizeY) + 'px'
+                    }:{
+                        maxWidth: elm.NuWidth + 'px', 
+                        maxHeight: (elm.NuHeight - 2 * gridSizeY) + 'px'
                     }"
-                ></b-img>
+                />
 
                 <div class="DynamicFormMove"
                     v-if="adminMode && formEdit"
@@ -512,6 +515,7 @@ export default {
             var reader = new FileReader();
             reader.addEventListener('load', function(e){
                 cm.objForm[ctr.CdField] = {Name:fileName, value:e.target.result};
+                cm.calcAction(ctr.TxAction);
             });
             reader.readAsDataURL(myFile);
         },
@@ -554,6 +558,7 @@ export default {
         calcEval: function(exp) {
             var frm = this.objForm;
             var cm = this;
+            var toolsFrm = tools;
             return eval(exp);
         },
         calcVisibility: function(ctrl) {
